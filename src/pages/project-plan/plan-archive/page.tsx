@@ -13,6 +13,7 @@ import type { PlanArchiveRecord } from '@/mocks/planArchiveMocks';
 import ArchiveSummaryCharts from './components/ArchiveSummaryCharts';
 import ArchiveTable from './components/ArchiveTable';
 import PlanReviewDetailModal from '@/pages/project-plan/plan-review/components/PlanReviewDetailModal';
+import DeclOperationLogModal from '@/pages/project-plan/declaration/components/DeclOperationLogModal';
 
 export default function PlanArchivePage() {
   const [records] = useState<PlanArchiveRecord[]>(planArchiveRecords);
@@ -27,6 +28,7 @@ export default function PlanArchivePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [detailTarget, setDetailTarget] = useState<PlanArchiveRecord | null>(null);
+  const [logTarget, setLogTarget] = useState<PlanArchiveRecord | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
@@ -200,6 +202,7 @@ export default function PlanArchivePage() {
           sortDir={prioritySortDir}
           onPrioritySort={handlePrioritySort}
           onView={setDetailTarget}
+          onViewLog={setLogTarget}
         />
 
         {displayList.length > 0 && (
@@ -248,6 +251,13 @@ export default function PlanArchivePage() {
         linkedPlanId={detailTarget?.linkedPlanId || ''}
         fallbackName={detailTarget?.planName}
         onClose={() => setDetailTarget(null)}
+      />
+
+      <DeclOperationLogModal
+        open={!!logTarget}
+        planId={logTarget?.linkedPlanId || ''}
+        planName={logTarget?.planName || ''}
+        onClose={() => setLogTarget(null)}
       />
 
       {toast && (

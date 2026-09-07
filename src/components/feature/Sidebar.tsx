@@ -27,17 +27,20 @@ const menuItems: MenuItem[] = [
   },
   {
     key: 'project-argument',
-    label: '项目论证管理',
+    label: '项目立项管理',
     icon: 'ri-survey-line',
     children: [
       { key: 'argument-apply', label: '项目论证申请', icon: 'ri-file-edit-line', path: '/project-argument/apply' },
-      { key: 'professional-pick', label: '论证会审专业挑选', icon: 'ri-user-search-line', path: '/project-argument/professional-pick' },
       { key: 'opinion-sign', label: '论证意见签署', icon: 'ri-draft-line', path: '/project-argument/opinion-sign' },
+      { key: 'init-declaration', label: '项目立项申请', icon: 'ri-file-list-3-line', path: '/project-initiation/declaration' },
+      { key: 'init-plan-review', label: '项目立项会审', icon: 'ri-search-2-line', path: '/project-initiation/plan-review/zhongte-stage' },
+      { key: 'init-leader-review', label: '项目立项签发', icon: 'ri-user-star-line', path: '/project-initiation/leader-review' },
+      { key: 'init-plan-deferral', label: '项目延期暂缓', icon: 'ri-time-line', path: '/project-initiation/plan-deferral' },
     ],
   },
   {
     key: 'project-approval',
-    label: '项目立项管理',
+    label: '项目立项管理留存',
     icon: 'ri-folder-add-line',
     children: [
       { key: 'approval-number', label: '立项号管理', icon: 'ri-barcode-line', path: '/project-plan/project-number' },

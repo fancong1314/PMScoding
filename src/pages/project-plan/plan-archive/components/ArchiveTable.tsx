@@ -6,6 +6,7 @@ interface Props {
   sortDir: 'none' | 'asc' | 'desc';
   onPrioritySort: () => void;
   onView: (record: PlanArchiveRecord) => void;
+  onViewLog: (record: PlanArchiveRecord) => void;
 }
 
 const SEQ_W = 56;
@@ -25,7 +26,7 @@ function PriorityBadge({ level }: { level: PlanPriorityLevel }) {
   );
 }
 
-export default function ArchiveTable({ records, pageOffset, sortDir, onPrioritySort, onView }: Props) {
+export default function ArchiveTable({ records, pageOffset, sortDir, onPrioritySort, onView, onViewLog }: Props) {
   const hBg = '#f5f7fa';
   const leftName = SEQ_W + PRIORITY_W;
   const activeAsc = sortDir === 'asc';
@@ -67,7 +68,7 @@ export default function ArchiveTable({ records, pageOffset, sortDir, onPriorityS
               <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">投资总估算（万元）</th>
               <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">效益（万元）</th>
               <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">通过日期</th>
-              <th className="sticky right-0 z-10 px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-l border-steel-200 whitespace-nowrap w-24"
+              <th className="sticky right-0 z-10 px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-l border-steel-200 whitespace-nowrap w-36"
                 style={{ backgroundColor: hBg }}>
                 操作
               </th>
@@ -107,11 +108,18 @@ export default function ArchiveTable({ records, pageOffset, sortDir, onPriorityS
                     <td className="px-3 py-2 text-center text-sm font-medium text-steel-800 border-b border-steel-100 tabular-nums">{r.budget.toFixed(2)}</td>
                     <td className="px-3 py-2 text-center text-sm text-steel-600 border-b border-steel-100 tabular-nums">{r.benefit.toFixed(2)}</td>
                     <td className="px-3 py-2 text-center text-xs text-steel-500 border-b border-steel-100 whitespace-nowrap">{r.approveDate}</td>
-                    <td className="sticky right-0 z-10 px-3 py-2 text-center border-b border-l border-steel-100" style={{ backgroundColor: rowBg }}>
-                      <button type="button" onClick={() => onView(r)}
-                        className="px-2 py-1 text-xs text-sky-600 hover:bg-sky-50 rounded cursor-pointer whitespace-nowrap">
-                        详情
-                      </button>
+                    <td className="sticky right-0 z-10 px-2 py-2 text-center border-b border-l border-steel-100" style={{ backgroundColor: rowBg }}>
+                      <div className="inline-flex items-center justify-center gap-0.5">
+                        <button type="button" onClick={() => onView(r)}
+                          className="px-2 py-1 text-xs text-sky-600 hover:bg-sky-50 rounded cursor-pointer whitespace-nowrap">
+                          详情
+                        </button>
+                        <button type="button" onClick={() => onViewLog(r)}
+                          className="px-2 py-1 text-xs text-steel-600 hover:bg-slate-100 rounded cursor-pointer whitespace-nowrap"
+                          title="操作日志">
+                          操作日志
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );

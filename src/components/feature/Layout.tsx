@@ -23,14 +23,24 @@ const pathMap: Record<string, { title: string; parent?: string; grandParent?: st
   '/project-plan/plan-deferral': { title: '年度计划暂缓', parent: '年度计划管理' },
   '/project-plan/plan-archive': { title: '计划资料管理', parent: '年度计划管理' },
   '/project-plan/payment-report': { title: '年度付款计划报表', parent: '年度计划管理' },
-  '/project-argument/apply': { title: '项目论证申请', parent: '项目论证管理' },
-  '/project-argument/opinion-sign': { title: '论证意见签署', parent: '项目论证管理' },
-  '/project-argument/opinion-sign/form': { title: '签署表单', parent: '论证意见签署', grandParent: '项目论证管理' },
-  '/project-approval/apply': { title: '项目立项申请', parent: '项目立项管理' },
-  '/project-approval/review': { title: '项目立项审批', parent: '项目立项管理' },
-  '/project-plan/project-number': { title: '立项号管理', parent: '项目立项管理' },
-  '/project-plan/project-number/form': { title: '新增立项号', parent: '立项号管理', grandParent: '项目立项管理' },
-  '/project-plan/project-number/change-form': { title: '变更申请', parent: '立项号管理', grandParent: '项目立项管理' },
+  '/project-argument/apply': { title: '项目论证申请', parent: '项目立项管理' },
+  '/project-argument/opinion-sign': { title: '论证意见签署', parent: '项目立项管理' },
+  '/project-argument/opinion-sign/form': { title: '签署表单', parent: '论证意见签署', grandParent: '项目立项管理' },
+  '/project-initiation/declaration': { title: '项目立项申请', parent: '项目立项管理' },
+  '/project-initiation/declaration/form': { title: '新增项目立项', parent: '项目立项申请', grandParent: '项目立项管理' },
+  '/project-initiation/declaration/form/new': { title: '新建类申请', parent: '项目立项申请', grandParent: '项目立项管理' },
+  '/project-initiation/declaration/form/tech': { title: '技改类申请', parent: '项目立项申请', grandParent: '项目立项管理' },
+  '/project-initiation/declaration/form/overhaul': { title: '大修类申请', parent: '项目立项申请', grandParent: '项目立项管理' },
+  '/project-initiation/declaration/form/minor': { title: '零固类申请', parent: '项目立项申请', grandParent: '项目立项管理' },
+  '/project-initiation/plan-review/zhongte-stage': { title: '项目立项会审', parent: '项目立项管理' },
+  '/project-initiation/leader-review': { title: '项目立项签发', parent: '项目立项管理' },
+  '/project-initiation/plan-deferral': { title: '项目延期暂缓', parent: '项目立项管理' },
+  '/project-initiation/plan-deferral/form': { title: '暂缓申请', parent: '项目延期暂缓', grandParent: '项目立项管理' },
+  '/project-approval/apply': { title: '项目立项申请', parent: '项目立项管理留存' },
+  '/project-approval/review': { title: '项目立项审批', parent: '项目立项管理留存' },
+  '/project-plan/project-number': { title: '立项号管理', parent: '项目立项管理留存' },
+  '/project-plan/project-number/form': { title: '新增立项号', parent: '立项号管理', grandParent: '项目立项管理留存' },
+  '/project-plan/project-number/change-form': { title: '变更申请', parent: '立项号管理', grandParent: '项目立项管理留存' },
   '/project-execute/quality-safety': { title: '质量安全管理', parent: '项目执行管理' },
   '/project-execute/quality-safety/issues': { title: '问题列表', parent: '质量安全管理', grandParent: '项目执行管理' },
   '/participant/negative-score': { title: '负面积分管理', parent: '参建方管理' },
@@ -174,7 +184,7 @@ export default function Layout({ children, mainClassName }: LayoutProps) {
         items.push({ title: current.parent, path: '' });
       }
       // On declaration form pages, distinguish add vs edit
-      if (location.pathname.startsWith('/project-plan/declaration/form')) {
+      if (location.pathname.startsWith('/project-plan/declaration/form') || location.pathname.startsWith('/project-initiation/declaration/form')) {
         const params = new URLSearchParams(location.search);
         const id = params.get('id');
         items.push({

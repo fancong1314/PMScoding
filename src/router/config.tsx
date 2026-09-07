@@ -27,9 +27,14 @@ import ProjectNumberFormPage from "../pages/project-plan/project-number/form/pag
 import ProjectNumberChangeFormPage from "../pages/project-plan/project-number/change-form/page";
 import ArgumentApplyPage from "../pages/project-argument/apply/page";
 import ArgumentApplyFormPage from "../pages/project-argument/apply/form/page";
-import ProfessionalPickPage from "../pages/project-argument/professional-pick/page";
 import OpinionSignPage from "../pages/project-argument/opinion-sign/page";
 import OpinionSignFormPage from "../pages/project-argument/opinion-sign/form/page";
+import InitDeclarationPage from "../pages/project-initiation/declaration/page";
+import InitDeclarationFormPage from "../pages/project-initiation/declaration/form/page";
+import InitZhongteStageReviewPage from "../pages/project-initiation/plan-review/zhongte-stage/page";
+import InitLeaderReviewPage from "../pages/project-initiation/leader-review/page";
+import InitPlanDeferralPage from "../pages/project-initiation/plan-deferral/page";
+import InitPlanDeferralFormPage from "../pages/project-initiation/plan-deferral/form/page";
 import ContractListPage from "../pages/project-execute/quality-safety/contract-list/page";
 import IssueListPage from "../pages/project-execute/quality-safety/issue-list/page";
 import ParticipantListPage from "../pages/participant/negative-score/participant-list/page";
@@ -283,16 +288,52 @@ const routes: RouteObject[] = [
     element: <ArgumentApplyFormPage />,
   },
   {
-    path: "/project-argument/professional-pick",
-    element: <ProfessionalPickPage />,
-  },
-  {
     path: "/project-argument/opinion-sign",
     element: <OpinionSignPage />,
   },
   {
     path: "/project-argument/opinion-sign/form",
     element: <OpinionSignFormPage />,
+  },
+  {
+    path: "/project-initiation/declaration",
+    element: <InitDeclarationPage />,
+  },
+  {
+    path: "/project-initiation/declaration/form",
+    element: <InitDeclarationFormPage />,
+  },
+  {
+    path: "/project-initiation/declaration/form/new",
+    element: <InitDeclarationFormPage />,
+  },
+  {
+    path: "/project-initiation/declaration/form/tech",
+    element: <InitDeclarationFormPage />,
+  },
+  {
+    path: "/project-initiation/declaration/form/overhaul",
+    element: <InitDeclarationFormPage />,
+  },
+  {
+    path: "/project-initiation/declaration/form/minor",
+    element: <InitDeclarationFormPage />,
+  },
+  {
+    path: "/project-initiation/plan-review/zhongte-stage",
+    element: <InitZhongteStageReviewPage />,
+  },
+  {
+    path: "/project-initiation/leader-review",
+    element: <InitLeaderReviewPage />,
+  },
+  {
+    path: "/project-initiation/plan-deferral",
+    element: <InitPlanDeferralPage />,
+  },
+  {
+    path: "/project-initiation/plan-deferral/form",
+    element: <InitPlanDeferralFormPage />,
   },
   {
     path: "/project-execute/quality-safety",

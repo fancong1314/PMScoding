@@ -134,6 +134,14 @@ export const projectMajorTypeFormPath: Record<ProjectMajorType, string> = {
   零固: '/project-plan/declaration/form/minor',
 };
 
+/** 项目立项管理 · 项目立项申请表单路径 */
+export const initiationMajorTypeFormPath: Record<ProjectMajorType, string> = {
+  新建: '/project-initiation/declaration/form/new',
+  技改: '/project-initiation/declaration/form/tech',
+  大修: '/project-initiation/declaration/form/overhaul',
+  零固: '/project-initiation/declaration/form/minor',
+};
+
 export const businessDivisions = [
   '炼铁事业部',
   '炼钢事业部',
