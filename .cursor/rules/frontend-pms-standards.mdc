@@ -1,0 +1,13 @@
+---
+description: 贵港 PMS 前端强制规范：编码前必须遵循 frontend-pms-standards SKILL，尤其是演示数据
+alwaysApply: true
+---
+
+# 前端规范强制执行
+
+在本仓库进行任何前端相关工作时（页面、组件、路由、样式、`src/mocks`）：
+
+1. **必须先读取并遵循**项目技能：`.cursor/skills/frontend-pms-standards/SKILL.md`。
+2. **演示数据为最高优先级强制项**：新建/扩展列表页或 TAB/大类分区时，必须为**每一个分区**写入可展示演示数据（建议 5～10 条，覆盖全部关键业务状态）；**禁止空列表、禁止只给默认 TAB 造数**。
+3. 未完成「演示数据」与 SKILL 内「生成后自查」勾选项，不得视为任务完成。
+4. 若列表使用 localStorage 缓存，更新 seed 后必须提升缓存版本号。
