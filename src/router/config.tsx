@@ -6,6 +6,7 @@ import PanoramaCockpitPage from "../pages/project-dashboard/panorama-cockpit/pag
 import ProjectDetailPage from "../pages/project-dashboard/project-detail/page";
 import ApprovalProcessPage from "../pages/project-plan/approval-process/page";
 import ZhongteStageReviewPage from "../pages/project-plan/plan-review/zhongte-stage/page";
+import JointOpinionSignPage from "../pages/project-plan/joint-opinion-sign/page";
 import LeaderReviewPage from "../pages/project-plan/leader-review/page";
 import PlanArchivePage from "../pages/project-plan/plan-archive/page";
 import PlanPaymentReportPage from "../pages/project-plan/payment-report/page";
@@ -238,6 +239,10 @@ const routes: RouteObject[] = [
   {
     path: "/project-plan/plan-review/zhongte-stage",
     element: <ZhongteStageReviewPage />,
+  },
+  {
+    path: "/project-plan/joint-opinion-sign",
+    element: <JointOpinionSignPage />,
   },
   {
     path: "/project-plan/leader-review",

@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
-import { projectPlans, withPaymentPlans, normalizeReviewStatus } from '@/mocks/projectPlans';
+import { projectPlans, withPaymentPlans, normalizeReviewStatus, withAnnualPlanOrgFields, ANNUAL_DECL_STORAGE_KEY } from '@/mocks/projectPlans';
 import type { ProjectPlan, ProjectMajorType, PaymentPlanRow } from '@/mocks/projectPlans';
 import BasicInfoSection from './components/BasicInfoSection';
 import DetailInfoSection from './components/DetailInfoSection';
 import PaymentPlanSection, { validatePaymentPlans } from './components/PaymentPlanSection';
 import OverhaulFormSection from './components/OverhaulFormSection';
 import MinorFormSection from './components/MinorFormSection';
+import InvestmentEstimateSection, { validateInvestmentEstimate } from './components/InvestmentEstimateSection';
 import AttachmentUploadSection, {
   validateRequiredAttachments,
   type AttachmentUploadMap,
@@ -16,18 +17,21 @@ import AttachmentUploadSection, {
 const NEW_TECH_SECTIONS = [
   { id: 'basic-info', title: '项目基本信息', icon: 'ri-file-info-line' },
   { id: 'detail-info', title: '项目详细信息', icon: 'ri-article-line' },
+  { id: 'investment-estimate', title: '年度计划投资估算', icon: 'ri-funds-line' },
   { id: 'payment-plan', title: '付款计划', icon: 'ri-calendar-schedule-line' },
   { id: 'attachment-upload', title: '附件上传', icon: 'ri-attachment-2' },
 ];
 
 const OVERHAUL_SECTIONS = [
   { id: 'overhaul-info', title: '大修项目信息', icon: 'ri-tools-line' },
+  { id: 'investment-estimate', title: '年度计划投资估算', icon: 'ri-funds-line' },
   { id: 'payment-plan', title: '付款计划', icon: 'ri-calendar-schedule-line' },
   { id: 'attachment-upload', title: '附件上传', icon: 'ri-attachment-2' },
 ];
 
 const MINOR_SECTIONS = [
   { id: 'minor-info', title: '基本资料维护', icon: 'ri-box-3-line' },
+  { id: 'investment-estimate', title: '年度计划投资估算', icon: 'ri-funds-line' },
   { id: 'payment-plan', title: '付款计划', icon: 'ri-calendar-schedule-line' },
   { id: 'attachment-upload', title: '附件上传', icon: 'ri-attachment-2' },
 ];
@@ -39,28 +43,33 @@ const PATH_TYPE_MAP: Record<string, ProjectMajorType> = {
   '/project-plan/declaration/form/minor': '零固',
 };
 
-const STORAGE_KEY = 'ng_decl_plans_v9';
+const STORAGE_KEY = ANNUAL_DECL_STORAGE_KEY;
 const nextPlanYear = String(new Date().getFullYear() + 1);
 
 function getStoredPlans(): ProjectPlan[] {
   try {
     const s = localStorage.getItem(STORAGE_KEY)
+      || localStorage.getItem('ng_decl_plans_v11')
+      || localStorage.getItem('ng_decl_plans_v10')
+      || localStorage.getItem('ng_decl_plans_v9')
       || localStorage.getItem('ng_decl_plans_v8')
       || localStorage.getItem('ng_decl_plans_v7')
       || localStorage.getItem('ng_decl_plans_v6')
       || localStorage.getItem('ng_decl_plans_v5');
-    if (!s) return projectPlans.map(withPaymentPlans);
-    return JSON.parse(s).map((p: ProjectPlan) => withPaymentPlans({
+    if (!s) return projectPlans.map((p) => withPaymentPlans(withAnnualPlanOrgFields(p)));
+    return JSON.parse(s).map((p: ProjectPlan) => withPaymentPlans(withAnnualPlanOrgFields({
       ...p,
       projectMajorType: p.projectMajorType || '技改',
       reviewStatus: normalizeReviewStatus(p.reviewStatus as string),
-    }));
-  } catch { return projectPlans.map(withPaymentPlans); }
+    })));
+  } catch { return projectPlans.map((p) => withPaymentPlans(withAnnualPlanOrgFields(p))); }
 }
 
 const emptyForm: Partial<ProjectPlan> = {
   planYear: nextPlanYear,
   businessDivision: '',
+  submitDept: '',
+  implementDept: '',
   projectMajorType: '新建',
   projectCategory: '',
   planName: '',
@@ -88,9 +97,15 @@ const emptyForm: Partial<ProjectPlan> = {
   modificationPurpose: '',
   effectDescription: '',
   projectSummary: '',
+  equipmentDesc: '',
   jianAnFee: 0,
+  designFee: 0,
   equipmentFee: 0,
   otherFee: 0,
+  designFeeRemark: '',
+  jianAnFeeRemark: '',
+  equipmentFeeRemark: '',
+  otherFeeRemark: '',
   hasJobChange: '否',
   jobChangeCount: 0,
   isCapitalOverhaul: '是',
@@ -108,7 +123,8 @@ const emptyForm: Partial<ProjectPlan> = {
   specModel: '',
   measureUnit: '',
   updateQty: 0,
-  inUseQty: 0,
+  equipmentStockQty: 0,
+  purchaseApplyQty: 0,
   unitPrice: 0,
   isNewMinor: '否',
   updateReason: '',
@@ -124,7 +140,7 @@ export default function DeclarationFormPage() {
   const lrId = searchParams.get('lrId');
   const isEdit = !!planId;
   const returnPath = fromLeaderReview ? '/project-plan/leader-review' : '/project-plan/declaration';
-  const LEADER_REVIEW_STORAGE = 'ng_plan_leader_review_v4';
+  const LEADER_REVIEW_STORAGE = 'ng_plan_leader_review_v6';
 
   const routeMajorType: ProjectMajorType = useMemo(() => {
     if (PATH_TYPE_MAP[location.pathname]) return PATH_TYPE_MAP[location.pathname];
@@ -200,12 +216,23 @@ export default function DeclarationFormPage() {
     }
   };
 
+  const handlePatch = (patch: Partial<ProjectPlan>) => {
+    setForm((prev) => ({ ...prev, ...patch }));
+    setDirty(true);
+    setErrors((prev) => {
+      const next = { ...prev };
+      Object.keys(patch).forEach((k) => { delete next[k]; });
+      return next;
+    });
+  };
+
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.businessDivision) e.businessDivision = '请选择项目单位';
+    if (!form.businessDivision) e.businessDivision = '请选择项目提报单位';
+    if (!form.implementDept) e.implementDept = '请选择实施主管部门';
     if (!form.projectCategory) e.projectCategory = '请选择项目类别';
     if (!form.planName?.trim()) e.planName = '请输入年度计划名称';
-    if (!form.budgetAmount || Number(form.budgetAmount) <= 0) e.budgetAmount = '请填写投资总估算';
+    Object.assign(e, validateInvestmentEstimate(form));
     if (!form.projectManager) e.projectManager = '请选择项目负责人';
     if (!form.planYear) e.planYear = '请选择计划年度';
     if (form.startDate && form.endDate && form.startDate >= form.endDate) {
@@ -227,8 +254,8 @@ export default function DeclarationFormPage() {
       if (!form.endDate) e.endDate = '请选择计划完工时间';
       if (!form.specModel?.trim()) e.specModel = '请输入规格型号';
       if (!form.measureUnit?.trim()) e.measureUnit = '请输入计量单位';
-      if (!form.updateQty || Number(form.updateQty) <= 0) e.updateQty = '请填写更新数量';
-      if (form.inUseQty == null || Number(form.inUseQty) < 0) e.inUseQty = '请填写在用数量';
+      if (!form.updateQty || Number(form.updateQty) <= 0) e.updateQty = '请填写需求数量';
+      if (!form.purchaseApplyQty || Number(form.purchaseApplyQty) <= 0) e.purchaseApplyQty = '请填写申请采购数量';
       if (!form.unitPrice || Number(form.unitPrice) <= 0) e.unitPrice = '请填写预估单价';
       if ((form.isNewMinor || '否') === '否' && !form.fixedAssetCode?.trim()) {
         e.fixedAssetCode = '请输入固定资产编码';
@@ -243,6 +270,13 @@ export default function DeclarationFormPage() {
       const firstKey = Object.keys(e)[0];
       if (firstKey.startsWith('attach_')) scrollToSection('attachment-upload');
       else if (firstKey.startsWith('payment') || firstKey === 'paymentPlanTotal') scrollToSection('payment-plan');
+      else if (
+        firstKey === 'budgetAmount' ||
+        firstKey === 'designFee' ||
+        firstKey === 'jianAnFee' ||
+        firstKey === 'equipmentFee' ||
+        firstKey === 'otherFee'
+      ) scrollToSection('investment-estimate');
       else if (minorMode) scrollToSection('minor-info');
       else scrollToSection(overhaulMode ? 'overhaul-info' : 'basic-info');
       showToast('请检查并填写必填项', 'error');
@@ -289,7 +323,7 @@ export default function DeclarationFormPage() {
           if (r.id !== lrId) return r;
           return {
             ...r,
-            status: 'modified',
+            status: 'leader_passed',
             planName: savedPlan?.planName || form.planName || r.planName,
             planYear: savedPlan?.planYear || form.planYear || r.planYear,
             projectMajorCategory: savedPlan?.projectMajorType || majorType || r.projectMajorCategory,
@@ -304,7 +338,7 @@ export default function DeclarationFormPage() {
         localStorage.setItem(LEADER_REVIEW_STORAGE, JSON.stringify(next));
       } catch { /* noop */ }
       navigate(returnPath, {
-        state: { success: true, message: '修改已保存，年度计划已进入「已修改」', tab: 'modified' },
+        state: { success: true, message: '修改已保存', tab: 'leader_passed' },
       });
       return;
     }
@@ -380,7 +414,7 @@ export default function DeclarationFormPage() {
               </h2>
               <p className="text-xs text-steel-400 mt-0.5">
                 {fromLeaderReview
-                  ? `项目部审查 · 领导通过后发起修改：${form.planName || planId}`
+                  ? `项目办呈送 · 已通过后发起修改：${form.planName || planId}`
                   : isEdit
                     ? `当前编辑：${form.planName || planId}`
                     : `当前项目大类：${majorType}，请填写信息后保存或提交`}
@@ -398,6 +432,7 @@ export default function DeclarationFormPage() {
                 data={form}
                 errors={errors}
                 onChange={handleChange}
+                onPatch={handlePatch}
                 sectionRef={(el) => { sectionRefs.current['overhaul-info'] = el; }}
               />
             ) : minorMode ? (
@@ -405,6 +440,7 @@ export default function DeclarationFormPage() {
                 data={form}
                 errors={errors}
                 onChange={handleChange}
+                onPatch={handlePatch}
                 sectionRef={(el) => { sectionRefs.current['minor-info'] = el; }}
               />
             ) : (
@@ -413,6 +449,7 @@ export default function DeclarationFormPage() {
                   data={form}
                   errors={errors}
                   onChange={handleChange}
+                  onPatch={handlePatch}
                   sectionRef={(el) => { sectionRefs.current['basic-info'] = el; }}
                 />
                 <DetailInfoSection
@@ -422,6 +459,13 @@ export default function DeclarationFormPage() {
                 />
               </>
             )}
+
+            <InvestmentEstimateSection
+              data={form}
+              errors={errors}
+              onPatch={handlePatch}
+              sectionRef={(el) => { sectionRefs.current['investment-estimate'] = el; }}
+            />
 
             <PaymentPlanSection
               rows={paymentPlans}

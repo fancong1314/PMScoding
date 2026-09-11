@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { projectPlans, reviewStatusMap, businessDivisions, projectCategories, projectMajorTypes, initiationMajorTypeFormPath, withPaymentPlans, normalizeReviewStatus } from '@/mocks/projectPlans';
+import { projectPlans, reviewStatusMap, businessDivisions, projectCategories, projectMajorTypes, initiationMajorTypeFormPath, withPaymentPlans, withInitiationDetailFields, normalizeReviewStatus } from '@/mocks/projectPlans';
 import type { ProjectPlan, ProjectMajorType } from '@/mocks/projectPlans';
 import { useColumnConfig } from '@/hooks/useColumnConfig';
 import type { ColumnDef } from '@/hooks/useColumnConfig';
@@ -13,43 +13,51 @@ import type { ApprovalRecord } from '@/mocks/approvalMocks';
 import Layout from '@/components/feature/Layout';
 
 const DEFAULT_COLUMNS: ColumnDef[] = [
+  { id: 'isInPlanProject',  label: '是否计划内项目',      visible: true,  width: 120 },
+  { id: 'annualPlanNo',     label: '年度计划号/项目计划号', visible: true,  width: 140 },
   { id: 'planYear',         label: '计划年度',            visible: true,  width: 90  },
   { id: 'projectMajorType', label: '项目大类',            visible: true,  width: 90  },
-  { id: 'businessDivision', label: '项目单位',            visible: true,  width: 110 },
+  { id: 'businessDivision', label: '项目单位/事业部',      visible: true,  width: 120 },
+  { id: 'ownerUnit',        label: '单位',                visible: false, width: 120 },
+  { id: 'implementUnit',    label: '实施主管单位',        visible: true,  width: 120 },
+  { id: 'professionalUnit', label: '专业主管单位',        visible: false, width: 120 },
   { id: 'projectCategory',  label: '项目类别',            visible: true,  width: 100 },
-  { id: 'budgetAmount',     label: '投资总估算(万元)',    visible: true,  width: 130 },
-  { id: 'benefit',          label: '效益(万元)',          visible: true,  width: 100 },
-  { id: 'projectManager',   label: '项目负责人',          visible: true,  width: 100 },
-  { id: 'projectManagerPhone', label: '负责人电话',       visible: false, width: 120 },
+  { id: 'budgetAmount',     label: '概算/计划金额(万元)',  visible: true,  width: 140 },
+  { id: 'declareFee',       label: '申报费用(万元)',      visible: false, width: 120 },
+  { id: 'isCapitalOverhaul', label: '是否资本性大修',     visible: false, width: 120 },
+  { id: 'argumentApplyNo',  label: '论证申请单号',        visible: false, width: 130 },
+  { id: 'isScrapRenew',     label: '是否报废更新',        visible: false, width: 110 },
+  { id: 'benefit',          label: '效益(万元)',          visible: true,  width: 110 },
+  { id: 'projectManager',   label: '项目经理/负责人',    visible: true,  width: 120 },
+  { id: 'projectManagerPhone', label: '联系电话',         visible: false, width: 120 },
+  { id: 'startDate',        label: '计划开工日期',        visible: true,  width: 120 },
+  { id: 'endDate',          label: '计划完工日期',        visible: true,  width: 120 },
+  { id: 'projectDuration',  label: '项目工期(月)',        visible: true,  width: 110 },
+  { id: 'hasJobChange',     label: '岗位增减',            visible: false, width: 90  },
   { id: 'currentReviewer',  label: '当前审核人',          visible: true,  width: 110 },
   { id: 'reviewStatus',     label: '审核状态',            visible: true,  width: 100 },
   { id: 'applicant',        label: '申报人',              visible: true,  width: 90  },
-  { id: 'startDate',        label: '计划开工时间',        visible: true,  width: 110 },
-  { id: 'endDate',          label: '计划完工时间',        visible: true,  width: 100 },
-  { id: 'supplementNote',   label: '补充实施理由',        visible: false, width: 160 },
 ];
 
-const STORAGE_KEY = 'ng_init_decl_plans_v1';
+const STORAGE_KEY = 'ng_init_decl_plans_v6';
 
 function normalizePlans(list: ProjectPlan[]): ProjectPlan[] {
-  return list.map((p) => withPaymentPlans({
+  return list.map((p) => withPaymentPlans(withInitiationDetailFields({
     ...p,
     projectMajorType: p.projectMajorType || '技改',
     reviewStatus: normalizeReviewStatus(p.reviewStatus as string),
-  }));
+  })));
 }
 
 function getStoredPlans(): ProjectPlan[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return normalizePlans(JSON.parse(stored));
-    localStorage.removeItem('ng_decl_plans_v8');
-    localStorage.removeItem('ng_decl_plans_v7');
-    localStorage.removeItem('ng_decl_plans_v6');
-    localStorage.removeItem('ng_decl_plans_v5');
-    localStorage.removeItem('ng_decl_plans_v4');
-    localStorage.removeItem('ng_decl_plans_v3');
-    localStorage.removeItem('ng_decl_plans_v2');
+    localStorage.removeItem('ng_init_decl_plans_v5');
+    localStorage.removeItem('ng_init_decl_plans_v4');
+    localStorage.removeItem('ng_init_decl_plans_v3');
+    localStorage.removeItem('ng_init_decl_plans_v2');
+    localStorage.removeItem('ng_init_decl_plans_v1');
     return normalizePlans(projectPlans);
   } catch {
     return normalizePlans(projectPlans);
@@ -96,7 +104,7 @@ export default function ProjectPlanDeclaration() {
   const [approvalRecords, setApprovalRecords] = useState<ApprovalRecord[]>(getApprovalRecords());
 
   const { columns, resetColumns, toggleVisible, reorderColumns, updateWidth } =
-    useColumnConfig('decl-plans-v8', DEFAULT_COLUMNS);
+    useColumnConfig('init-decl-plans-v6', DEFAULT_COLUMNS);
 
   useEffect(() => {
     if (location.state?.success) {
@@ -384,7 +392,7 @@ export default function ProjectPlanDeclaration() {
               style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
             >
               <div className="w-4 h-4 flex items-center justify-center"><i className="ri-add-line" /></div>
-              新增{activeMajorType}计划
+              立项申请
             </button>
             <button
               onClick={handleExport}
@@ -405,7 +413,7 @@ export default function ProjectPlanDeclaration() {
               className="flex items-center gap-1.5 px-3 py-2 text-sm text-steel-600 border border-steel-200 rounded-md hover:bg-slate-50 transition-colors whitespace-nowrap cursor-pointer"
             >
               <div className="w-4 h-4 flex items-center justify-center"><i className="ri-upload-2-line" /></div>
-              导入计划
+              导入
             </button>
             <input ref={importRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={() => showToast('导入成功', 'success')} />
           </div>

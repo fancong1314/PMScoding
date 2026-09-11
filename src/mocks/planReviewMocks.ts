@@ -20,20 +20,47 @@ export const RETURN_RESTART_NODE_OPTIONS: { value: ReturnRestartNode; label: str
   { value: 'project_office', label: '项目办审批' },
 ];
 
+export type JointSignPassResult = '通过' | '不通过' | '';
+
+export interface JointSignAttachment {
+  id: string;
+  name: string;
+}
+
 export interface JointReviewParticipantInfo {
   id: string;
   personId: string;
   personName: string;
   unit: string;
-  /** 专业意见（会审通过时填写，非必填） */
+  /** 专业意见（来自意见签署，会审通过时自动带入） */
   opinion?: string;
+  /** 是否已签署意见 */
+  signed?: boolean;
+  /** 签署时间 */
+  signTime?: string;
+  /** 会审结果 */
+  passResult?: JointSignPassResult;
+  /** 签署附件（文档名称列展示） */
+  attachments?: JointSignAttachment[];
 }
 
 export interface JointReviewMeetingInfo {
   reviewTime: string;
   location: string;
+  /** 会审意见截至时间 */
+  opinionDeadline: string;
   participants: JointReviewParticipantInfo[];
   opinionSummary?: string;
+}
+
+/** 意见签署列表摘要：已签/总数、通过人数、不通过人数 */
+export function getOpinionSignSummary(meeting?: JointReviewMeetingInfo | null) {
+  const list = meeting?.participants || [];
+  const total = list.length;
+  const signed = list.filter((p) => p.signed).length;
+  const passCount = list.filter((p) => p.signed && p.passResult === '通过').length;
+  const failCount = list.filter((p) => p.signed && p.passResult === '不通过').length;
+  return { signed, total, passCount, failCount };
 }
 
 export interface PlanReviewRecord {
@@ -142,23 +169,51 @@ export const jointReviewPersonnel = [
   { id: 'BX0600999', name: '刘洋', unit: '战略运营部' },
 ];
 
-/** 会审中演示记录的默认会审信息 */
+const DEMO_SIGN_OPINIONS = [
+  '同意该年度计划立项，建议加强设备选型论证。',
+  '投资估算偏高，建议补充效益测算依据后再实施。',
+  '安全环保措施完备，同意通过。',
+  '工期安排偏紧，建议预留联调缓冲期。',
+  '专业接口清晰，同意列入年度计划。',
+];
+
+/** 会审中演示记录的默认会审信息（含意见签署进度） */
 export function defaultJointMeeting(seed = 0): JointReviewMeetingInfo {
-  const people = [
-    jointReviewPersonnel[seed % jointReviewPersonnel.length],
-    jointReviewPersonnel[(seed + 1) % jointReviewPersonnel.length],
-    jointReviewPersonnel[(seed + 3) % jointReviewPersonnel.length],
-  ];
-  return {
-    reviewTime: `2026-03-${String(10 + (seed % 15)).padStart(2, '0')}T14:30`,
-    location: seed % 2 === 0 ? '工程管理部三楼会议室' : '公司主楼A201会议室',
-    participants: people.map((p, i) => ({
+  const total = 8 + (seed % 5); // 8～12 人，覆盖图示比例场景
+  const signedCount = Math.min(total, 2 + (seed % 4)); // 2～5 人已签
+  const day = String(10 + (seed % 15)).padStart(2, '0');
+  const people = Array.from({ length: total }, (_, i) => {
+    const p = jointReviewPersonnel[(seed + i) % jointReviewPersonnel.length];
+    const signed = i < signedCount;
+    const passResult: JointSignPassResult = !signed
+      ? ''
+      : i % 2 === 0
+        ? '通过'
+        : '不通过';
+    return {
       id: `jp_demo_${seed}_${i}`,
       personId: p.id,
       personName: p.name,
       unit: p.unit,
-      opinion: '',
-    })),
+      signed,
+      signTime: signed ? `2026-03-${day} ${10 + (i % 6)}:${String((i * 7) % 60).padStart(2, '0')}` : '',
+      passResult,
+      opinion: signed ? DEMO_SIGN_OPINIONS[i % DEMO_SIGN_OPINIONS.length] : '',
+      attachments: signed
+        ? [
+            { id: `att_${seed}_${i}_1`, name: '会审记录.PDF' },
+            ...(i % 3 === 0 ? [{ id: `att_${seed}_${i}_2`, name: '专业意见附件.docx' }] : []),
+          ]
+        : [],
+    } satisfies JointReviewParticipantInfo;
+  });
+
+  return {
+    reviewTime: `2026-03-${day}T14:30`,
+    location: seed % 2 === 0 ? '工程管理部三楼会议室' : '公司主楼A201会议室',
+    opinionDeadline: `2026-03-${String(Math.min(28, 12 + (seed % 10))).padStart(2, '0')}T18:00`,
+    participants: people,
+    opinionSummary: '',
   };
 }
 

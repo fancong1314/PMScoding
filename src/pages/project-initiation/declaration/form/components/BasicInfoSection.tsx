@@ -1,11 +1,21 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { ProjectPlan } from '@/mocks/projectPlans';
-import { constructionOrgTree, projectCategories, projectManagers, type OrgNode } from '@/mocks/projectPlans';
+import {
+  calcProjectDurationMonths,
+  constructionOrgTree,
+  initiationImplementUnits,
+  initiationProfessionalUnits,
+  projectCategories,
+  projectManagers,
+  type OrgNode,
+} from '@/mocks/projectPlans';
+import AnnualPlanSelectModal from './AnnualPlanSelectModal';
 
 interface Props {
   data: Partial<ProjectPlan>;
   errors: Record<string, string>;
   onChange: (field: keyof ProjectPlan, value: string | number) => void;
+  onPatch?: (patch: Partial<ProjectPlan>) => void;
   sectionRef: (el: HTMLDivElement | null) => void;
 }
 
@@ -63,23 +73,66 @@ function OrgTreeItem({
   );
 }
 
-export default function BasicInfoSection({ data, errors, onChange, sectionRef }: Props) {
+export default function BasicInfoSection({ data, errors, onChange, onPatch, sectionRef }: Props) {
   const [showManagerModal, setShowManagerModal] = useState(false);
   const [showOrgModal, setShowOrgModal] = useState(false);
+  const [showPlanModal, setShowPlanModal] = useState(false);
   const [managerSearch, setManagerSearch] = useState('');
+
+  const isInPlan = (data.isInPlanProject || '否') === '是';
+  const jobChange = data.hasJobChange || '无';
+  const duration = data.projectDuration ?? calcProjectDurationMonths(data.startDate, data.endDate);
 
   const filteredManagers = projectManagers.filter(
     (m) => !managerSearch || m.name.includes(managerSearch) || m.id.includes(managerSearch)
   );
 
+  const patchDates = (startDate: string, endDate: string) => {
+    const projectDuration = calcProjectDurationMonths(startDate, endDate);
+    if (onPatch) onPatch({ startDate, endDate, projectDuration });
+    else {
+      onChange('startDate', startDate);
+      onChange('endDate', endDate);
+      onChange('projectDuration', projectDuration);
+    }
+  };
+
   const handleSelectManager = (m: (typeof projectManagers)[0]) => {
-    onChange('projectManager', m.name);
-    onChange('projectManagerPhone', m.phone);
+    if (onPatch) onPatch({ projectManager: m.name, projectManagerPhone: m.phone });
+    else {
+      onChange('projectManager', m.name);
+      onChange('projectManagerPhone', m.phone);
+    }
     setShowManagerModal(false);
     setManagerSearch('');
   };
 
-  const colClass = 'grid grid-cols-[100px_1fr] gap-3 items-start';
+  const handleSelectAnnualPlan = (plan: ProjectPlan) => {
+    const no = plan.planNo || plan.annualPlanNo || '';
+    const startDate = plan.startDate?.length === 7 ? `${plan.startDate}-01` : (plan.startDate || data.startDate || '');
+    const endDate = plan.endDate?.length === 7 ? `${plan.endDate}-28` : (plan.endDate || data.endDate || '');
+    const patch: Partial<ProjectPlan> = {
+      annualPlanId: plan.id,
+      annualPlanNo: no,
+      planName: plan.planName,
+      planYear: plan.planYear || data.planYear,
+      businessDivision: plan.businessDivision || data.businessDivision,
+      projectCategory: plan.projectCategory || data.projectCategory,
+      budgetAmount: plan.budgetAmount || data.budgetAmount,
+      benefit: plan.benefit ?? data.benefit,
+      projectManager: plan.projectManager || data.projectManager,
+      projectManagerPhone: plan.projectManagerPhone || data.projectManagerPhone,
+      startDate,
+      endDate,
+      projectDuration: calcProjectDurationMonths(startDate, endDate),
+      implementUnit: plan.implementUnit || plan.businessDivision || data.implementUnit,
+    };
+    if (onPatch) onPatch(patch);
+    else Object.entries(patch).forEach(([k, v]) => onChange(k as keyof ProjectPlan, v as string | number));
+    setShowPlanModal(false);
+  };
+
+  const colClass = 'grid grid-cols-[130px_1fr] gap-3 items-start';
 
   return (
     <div id="basic-info" ref={sectionRef} className="bg-white rounded-lg border border-steel-200 overflow-hidden">
@@ -95,7 +148,55 @@ export default function BasicInfoSection({ data, errors, onChange, sectionRef }:
       </div>
 
       <div className="p-5 space-y-4">
-        {/* 项目单位 + 项目类别 */}
+        <div className="grid grid-cols-2 gap-x-8">
+          <div className={colClass}>
+            <label className={labelCls}>是否计划内项目{requiredStar}</label>
+            <div>
+              <select
+                value={data.isInPlanProject || '否'}
+                onChange={(e) => {
+                  const v = e.target.value as '是' | '否';
+                  if (onPatch) {
+                    onPatch({
+                      isInPlanProject: v,
+                      ...(v === '否' ? { annualPlanNo: '', annualPlanId: '' } : {}),
+                    });
+                  } else {
+                    onChange('isInPlanProject', v);
+                    if (v === '否') {
+                      onChange('annualPlanNo', '');
+                      onChange('annualPlanId', '');
+                    }
+                  }
+                }}
+                className={inputCls(errors.isInPlanProject) + ' cursor-pointer'}
+              >
+                <option value="否">否</option>
+                <option value="是">是</option>
+              </select>
+              {errors.isInPlanProject && <p className="mt-1 text-xs text-red-500">{errors.isInPlanProject}</p>}
+            </div>
+          </div>
+
+          {isInPlan && (
+            <div className={colClass}>
+              <label className={labelCls}>年度计划号{requiredStar}</label>
+              <div>
+                <div
+                  onClick={() => setShowPlanModal(true)}
+                  className={`${inputCls(errors.annualPlanNo)} cursor-pointer flex items-center justify-between`}
+                >
+                  <span className={data.annualPlanNo ? 'text-steel-800 font-mono text-xs' : 'text-steel-400'}>
+                    {data.annualPlanNo || '点击选择已通过的年度计划'}
+                  </span>
+                  <i className="ri-search-line text-steel-400 text-sm" />
+                </div>
+                {errors.annualPlanNo && <p className="mt-1 text-xs text-red-500">{errors.annualPlanNo}</p>}
+              </div>
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
           <div className={colClass}>
             <label className={labelCls}>项目单位{requiredStar}</label>
@@ -130,7 +231,41 @@ export default function BasicInfoSection({ data, errors, onChange, sectionRef }:
           </div>
         </div>
 
-        {/* 项目名称 */}
+        <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+          <div className={colClass}>
+            <label className={labelCls}>实施主管单位{requiredStar}</label>
+            <div>
+              <select
+                value={data.implementUnit || ''}
+                onChange={(e) => onChange('implementUnit', e.target.value)}
+                className={inputCls(errors.implementUnit) + ' cursor-pointer'}
+              >
+                <option value="">请选择实施主管单位</option>
+                {initiationImplementUnits.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
+              {errors.implementUnit && <p className="mt-1 text-xs text-red-500">{errors.implementUnit}</p>}
+            </div>
+          </div>
+          <div className={colClass}>
+            <label className={labelCls}>专业主管单位{requiredStar}</label>
+            <div>
+              <select
+                value={data.professionalUnit || ''}
+                onChange={(e) => onChange('professionalUnit', e.target.value)}
+                className={inputCls(errors.professionalUnit) + ' cursor-pointer'}
+              >
+                <option value="">请选择专业主管单位</option>
+                {initiationProfessionalUnits.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
+              {errors.professionalUnit && <p className="mt-1 text-xs text-red-500">{errors.professionalUnit}</p>}
+            </div>
+          </div>
+        </div>
+
         <div className={colClass}>
           <label className={labelCls}>项目名称{requiredStar}</label>
           <div>
@@ -145,22 +280,9 @@ export default function BasicInfoSection({ data, errors, onChange, sectionRef }:
           </div>
         </div>
 
-        {/* 效益 + 投资总估算 */}
         <div className="grid grid-cols-2 gap-x-8">
           <div className={colClass}>
-            <label className={labelCls}>效益(万元)</label>
-            <input
-              type="number"
-              min="0"
-              step="1"
-              value={data.benefit || ''}
-              onChange={(e) => onChange('benefit', Number(e.target.value))}
-              placeholder="0.00"
-              className={inputCls()}
-            />
-          </div>
-          <div className={colClass}>
-            <label className={labelCls}>投资总估算(万元){requiredStar}</label>
+            <label className={labelCls}>概算总额(万元){requiredStar}</label>
             <div>
               <div className="relative">
                 <input
@@ -177,71 +299,28 @@ export default function BasicInfoSection({ data, errors, onChange, sectionRef }:
               {errors.budgetAmount && <p className="mt-1 text-xs text-red-500">{errors.budgetAmount}</p>}
             </div>
           </div>
-        </div>
-
-        {/* 岗位增减 */}
-        <div className="grid grid-cols-2 gap-x-8">
           <div className={colClass}>
-            <label className={labelCls}>涉及岗位增减</label>
-            <select
-              value={data.hasJobChange || '否'}
-              onChange={(e) => onChange('hasJobChange', e.target.value)}
-              className={inputCls() + ' cursor-pointer'}
-            >
-              <option value="否">否</option>
-              <option value="是">是</option>
-            </select>
-          </div>
-          {data.hasJobChange === '是' && (
-            <div className={colClass}>
-              <label className={labelCls}>增减人数</label>
+            <label className={labelCls}>效益(万元)</label>
+            <div>
               <div className="relative">
                 <input
                   type="number"
-                  value={data.jobChangeCount || ''}
-                  onChange={(e) => onChange('jobChangeCount', Number(e.target.value))}
-                  placeholder="负数为减少，正数为增加"
-                  className={inputCls() + ' pr-8'}
+                  min="0"
+                  step="1"
+                  value={data.benefit ?? ''}
+                  onChange={(e) => onChange('benefit', Number(e.target.value))}
+                  placeholder="0.00"
+                  className={inputCls() + ' pr-10'}
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel-400">人</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel-400">万元</span>
               </div>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* 项目负责人 + 电话 */}
         <div className="grid grid-cols-2 gap-x-8">
           <div className={colClass}>
-            <label className={labelCls}>项目负责人{requiredStar}</label>
-            <div>
-              <div
-                onClick={() => setShowManagerModal(true)}
-                className={`${inputCls(errors.projectManager)} cursor-pointer flex items-center justify-between`}
-              >
-                <span className={data.projectManager ? 'text-steel-800' : 'text-steel-400'}>
-                  {data.projectManager || '点击选择项目负责人'}
-                </span>
-                <i className="ri-user-search-line text-steel-400 text-sm" />
-              </div>
-              {errors.projectManager && <p className="mt-1 text-xs text-red-500">{errors.projectManager}</p>}
-            </div>
-          </div>
-          <div className={colClass}>
-            <label className={labelCls}>负责人电话</label>
-            <input
-              type="text"
-              value={data.projectManagerPhone || ''}
-              onChange={(e) => onChange('projectManagerPhone', e.target.value)}
-              placeholder="选择项目负责人后自动带入，可修改"
-              className={inputCls()}
-            />
-          </div>
-        </div>
-
-        {/* 计划年度 + 开工 + 完工 */}
-        <div className="grid grid-cols-3 gap-x-6">
-          <div className="grid grid-cols-[90px_1fr] gap-2 items-start">
-            <label className={labelCls + ' text-xs'}>计划年度{requiredStar}</label>
+            <label className={labelCls}>计划年度{requiredStar}</label>
             <div>
               <select
                 value={data.planYear || nextYear}
@@ -258,52 +337,131 @@ export default function BasicInfoSection({ data, errors, onChange, sectionRef }:
               {errors.planYear && <p className="mt-1 text-xs text-red-500">{errors.planYear}</p>}
             </div>
           </div>
-          <div className="grid grid-cols-[90px_1fr] gap-2 items-start">
-            <label className={labelCls + ' text-xs'}>计划开工</label>
-            <input
-              type="month"
-              value={data.startDate || ''}
-              onChange={(e) => onChange('startDate', e.target.value)}
-              className={inputCls() + ' cursor-pointer'}
-            />
-          </div>
-          <div className="grid grid-cols-[90px_1fr] gap-2 items-start">
-            <label className={labelCls + ' text-xs'}>计划完工</label>
-            <input
-              type="month"
-              value={data.endDate || ''}
-              onChange={(e) => onChange('endDate', e.target.value)}
-              min={data.startDate || ''}
-              className={inputCls(errors.endDate) + ' cursor-pointer'}
-            />
-            {errors.endDate && <p className="mt-1 text-xs text-red-500">{errors.endDate}</p>}
-          </div>
-        </div>
-
-        {/* 绝对工期 */}
-        <div className="grid grid-cols-2 gap-x-8">
           <div className={colClass}>
-            <label className={labelCls}>绝对工期</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={(() => {
-                  if (!data.startDate || !data.endDate) return '';
-                  const [sy, sm] = data.startDate.split('-').map(Number);
-                  const [ey, em] = data.endDate.split('-').map(Number);
-                  const months = (ey - sy) * 12 + (em - sm);
-                  return months > 0 ? `${months} 个月` : '';
-                })()}
-                readOnly
-                className={inputCls() + ' bg-slate-100 text-steel-500 cursor-not-allowed'}
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel-400">自动计算</span>
+            <label className={labelCls}>项目经理{requiredStar}</label>
+            <div>
+              <div
+                onClick={() => setShowManagerModal(true)}
+                className={`${inputCls(errors.projectManager)} cursor-pointer flex items-center justify-between`}
+              >
+                <span className={data.projectManager ? 'text-steel-800' : 'text-steel-400'}>
+                  {data.projectManager || '点击选择项目经理'}
+                </span>
+                <i className="ri-user-search-line text-steel-400 text-sm" />
+              </div>
+              {errors.projectManager && <p className="mt-1 text-xs text-red-500">{errors.projectManager}</p>}
             </div>
           </div>
         </div>
+
+        <div className="grid grid-cols-2 gap-x-8">
+          <div className={colClass}>
+            <label className={labelCls}>项目经理电话</label>
+            <input
+              type="text"
+              value={data.projectManagerPhone || ''}
+              onChange={(e) => onChange('projectManagerPhone', e.target.value)}
+              placeholder="选择项目经理后自动带入，可修改"
+              className={inputCls()}
+            />
+          </div>
+          <div className={colClass}>
+            <label className={labelCls}>项目工期</label>
+            <div className="relative">
+              <input
+                type="text"
+                value={duration > 0 ? String(duration) : ''}
+                readOnly
+                placeholder="根据开工/完工日期自动计算"
+                className={inputCls() + ' pr-10 bg-slate-50'}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel-400">月</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-8">
+          <div className={colClass}>
+            <label className={labelCls}>计划开工日期{requiredStar}</label>
+            <div>
+              <input
+                type="date"
+                value={data.startDate || ''}
+                onChange={(e) => patchDates(e.target.value, data.endDate || '')}
+                className={inputCls(errors.startDate) + ' cursor-pointer'}
+              />
+              {errors.startDate && <p className="mt-1 text-xs text-red-500">{errors.startDate}</p>}
+            </div>
+          </div>
+          <div className={colClass}>
+            <label className={labelCls}>计划完工日期{requiredStar}</label>
+            <div>
+              <input
+                type="date"
+                value={data.endDate || ''}
+                min={data.startDate || ''}
+                onChange={(e) => patchDates(data.startDate || '', e.target.value)}
+                className={inputCls(errors.endDate) + ' cursor-pointer'}
+              />
+              {errors.endDate && <p className="mt-1 text-xs text-red-500">{errors.endDate}</p>}
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-x-8">
+          <div className={colClass}>
+            <label className={labelCls}>是否涉及岗位增减{requiredStar}</label>
+            <div>
+              <select
+                value={jobChange}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (onPatch) {
+                    onPatch({ hasJobChange: v, ...(v === '无' ? { jobChangeCount: 0 } : {}) });
+                  } else {
+                    onChange('hasJobChange', v);
+                    if (v === '无') onChange('jobChangeCount', 0);
+                  }
+                }}
+                className={inputCls(errors.hasJobChange) + ' cursor-pointer'}
+              >
+                <option value="无">无</option>
+                <option value="增加">增加</option>
+                <option value="减少">减少</option>
+              </select>
+              {errors.hasJobChange && <p className="mt-1 text-xs text-red-500">{errors.hasJobChange}</p>}
+            </div>
+          </div>
+          {jobChange !== '无' && (
+            <div className={colClass}>
+              <label className={labelCls}>岗位增减人数{requiredStar}</label>
+              <div>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={data.jobChangeCount || ''}
+                    onChange={(e) => onChange('jobChangeCount', Number(e.target.value))}
+                    placeholder="请输入人数"
+                    className={inputCls(errors.jobChangeCount) + ' pr-10'}
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel-400">人</span>
+                </div>
+                {errors.jobChangeCount && <p className="mt-1 text-xs text-red-500">{errors.jobChangeCount}</p>}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* 组织架构选择 */}
+      <AnnualPlanSelectModal
+        open={showPlanModal}
+        selectedId={data.annualPlanId}
+        onClose={() => setShowPlanModal(false)}
+        onSelect={handleSelectAnnualPlan}
+      />
+
       {showOrgModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowOrgModal(false)}>
           <div className="absolute inset-0 bg-black/30" />
@@ -336,7 +494,6 @@ export default function BasicInfoSection({ data, errors, onChange, sectionRef }:
         </div>
       )}
 
-      {/* 项目负责人选择 */}
       {showManagerModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowManagerModal(false)}>
           <div className="absolute inset-0 bg-black/30" />
@@ -345,7 +502,7 @@ export default function BasicInfoSection({ data, errors, onChange, sectionRef }:
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-steel-100">
-              <h4 className="text-sm font-semibold text-steel-800">选择项目负责人</h4>
+              <h4 className="text-sm font-semibold text-steel-800">选择项目经理</h4>
               <button onClick={() => setShowManagerModal(false)} className="w-6 h-6 flex items-center justify-center text-steel-400 hover:text-steel-600 cursor-pointer">
                 <i className="ri-close-line" />
               </button>

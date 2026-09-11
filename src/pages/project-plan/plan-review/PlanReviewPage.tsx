@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+﻿import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import {
@@ -10,6 +10,7 @@ import {
   PRIORITY_SORT_ORDER,
   normalizePlanReviewStatus,
   RETURN_RESTART_NODE_OPTIONS,
+  defaultJointMeeting,
 } from '@/mocks/planReviewMocks';
 import type { PlanReviewRecord, PlanPriorityLevel, PlanReviewStatus, ReturnRestartNode } from '@/mocks/planReviewMocks';
 import { projectMajorTypeFormPath } from '@/mocks/projectPlans';
@@ -22,6 +23,9 @@ import JointReviewNoticeModal from './components/JointReviewNoticeModal';
 import type { JointReviewPassPayload } from './components/JointReviewPassModal';
 import PlanReviewDetailModal from './components/PlanReviewDetailModal';
 import ReturnReviewModal from './components/ReturnReviewModal';
+import RejectModal from './components/RejectModal';
+import JointReviewDetailModal from './components/JointReviewDetailModal';
+import type { JointReviewDetailPayload } from './components/JointReviewDetailModal';
 
 type ReviewDept = 'business-unit' | 'professional-dept' | 'chief-engineer' | 'operations-dept' | 'budget-committee' | 'zhongte-stage';
 type JointTab = 'pending_joint' | 'reviewing';
@@ -39,7 +43,7 @@ function getDefaultColumns(reviewDept: ReviewDept): ColumnDef[] {
   const base: ColumnDef[] = [
     { id: 'applyYear',              label: '计划年度',        visible: true,  width: 90  },
     { id: 'projectMajorCategory',   label: '项目大类',        visible: true,  width: 90  },
-    { id: 'businessUnit',           label: '项目单位',        visible: true,  width: 120 },
+    { id: 'businessUnit',           label: '项目提报单位',        visible: true,  width: 120 },
     { id: 'projectCategory',        label: '项目类别',        visible: true,  width: 120 },
     { id: 'planName',               label: '年度计划名称',    visible: true,  width: 260 },
     { id: 'budget',                 label: '投资总估算(万元)', visible: true,  width: 130 },
@@ -61,6 +65,9 @@ function getDefaultColumns(reviewDept: ReviewDept): ColumnDef[] {
     return [
       { id: 'priorityLevel', label: '优先级排序', visible: true, width: 100 },
       planNameCol,
+      { id: 'jointDetail', label: '会审人员', visible: true, width: 100 },
+      { id: 'opinionDeadline', label: '会审意见截至时间', visible: true, width: 150 },
+      { id: 'opinionSign', label: '意见签署', visible: true, width: 200 },
       ...rest,
     ];
   }
@@ -74,11 +81,26 @@ function normalizeRecord(r: PlanReviewRecord): PlanReviewRecord {
     const n = Number(r.zsSortNo) || 3;
     priorityLevel = n <= 1 ? 'A' : n === 2 ? 'B' : n === 3 ? 'C' : 'D';
   }
+  const projectStatus = normalizePlanReviewStatus(r.projectStatus as string);
+  let jointMeeting =
+    r.jointMeeting ||
+    (projectStatus === 'reviewing' || projectStatus === 'approved'
+      ? defaultJointMeeting(Number(r.zsSortNo) || 0)
+      : undefined);
+  if (jointMeeting && !jointMeeting.opinionDeadline) {
+    jointMeeting = {
+      ...jointMeeting,
+      opinionDeadline: jointMeeting.reviewTime
+        ? `${jointMeeting.reviewTime.slice(0, 10)}T18:00`
+        : defaultJointMeeting(Number(r.zsSortNo) || 0).opinionDeadline,
+    };
+  }
   return {
     ...r,
     priorityLevel,
-    projectStatus: normalizePlanReviewStatus(r.projectStatus as string),
+    projectStatus,
     linkedPlanId: r.linkedPlanId || r.id,
+    jointMeeting,
   };
 }
 
@@ -102,8 +124,8 @@ export default function PlanReviewPage({ reviewDept }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const isJointReview = reviewDept === 'zhongte-stage';
-  const storageKey = `ng_plan_review_${reviewDept}_v4`;
-  const colKey = `plan-review-cols-${reviewDept}-v6`;
+  const storageKey = `ng_plan_review_${reviewDept}_v6`;
+  const colKey = `plan-review-cols-${reviewDept}-v11`;
 
   const [records, setRecords] = useState<PlanReviewRecord[]>(() => getStored(storageKey));
   const [activeTab, setActiveTab] = useState<JointTab>('pending_joint');
@@ -121,7 +143,10 @@ export default function PlanReviewPage({ reviewDept }: Props) {
   const [noticeOpen, setNoticeOpen] = useState(false);
   const [priorityModalOpen, setPriorityModalOpen] = useState(false);
   const [detailTarget, setDetailTarget] = useState<PlanReviewRecord | null>(null);
-  const [returnTarget, setReturnTarget] = useState<PlanReviewRecord | null>(null);
+  const [jointDetailTarget, setJointDetailTarget] = useState<PlanReviewRecord | null>(null);
+  const [returnOpen, setReturnOpen] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [batchActionIds, setBatchActionIds] = useState<string[]>([]);
 
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
 
@@ -233,25 +258,62 @@ export default function PlanReviewPage({ reviewDept }: Props) {
     showToast(`「${record.planName.slice(0, 18)}」会审通过`);
   };
 
-  const handleReject = (id: string, reason: string) => {
-    setRecords((prev) => prev.map((r) => r.id === id ? { ...r, projectStatus: 'rejected' as PlanReviewStatus, cancelReason: reason, isCancelled: true, latestStage: '已驳回' } : r));
-    setSelectedRows((prev) => prev.filter((rid) => rid !== id));
-    showToast('已驳回，年度计划已作废', 'info');
+  const handleReject = (ids: string[], reason: string) => {
+    setRecords((prev) =>
+      prev.map((r) =>
+        ids.includes(r.id)
+          ? { ...r, projectStatus: 'rejected' as PlanReviewStatus, cancelReason: reason, isCancelled: true, latestStage: '已驳回' }
+          : r
+      )
+    );
+    setSelectedRows((prev) => prev.filter((rid) => !ids.includes(rid)));
+    showToast(ids.length > 1 ? `已驳回 ${ids.length} 条年度计划` : '已驳回，年度计划已作废', 'info');
   };
 
   const handleReturn = (reason: string, restartNode: ReturnRestartNode) => {
-    if (!returnTarget) return;
+    const ids = batchActionIds.length > 0 ? batchActionIds : [];
+    if (ids.length === 0) return;
     const nodeLabel = RETURN_RESTART_NODE_OPTIONS.find((o) => o.value === restartNode)?.label || restartNode;
-    setRecords((prev) => prev.map((r) => r.id === returnTarget.id ? {
-      ...r,
-      projectStatus: 'returned' as PlanReviewStatus,
-      cancelReason: reason,
-      returnRestartNode: restartNode,
-      latestStage: `已退回（${nodeLabel}）`,
-    } : r));
-    setSelectedRows((prev) => prev.filter((id) => id !== returnTarget.id));
-    setReturnTarget(null);
-    showToast(`已退回，重新提交后从「${nodeLabel}」开始审批`, 'info');
+    setRecords((prev) =>
+      prev.map((r) =>
+        ids.includes(r.id)
+          ? {
+              ...r,
+              projectStatus: 'returned' as PlanReviewStatus,
+              cancelReason: reason,
+              returnRestartNode: restartNode,
+              latestStage: `已退回（${nodeLabel}）`,
+            }
+          : r
+      )
+    );
+    setSelectedRows((prev) => prev.filter((id) => !ids.includes(id)));
+    setReturnOpen(false);
+    setBatchActionIds([]);
+    showToast(
+      ids.length > 1
+        ? `已退回 ${ids.length} 条，重新提交后从「${nodeLabel}」开始审批`
+        : `已退回，重新提交后从「${nodeLabel}」开始审批`,
+      'info'
+    );
+  };
+
+  const openBatchReject = () => {
+    if (selectedRows.length === 0) {
+      showToast('请先勾选需要驳回的年度计划', 'error');
+      return;
+    }
+    setBatchActionIds([...selectedRows]);
+    setRejectOpen(true);
+  };
+
+  const openBatchReturn = () => {
+    if (selectedRows.length === 0) {
+      showToast('请先勾选需要退回的年度计划', 'error');
+      return;
+    }
+    setBatchActionIds([...selectedRows]);
+    setReturnOpen(true);
   };
 
   const handleModify = (record: PlanReviewRecord) => {
@@ -260,6 +322,41 @@ export default function PlanReviewPage({ reviewDept }: Props) {
   };
 
   const handleView = (record: PlanReviewRecord) => setDetailTarget(record);
+
+  const handleJointDetail = (record: PlanReviewRecord) => setJointDetailTarget(record);
+
+  const handleJointDetailSubmit = (payload: JointReviewDetailPayload) => {
+    if (!jointDetailTarget) return;
+    const prevMeeting = jointDetailTarget.jointMeeting;
+    const meeting = {
+      reviewTime: payload.reviewTime,
+      location: payload.location,
+      opinionDeadline: payload.opinionDeadline,
+      participants: payload.participants.map((p) => {
+        const old = prevMeeting?.participants.find(
+          (x) => x.personId === p.personId || x.id === p.id
+        );
+        return {
+          ...p,
+          opinion: p.opinion || old?.opinion || '',
+          signed: p.signed ?? old?.signed,
+          signTime: p.signTime ?? old?.signTime,
+          passResult: p.passResult ?? old?.passResult,
+          attachments: p.attachments ?? old?.attachments,
+        };
+      }),
+      opinionSummary: prevMeeting?.opinionSummary || '',
+    };
+    setRecords((prev) =>
+      prev.map((r) => (r.id === jointDetailTarget.id ? { ...r, jointMeeting: meeting } : r))
+    );
+    setJointDetailTarget(null);
+    showToast(
+      payload.sendNotice
+        ? '会审通知已修改并重新发送'
+        : '会审通知已修改并提交'
+    );
+  };
 
   const handleOpenNotice = () => {
     if (selectedRows.length === 0) {
@@ -272,6 +369,7 @@ export default function PlanReviewPage({ reviewDept }: Props) {
   const handleNoticeSubmit = (payload: {
     reviewTime: string;
     location: string;
+    opinionDeadline: string;
     participants: { id: string; personId: string; personName: string; unit: string }[];
     sendNotice: boolean;
   }) => {
@@ -279,7 +377,15 @@ export default function PlanReviewPage({ reviewDept }: Props) {
     const meeting = {
       reviewTime: payload.reviewTime,
       location: payload.location,
-      participants: payload.participants.map((p) => ({ ...p, opinion: '' })),
+      opinionDeadline: payload.opinionDeadline,
+      participants: payload.participants.map((p) => ({
+        ...p,
+        opinion: '',
+        signed: false,
+        signTime: '',
+        passResult: '' as const,
+        attachments: [],
+      })),
       opinionSummary: '',
     };
     setRecords((prev) =>
@@ -365,9 +471,9 @@ export default function PlanReviewPage({ reviewDept }: Props) {
               <input value={filterName} onChange={(e) => setFilterName(e.target.value)} placeholder="模糊匹配" className={inputCls} />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-xs text-steel-500 whitespace-nowrap w-20 text-right flex-shrink-0">项目单位</label>
+              <label className="text-xs text-steel-500 whitespace-nowrap w-20 text-right flex-shrink-0">项目提报单位</label>
               <select value={filterUnit} onChange={(e) => setFilterUnit(e.target.value)} className={inputCls + ' cursor-pointer'}>
-                <option value="">全部项目单位</option>
+                <option value="">全部项目提报单位</option>
                 {planReviewBusinessUnits.map((u) => <option key={u} value={u}>{u}</option>)}
               </select>
             </div>
@@ -444,18 +550,40 @@ export default function PlanReviewPage({ reviewDept }: Props) {
             )}
 
             {isJointReview && activeTab === 'reviewing' && (
-              <button
-                type="button"
-                onClick={handleOpenPriority}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap"
-                style={{ background: 'linear-gradient(135deg,#7c3aed,#8b5cf6)' }}
-              >
-                <i className="ri-sort-asc" />
-                优先级排序
-                {selectedRows.length > 0 && (
-                  <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">{selectedRows.length}</span>
-                )}
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={handleOpenPriority}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap"
+                  style={{ background: 'linear-gradient(135deg,#7c3aed,#8b5cf6)' }}
+                >
+                  <i className="ri-sort-asc" />
+                  优先级排序
+                  {selectedRows.length > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">{selectedRows.length}</span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={openBatchReject}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-red-500 hover:bg-red-600"
+                >
+                  驳回
+                  {selectedRows.length > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">{selectedRows.length}</span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={openBatchReturn}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-orange-500 hover:bg-orange-600"
+                >
+                  退回
+                  {selectedRows.length > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded-full">{selectedRows.length}</span>
+                  )}
+                </button>
+              </>
             )}
 
             <button
@@ -502,10 +630,10 @@ export default function PlanReviewPage({ reviewDept }: Props) {
           onToggleSelectAll={() => setSelectedRows(selectedRows.length === paginated.length ? [] : paginated.map((r) => r.id))}
           onToggleSelectRow={(id) => setSelectedRows((prev) => prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id])}
           onPass={handlePass}
-          onReject={handleReject}
-          onReturn={(record) => setReturnTarget(record)}
           onView={handleView}
           onModify={handleModify}
+          onJointDetail={handleJointDetail}
+          onSmsToast={(msg) => showToast(msg, 'success')}
           onToggleVisible={toggleVisible}
           onReorder={reorderColumns}
           onResetColumns={resetColumns}
@@ -552,6 +680,7 @@ export default function PlanReviewPage({ reviewDept }: Props) {
       <JointReviewNoticeModal
         open={noticeOpen}
         planNames={selectedPlans.map((p) => p.planName)}
+        businessUnits={selectedPlans.map((p) => p.businessUnit)}
         onClose={() => setNoticeOpen(false)}
         onSubmit={handleNoticeSubmit}
       />
@@ -561,6 +690,13 @@ export default function PlanReviewPage({ reviewDept }: Props) {
         selectedCount={selectedRows.length}
         onClose={() => setPriorityModalOpen(false)}
         onConfirm={handleConfirmPriority}
+      />
+
+      <JointReviewDetailModal
+        open={!!jointDetailTarget}
+        record={jointDetailTarget}
+        onClose={() => setJointDetailTarget(null)}
+        onSubmit={handleJointDetailSubmit}
       />
 
       <PlanReviewDetailModal
@@ -576,10 +712,30 @@ export default function PlanReviewPage({ reviewDept }: Props) {
       />
 
       <ReturnReviewModal
-        open={!!returnTarget}
-        planName={returnTarget?.planName || ''}
-        onClose={() => setReturnTarget(null)}
+        open={returnOpen}
+        planName={
+          batchActionIds.length === 1
+            ? (records.find((r) => r.id === batchActionIds[0])?.planName || '')
+            : `已选 ${batchActionIds.length} 条年度计划`
+        }
+        onClose={() => { setReturnOpen(false); setBatchActionIds([]); }}
         onConfirm={handleReturn}
+      />
+
+      <RejectModal
+        open={rejectOpen}
+        mode="reject"
+        planName={
+          batchActionIds.length === 1
+            ? (records.find((r) => r.id === batchActionIds[0])?.planName || '')
+            : `已选 ${batchActionIds.length} 条年度计划`
+        }
+        onClose={() => { setRejectOpen(false); setBatchActionIds([]); }}
+        onConfirm={(reason) => {
+          handleReject(batchActionIds, reason);
+          setRejectOpen(false);
+          setBatchActionIds([]);
+        }}
       />
 
       {toast && (

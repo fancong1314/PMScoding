@@ -18,8 +18,16 @@ const menuItems: MenuItem[] = [
     icon: 'ri-calendar-todo-line',
     children: [
       { key: 'declaration', label: '年度计划申报', icon: 'ri-file-list-3-line', path: '/project-plan/declaration' },
-      { key: 'plan-review', label: '年度计划会审', icon: 'ri-search-2-line', path: '/project-plan/plan-review/zhongte-stage' },
-      { key: 'leader-review', label: '项目部审查', icon: 'ri-user-star-line', path: '/project-plan/leader-review' },
+      {
+        key: 'plan-examine',
+        label: '年度计划审查',
+        icon: 'ri-file-search-line',
+        grandchildren: [
+          { key: 'plan-review', label: '年度计划会审', icon: 'ri-search-2-line', path: '/project-plan/plan-review/zhongte-stage' },
+          { key: 'joint-opinion-sign', label: '会审意见签署', icon: 'ri-draft-line', path: '/project-plan/joint-opinion-sign' },
+          { key: 'leader-review', label: '项目办呈送', icon: 'ri-user-star-line', path: '/project-plan/leader-review' },
+        ],
+      },
       { key: 'plan-deferral', label: '年度计划暂缓', icon: 'ri-time-line', path: '/project-plan/plan-deferral' },
       { key: 'plan-archive', label: '计划资料管理', icon: 'ri-folder-chart-line', path: '/project-plan/plan-archive' },
       { key: 'payment-report', label: '年度付款计划报表', icon: 'ri-money-cny-box-line', path: '/project-plan/payment-report' },

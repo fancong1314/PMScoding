@@ -1,6 +1,6 @@
-import type { LeaderReviewRecord, LeaderReviewStatus, PlanPriorityLevel } from '@/mocks/planLeaderReviewMocks';
+﻿import type { LeaderReviewRecord, LeaderReviewStatus, PlanPriorityLevel } from '@/mocks/planLeaderReviewMocks';
 
-export type RowAction = 'present' | 'return' | 'pass' | 'reject' | 'restore' | 'edit' | 'view';
+export type RowAction = 'present' | 'return' | 'pass' | 'reject' | 'edit' | 'view';
 export type LeaderSortField = 'budget' | 'benefit' | 'priorityLevel';
 
 interface Props {
@@ -26,7 +26,7 @@ const COLS: { id: string; label: string; width: number; sortable?: boolean }[] =
   { id: 'projectMajorCategory', label: '项目大类', width: 90 },
   { id: 'projectCategory', label: '项目类型', width: 120 },
   { id: 'applicant', label: '申报人', width: 90 },
-  { id: 'businessUnit', label: '项目单位', width: 120 },
+  { id: 'businessUnit', label: '项目提报单位', width: 120 },
   { id: 'budget', label: '投资总估算（万元）', width: 140, sortable: true },
   { id: 'benefit', label: '效益（万元）', width: 110, sortable: true },
   { id: 'startDate', label: '计划开工时间', width: 120 },
@@ -35,12 +35,8 @@ const COLS: { id: string; label: string; width: number; sortable?: boolean }[] =
 
 function actionWidth(tab: LeaderReviewStatus) {
   switch (tab) {
+    case 'pending_present':
     case 'leader_passed':
-      return 200;
-    case 'leader_returned':
-    case 'modified':
-      return 168;
-    case 'rejected':
       return 120;
     default:
       return 88;
@@ -50,18 +46,8 @@ function actionWidth(tab: LeaderReviewStatus) {
 function rowActions(tab: LeaderReviewStatus): RowAction[] {
   switch (tab) {
     case 'pending_present':
-    case 'leader_reviewing':
-    case 'returned':
-    case 'approved':
-      return ['view'];
     case 'leader_passed':
-      return ['edit', 'return', 'pass', 'view'];
-    case 'modified':
-      return ['return', 'pass', 'view'];
-    case 'leader_returned':
-      return ['return', 'reject', 'view'];
-    case 'rejected':
-      return ['restore', 'view'];
+      return ['edit', 'view'];
     default:
       return ['view'];
   }
@@ -72,7 +58,6 @@ const ACTION_LABEL: Record<RowAction, string> = {
   return: '退回',
   pass: '通过',
   reject: '驳回',
-  restore: '恢复',
   edit: '修改',
   view: '详情',
 };
@@ -82,7 +67,6 @@ const ACTION_CLS: Record<RowAction, string> = {
   return: 'text-orange-600 hover:bg-orange-50',
   pass: 'text-emerald-600 hover:bg-emerald-50',
   reject: 'text-red-600 hover:bg-red-50',
-  restore: 'text-violet-600 hover:bg-violet-50',
   edit: 'text-indigo-600 hover:bg-indigo-50',
   view: 'text-sky-600 hover:bg-sky-50',
 };

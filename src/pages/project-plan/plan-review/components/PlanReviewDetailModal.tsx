@@ -1,6 +1,8 @@
-import { projectPlans, withPaymentPlans, projectMajorTypeFormPath } from '@/mocks/projectPlans';
+import { projectPlans, withPaymentPlans, withAnnualPlanOrgFields, projectMajorTypeFormPath } from '@/mocks/projectPlans';
 import type { ProjectPlan } from '@/mocks/projectPlans';
 import { getPlanDeclarationAttachmentConfigs } from '@/mocks/archiveConfigMocks';
+import { FormViewBlock, FormViewItem } from '@/components/feature/FormLayout';
+import { InvestmentEstimateView } from '@/pages/project-plan/declaration/form/components/InvestmentEstimateSection';
 
 interface Props {
   open: boolean;
@@ -12,18 +14,18 @@ interface Props {
 
 function getPlan(linkedPlanId: string): ProjectPlan | null {
   try {
-    const keys = ['ng_decl_plans_v9', 'ng_decl_plans_v8', 'ng_decl_plans_v7'];
+    const keys = ['ng_decl_plans_v12', 'ng_decl_plans_v11', 'ng_decl_plans_v10', 'ng_decl_plans_v9', 'ng_decl_plans_v8', 'ng_decl_plans_v7'];
     for (const key of keys) {
       const s = localStorage.getItem(key);
       if (s) {
         const list = JSON.parse(s) as ProjectPlan[];
         const found = list.find((p) => p.id === linkedPlanId);
-        if (found) return withPaymentPlans(found);
+        if (found) return withPaymentPlans(withAnnualPlanOrgFields(found));
       }
     }
   } catch { /* noop */ }
   const fromMock = projectPlans.find((p) => p.id === linkedPlanId);
-  return fromMock ? withPaymentPlans(fromMock) : null;
+  return fromMock ? withPaymentPlans(withAnnualPlanOrgFields(fromMock)) : null;
 }
 
 const DETAIL_FIELDS: { field: keyof ProjectPlan; label: string }[] = [
@@ -35,7 +37,8 @@ const DETAIL_FIELDS: { field: keyof ProjectPlan; label: string }[] = [
   { field: 'modificationContent', label: '改造主要内容' },
   { field: 'modificationPurpose', label: '改造目的' },
   { field: 'effectDescription', label: '效果说明/效益计算' },
-  { field: 'projectSummary', label: '项目概要总体描述' },
+  { field: 'equipmentDesc', label: '设备装备描述' },
+  { field: 'projectSummary', label: '项目总体结论' },
 ];
 
 export default function PlanReviewDetailModal({ open, linkedPlanId, fallbackName, onClose, onEdit }: Props) {
@@ -82,81 +85,55 @@ export default function PlanReviewDetailModal({ open, linkedPlanId, fallbackName
             </div>
           ) : (
             <>
-              <div>
-                <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                  <div className="w-1 h-4 rounded-full bg-primary-500" />
-                  业务信息
-                </h4>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-3 p-4 rounded-lg border border-slate-200 bg-slate-50/50">
-                  {[
-                    ['项目大类', plan.projectMajorType],
-                    ['计划年度', `${plan.planYear}年`],
-                    ['项目单位', plan.businessDivision],
-                    ['项目类别', plan.projectCategory],
-                    ['投资总估算', `${plan.budgetAmount.toFixed(2)} 万元`],
-                    ['项目负责人', plan.projectManager],
-                    ['负责人电话', plan.projectManagerPhone || '—'],
-                    ['计划开工时间', plan.startDate || '—'],
-                    ['计划完工时间', plan.endDate || '—'],
-                  ].map(([label, value]) => (
-                    <div key={label as string} className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                      <span className="text-sm text-slate-500">{label}</span>
-                      <span className="text-sm font-medium text-slate-800 text-right max-w-[250px] truncate">{value}</span>
-                    </div>
-                  ))}
-                  {plan.projectMajorType === '大修' && (
-                    <>
-                      <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                        <span className="text-sm text-slate-500">是否资本性大修</span>
-                        <span className="text-sm font-medium text-slate-800">{plan.isCapitalOverhaul || '—'}</span>
-                      </div>
-                      <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                        <span className="text-sm text-slate-500">设备名称</span>
-                        <span className="text-sm font-medium text-slate-800">{plan.equipmentName || '—'}</span>
-                      </div>
-                      <div className="col-span-2 flex items-start justify-between py-1.5 px-3 rounded bg-white">
-                        <span className="text-sm text-slate-500 flex-shrink-0">设备大修理由</span>
-                        <span className="text-sm text-slate-700 text-right">{plan.overhaulReason || '—'}</span>
-                      </div>
-                    </>
-                  )}
-                  {plan.projectMajorType === '零固' && (
-                    <>
-                      <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                        <span className="text-sm text-slate-500">规格型号</span>
-                        <span className="text-sm font-medium text-slate-800">{plan.specModel || '—'}</span>
-                      </div>
-                      <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                        <span className="text-sm text-slate-500">是否新增零固</span>
-                        <span className="text-sm font-medium text-slate-800">{plan.isNewMinor || '—'}</span>
-                      </div>
-                      <div className="col-span-2 flex items-start justify-between py-1.5 px-3 rounded bg-white">
-                        <span className="text-sm text-slate-500 flex-shrink-0">更新理由</span>
-                        <span className="text-sm text-slate-700 text-right">{plan.updateReason || '—'}</span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
+              <FormViewBlock title="业务信息">
+                <FormViewItem label="项目大类" value={plan.projectMajorType} />
+                <FormViewItem label="计划年度" value={`${plan.planYear}年`} />
+                <FormViewItem label="项目提报单位" value={plan.businessDivision} />
+                <FormViewItem label="提报部门" value={plan.submitDept} />
+                <FormViewItem label="实施主管部门" value={plan.implementDept} />
+                <FormViewItem label="项目类别" value={plan.projectCategory} />
+                <FormViewItem label="投资总估算" value={`${plan.budgetAmount.toFixed(2)} 万元`} />
+                <FormViewItem label="项目负责人" value={plan.projectManager} />
+                <FormViewItem label="负责人电话" value={plan.projectManagerPhone} />
+                <FormViewItem label="计划开工时间" value={plan.startDate} />
+                <FormViewItem label="计划完工时间" value={plan.endDate} />
+                {plan.projectMajorType === '大修' && (
+                  <>
+                    <FormViewItem label="是否资本性大修" value={plan.isCapitalOverhaul} />
+                    <FormViewItem label="设备名称" value={plan.equipmentName} />
+                    <FormViewItem label="设备大修理由" value={plan.overhaulReason} multiline fullWidth />
+                  </>
+                )}
+                {plan.projectMajorType === '零固' && (
+                  <>
+                    <FormViewItem label="设备编码" value={plan.equipmentCode} />
+                    <FormViewItem label="设备名称" value={plan.equipmentName} />
+                    <FormViewItem label="设备库存数量" value={plan.equipmentStockQty} />
+                    <FormViewItem label="规格型号" value={plan.specModel} />
+                    <FormViewItem label="计量单位" value={plan.measureUnit} />
+                    <FormViewItem label="需求数量" value={plan.updateQty} />
+                    <FormViewItem label="申请采购数量" value={plan.purchaseApplyQty} />
+                    <FormViewItem label="是否新增零固" value={plan.isNewMinor} />
+                    <FormViewItem label="更新理由" value={plan.updateReason} multiline fullWidth />
+                  </>
+                )}
+              </FormViewBlock>
 
               {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改') && (
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                    <div className="w-1 h-4 rounded-full bg-primary-500" />
-                    项目详细信息
-                  </h4>
-                  <div className="space-y-2 p-4 rounded-lg border border-slate-200 bg-slate-50/50">
-                    {DETAIL_FIELDS.map(({ field, label }) => (
-                      <div key={field} className="flex items-start gap-4 py-2 px-3 rounded bg-white">
-                        <span className="text-sm text-slate-500 w-36 flex-shrink-0">{label}</span>
-                        <span className="text-sm text-slate-700 flex-1 whitespace-pre-wrap">
-                          {(plan[field] as string) || '—'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <FormViewBlock title="项目详细信息">
+                  {DETAIL_FIELDS.map(({ field, label }) => (
+                    <FormViewItem
+                      key={field}
+                      label={label}
+                      value={plan[field] as string}
+                      multiline
+                      fullWidth
+                    />
+                  ))}
+                </FormViewBlock>
               )}
+
+              <InvestmentEstimateView plan={plan} />
 
               <div>
                 <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">

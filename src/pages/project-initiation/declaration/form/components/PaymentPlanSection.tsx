@@ -37,7 +37,7 @@ export function validatePaymentPlans(
   const budget = Number(budgetAmount) || 0;
 
   if (budget > 0 && total > budget + 0.001) {
-    errors.paymentPlanTotal = `付款计划合计 ${total.toFixed(2)} 万元已超过投资总估算 ${budget.toFixed(2)} 万元`;
+    errors.paymentPlanTotal = `付款计划合计 ${total.toFixed(2)} 万元已超过概算总额 ${budget.toFixed(2)} 万元`;
   }
 
   rows.forEach((r, idx) => {
@@ -64,7 +64,7 @@ export default function PaymentPlanSection({
   const overBudget = budget > 0 && total > budget + 0.001;
   const remain = round2(Math.max(0, budget - total));
 
-  // 投资总估算变更时，已填比例的行自动重算金额
+  // 概算总额变更时，已填比例的行自动重算金额
   useEffect(() => {
     if (budget <= 0) return;
     let changed = false;
@@ -78,7 +78,7 @@ export default function PaymentPlanSection({
       return r;
     });
     if (changed) onChange(next);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅响应投资总估算变化
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 仅响应概算总额变化
   }, [budget]);
 
   const updateRow = (id: string, patch: Partial<PaymentPlanRow>) => {
@@ -113,7 +113,7 @@ export default function PaymentPlanSection({
           <i className="ri-calendar-schedule-line text-emerald-500" />
         </div>
         <h3 className="text-sm font-semibold text-steel-800">付款计划</h3>
-        <span className="text-xs text-steel-400 ml-1">按月份编制付款安排，合计不得超过投资总估算</span>
+        <span className="text-xs text-steel-400 ml-1">按月份编制付款安排，合计不得超过概算总额</span>
       </div>
 
       <div className="p-5 space-y-3">
@@ -128,11 +128,11 @@ export default function PaymentPlanSection({
           <div>
             {budget > 0 ? (
               <>
-                当前投资总估算为 <span className="font-semibold">{budget.toFixed(2)}</span> 万元，
-                付款计划合计金额不得超过该金额；填写比例时可按投资总估算自动计算付款金额。
+                当前概算总额为 <span className="font-semibold">{budget.toFixed(2)}</span> 万元，
+                付款计划合计金额不得超过该金额；填写比例时可按概算总额自动计算付款金额。
               </>
             ) : (
-              <>请先在上方填写「投资总估算（万元）」后，再编制付款计划（可按比例自动计算金额）。</>
+              <>请先在上方填写「概算总额（万元）」后，再编制付款计划（可按比例自动计算金额）。</>
             )}
           </div>
         </div>
@@ -257,7 +257,7 @@ export default function PaymentPlanSection({
 
         {(errors.paymentPlanTotal || overBudget) && (
           <p className="text-xs text-red-500">
-            {errors.paymentPlanTotal || `付款计划合计 ${total.toFixed(2)} 万元已超过投资总估算 ${budget.toFixed(2)} 万元`}
+            {errors.paymentPlanTotal || `付款计划合计 ${total.toFixed(2)} 万元已超过概算总额 ${budget.toFixed(2)} 万元`}
           </p>
         )}
 

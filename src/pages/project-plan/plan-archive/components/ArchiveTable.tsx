@@ -1,4 +1,5 @@
-import type { PlanArchiveRecord, PlanPriorityLevel } from '@/mocks/planArchiveMocks';
+﻿import type { PlanArchiveRecord, PlanPriorityLevel } from '@/mocks/planArchiveMocks';
+import { getAvailableAmount, planAmountStatusMap } from '@/mocks/planArchiveMocks';
 
 interface Props {
   records: PlanArchiveRecord[];
@@ -7,6 +8,8 @@ interface Props {
   onPrioritySort: () => void;
   onView: (record: PlanArchiveRecord) => void;
   onViewLog: (record: PlanArchiveRecord) => void;
+  onEditControlAmount: (record: PlanArchiveRecord) => void;
+  onViewOccupy: (record: PlanArchiveRecord) => void;
 }
 
 const SEQ_W = 56;
@@ -26,7 +29,16 @@ function PriorityBadge({ level }: { level: PlanPriorityLevel }) {
   );
 }
 
-export default function ArchiveTable({ records, pageOffset, sortDir, onPrioritySort, onView, onViewLog }: Props) {
+export default function ArchiveTable({
+  records,
+  pageOffset,
+  sortDir,
+  onPrioritySort,
+  onView,
+  onViewLog,
+  onEditControlAmount,
+  onViewOccupy,
+}: Props) {
   const hBg = '#f5f7fa';
   const leftName = SEQ_W + PRIORITY_W;
   const activeAsc = sortDir === 'asc';
@@ -35,7 +47,7 @@ export default function ArchiveTable({ records, pageOffset, sortDir, onPriorityS
   return (
     <div className="bg-white rounded-lg border border-steel-200 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left" style={{ minWidth: 1280 }}>
+        <table className="w-full border-collapse text-left" style={{ minWidth: 1680 }}>
           <thead>
             <tr className="bg-slate-50">
               <th className="sticky left-0 z-10 px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 w-14"
@@ -64,8 +76,12 @@ export default function ArchiveTable({ records, pageOffset, sortDir, onPriorityS
               <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">计划年度</th>
               <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">项目大类</th>
               <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">项目类型</th>
-              <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">项目单位</th>
+              <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">项目提报单位</th>
               <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">投资总估算（万元）</th>
+              <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">计划管控金额（万元）</th>
+              <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">计划占用金额（万元）</th>
+              <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">计划可用金额（万元）</th>
+              <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">金额状态</th>
               <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">效益（万元）</th>
               <th className="px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">通过日期</th>
               <th className="sticky right-0 z-10 px-3 py-2 text-center text-xs font-medium text-steel-500 border-b border-l border-steel-200 whitespace-nowrap w-36"
@@ -77,11 +93,14 @@ export default function ArchiveTable({ records, pageOffset, sortDir, onPriorityS
           <tbody>
             {records.length === 0 ? (
               <tr>
-                <td colSpan={12} className="py-14 text-center text-sm text-steel-400">暂无已通过的年度计划</td>
+                <td colSpan={16} className="py-14 text-center text-sm text-steel-400">暂无已通过的年度计划</td>
               </tr>
             ) : (
               records.map((r, idx) => {
                 const rowBg = idx % 2 === 0 ? '#ffffff' : '#fafbfd';
+                const available = getAvailableAmount(r);
+                const editingLocked = r.amountStatus === '审批中';
+                const statusMeta = r.amountStatus ? planAmountStatusMap[r.amountStatus] : null;
                 return (
                   <tr key={r.id} style={{ backgroundColor: rowBg }}>
                     <td className="sticky left-0 z-10 px-3 py-2 text-center text-sm text-steel-500 border-b border-steel-100" style={{ backgroundColor: rowBg }}>
@@ -106,6 +125,47 @@ export default function ArchiveTable({ records, pageOffset, sortDir, onPriorityS
                       <span className="inline-flex px-2 py-0.5 rounded-md text-xs bg-slate-100 text-steel-600 whitespace-nowrap">{r.businessUnit}</span>
                     </td>
                     <td className="px-3 py-2 text-center text-sm font-medium text-steel-800 border-b border-steel-100 tabular-nums">{r.budget.toFixed(2)}</td>
+                    <td className="px-3 py-2 text-center border-b border-steel-100 whitespace-nowrap">
+                      <span className="inline-flex items-center justify-center gap-1">
+                        <span className="text-sm font-medium text-steel-800 tabular-nums">{r.controlAmount.toFixed(2)}</span>
+                        <button
+                          type="button"
+                          disabled={editingLocked}
+                          onClick={() => onEditControlAmount(r)}
+                          className={`w-6 h-6 inline-flex items-center justify-center rounded cursor-pointer ${
+                            editingLocked
+                              ? 'text-steel-300 cursor-not-allowed'
+                              : 'text-sky-600 hover:bg-sky-50'
+                          }`}
+                          title={editingLocked ? '费用增补审批中，暂不可修改' : '修改计划管控金额'}
+                        >
+                          <i className="ri-edit-line text-sm" />
+                        </button>
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 text-center text-sm text-steel-700 border-b border-steel-100 tabular-nums">
+                      {r.occupiedAmount.toFixed(2)}
+                    </td>
+                    <td className="px-3 py-2 text-center border-b border-steel-100">
+                      <button
+                        type="button"
+                        onClick={() => onViewOccupy(r)}
+                        className="text-sm font-medium tabular-nums hover:underline cursor-pointer"
+                        style={{ color: '#2563eb' }}
+                        title="查看计划占用金额明细"
+                      >
+                        {available.toFixed(2)}
+                      </button>
+                    </td>
+                    <td className="px-3 py-2 text-center border-b border-steel-100 whitespace-nowrap">
+                      {statusMeta ? (
+                        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusMeta.color}`}>
+                          {statusMeta.label}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-steel-400">—</span>
+                      )}
+                    </td>
                     <td className="px-3 py-2 text-center text-sm text-steel-600 border-b border-steel-100 tabular-nums">{r.benefit.toFixed(2)}</td>
                     <td className="px-3 py-2 text-center text-xs text-steel-500 border-b border-steel-100 whitespace-nowrap">{r.approveDate}</td>
                     <td className="sticky right-0 z-10 px-2 py-2 text-center border-b border-l border-steel-100" style={{ backgroundColor: rowBg }}>

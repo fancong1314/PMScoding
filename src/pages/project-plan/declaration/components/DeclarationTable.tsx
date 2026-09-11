@@ -4,6 +4,7 @@ import { reviewStatusMap } from '@/mocks/projectPlans';
 import type { ColumnDef } from '@/hooks/useColumnConfig';
 import ColumnSettingsPanel from './ColumnSettingsPanel';
 import type { ApprovalRecord } from '@/mocks/approvalMocks';
+import { canWithdrawDeclaration } from '@/mocks/approvalMocks';
 
 interface Props {
   plans: ProjectPlan[];
@@ -16,6 +17,7 @@ interface Props {
   onViewLog: (plan: ProjectPlan) => void;
   onViewApproval: (plan: ProjectPlan) => void;
   onProcessApproval: (plan: ProjectPlan) => void;
+  onWithdraw: (plan: ProjectPlan) => void;
   getApprovalRecord: (planId: string) => ApprovalRecord | undefined;
   pageOffset: number;
   budgetSort: 'desc' | 'asc' | null;
@@ -30,6 +32,10 @@ function renderCell(col: ColumnDef, plan: ProjectPlan): React.ReactNode {
       return <span className="whitespace-nowrap font-medium text-steel-700">{plan.planYear}年</span>;
     case 'businessDivision':
       return <span className="whitespace-nowrap text-steel-600">{plan.businessDivision}</span>;
+    case 'submitDept':
+      return <span className="whitespace-nowrap text-steel-600">{plan.submitDept || '—'}</span>;
+    case 'implementDept':
+      return <span className="whitespace-nowrap text-steel-600">{plan.implementDept || '—'}</span>;
     case 'projectMajorType':
       return (
         <span className="inline-flex items-center px-2 py-0.5 text-xs rounded-full bg-emerald-50 text-emerald-700 whitespace-nowrap">
@@ -124,6 +130,7 @@ export default function DeclarationTable({
   onViewLog,
   onViewApproval,
   onProcessApproval,
+  onWithdraw,
   getApprovalRecord,
   pageOffset,
   budgetSort,
@@ -321,6 +328,15 @@ export default function DeclarationTable({
                           title="删除"
                         >
                           <i className="ri-delete-bin-line text-sm" />
+                        </button>
+                      )}
+                      {canWithdrawDeclaration(plan, getApprovalRecord(plan.id)) && (
+                        <button
+                          onClick={() => onWithdraw(plan)}
+                          className="w-7 h-7 flex items-center justify-center rounded hover:bg-orange-50 text-steel-400 hover:text-orange-500 transition-colors cursor-pointer"
+                          title="撤回（尚未审批时可撤回后重新发起）"
+                        >
+                          <i className="ri-arrow-go-back-line text-sm" />
                         </button>
                       )}
                       {getApprovalRecord(plan.id) && (

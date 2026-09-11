@@ -92,6 +92,9 @@ export const functionNodeTree: FunctionNode[] = [
   // 一级菜单 - 年度计划管理
   { id: 'n-plan', name: '年度计划管理', level: 1, parentId: null, path: '年度计划管理', configStatus: 'configured' },
   { id: 'n-plan-1', name: '年度计划申报', level: 2, parentId: 'n-plan', path: '年度计划管理 > 年度计划申报', configStatus: 'configured' },
+  { id: 'n-plan-2', name: '会审意见签署', level: 2, parentId: 'n-plan', path: '年度计划管理 > 会审意见签署', configStatus: 'configured' },
+  { id: 'n-init', name: '项目立项管理', level: 1, parentId: null, path: '项目立项管理', configStatus: 'configured' },
+  { id: 'n-init-1', name: '项目立项申请', level: 2, parentId: 'n-init', path: '项目立项管理 > 项目立项申请', configStatus: 'configured' },
 ];
 
 // 生成节点子节点映射
@@ -174,6 +177,15 @@ export const attachmentConfigs: Record<string, AttachmentConfig[]> = {
     { id: 'ac-plan-1', nodeId: 'n-plan-1', docName: '项目建议书', type: '多选', projectMajorTypes: ['新建', '技改', '大修', '零固'], versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '含项目建设必要性、初步方案及投资匡算', templateFile: '项目建议书模板.docx', enabled: true },
     { id: 'ac-plan-2', nodeId: 'n-plan-1', docName: '可行性研究报告', type: '多选', projectMajorTypes: ['新建', '技改', '大修', '零固'], versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '须为正式版可研报告，含投资估算与效益分析', templateFile: '可行性研究报告模板.docx', enabled: true },
   ],
+  // 会审意见签署
+  'n-plan-2': [
+    { id: 'ac-jos-1', nodeId: 'n-plan-2', docName: '论证文件', type: '多选', projectMajorTypes: ['新建', '技改', '大修', '零固'], versionManaged: true, required: false, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '仅限 word、pdf、excel、jpg 等常规格式文件，大小不超过 100MB', templateFile: '论证文件示例模板.docx', enabled: true },
+  ],
+  // 项目立项申请（新建/技改）
+  'n-init-1': [
+    { id: 'ac-init-1', nodeId: 'n-init-1', docName: '建设工期附件', type: '多选', projectMajorTypes: ['新建', '技改', '大修', '零固'], versionManaged: false, required: false, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 50, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '建设工期甘特图、节点计划等支撑材料', templateFile: '建设工期计划模板.xlsx', enabled: true },
+    { id: 'ac-init-2', nodeId: 'n-init-1', docName: '论证文件', type: '多选', projectMajorTypes: ['新建', '技改', '大修', '零固'], versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '立项论证相关正式文件，须加盖单位公章', templateFile: '论证文件示例模板.docx', enabled: true },
+  ],
 };
 
 // 条件配置数据
@@ -226,6 +238,12 @@ export function getAttachmentConfigs(nodeId: string): AttachmentConfig[] {
 /** 年度计划申报节点 ID（与项目档案配置树一致） */
 export const PLAN_DECLARATION_NODE_ID = 'n-plan-1';
 
+/** 会审意见签署节点 ID */
+export const JOINT_OPINION_SIGN_NODE_ID = 'n-plan-2';
+
+/** 项目立项申请节点 ID */
+export const INITIATION_DECLARATION_NODE_ID = 'n-init-1';
+
 /** 按项目大类获取年度计划申报节点的附件配置（演示数据，对应档案配置模块） */
 export function getPlanDeclarationAttachmentConfigs(majorType: string): AttachmentConfig[] {
   return getAttachmentConfigs(PLAN_DECLARATION_NODE_ID).filter((c) => {
@@ -233,6 +251,28 @@ export function getPlanDeclarationAttachmentConfigs(majorType: string): Attachme
     if (!c.projectMajorTypes || c.projectMajorTypes.length === 0) return true;
     return c.projectMajorTypes.includes(majorType);
   });
+}
+
+/** 会审意见签署附件配置 */
+export function getJointOpinionSignAttachmentConfigs(majorType?: string): AttachmentConfig[] {
+  return getAttachmentConfigs(JOINT_OPINION_SIGN_NODE_ID).filter((c) => {
+    if (!c.enabled) return false;
+    if (!c.projectMajorTypes || c.projectMajorTypes.length === 0) return true;
+    if (!majorType) return true;
+    return c.projectMajorTypes.includes(majorType);
+  });
+}
+
+/** 项目立项申请附件配置：新建/技改/大修/零固均为建设工期附件+论证文件 */
+export function getInitiationDeclarationAttachmentConfigs(majorType: string): AttachmentConfig[] {
+  if (majorType === '新建' || majorType === '技改' || majorType === '大修' || majorType === '零固') {
+    return getAttachmentConfigs(INITIATION_DECLARATION_NODE_ID).filter((c) => {
+      if (!c.enabled) return false;
+      if (!c.projectMajorTypes || c.projectMajorTypes.length === 0) return true;
+      return c.projectMajorTypes.includes(majorType) || c.projectMajorTypes.includes('新建');
+    });
+  }
+  return getPlanDeclarationAttachmentConfigs(majorType);
 }
 
 // 获取节点条件配置

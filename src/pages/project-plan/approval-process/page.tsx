@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { approvalRecords, getApprovalRecords, setStoredApprovalRecords, updateApprovalRecord } from '@/mocks/approvalMocks';
@@ -287,7 +287,7 @@ export default function ApprovalProcessPage() {
                       <span className="text-sm font-medium text-slate-800 truncate max-w-[200px]">{plan.planName}</span>
                     </div>
                     <div className="flex items-center justify-between py-2 px-3 rounded bg-slate-50">
-                      <span className="text-sm text-slate-500">项目单位</span>
+                      <span className="text-sm text-slate-500">项目提报单位</span>
                       <span className="text-sm text-slate-700">{plan.businessDivision}</span>
                     </div>
                     <div className="flex items-center justify-between py-2 px-3 rounded bg-slate-50">

@@ -48,6 +48,18 @@ function renderCell(col: ColumnDef, plan: ProjectPlan): React.ReactNode {
           {plan.planName}
         </span>
       );
+    case 'isInPlanProject':
+      return (
+        <span className="whitespace-nowrap text-steel-600">
+          {plan.isInPlanProject || (plan.annualPlanNo ? '是' : '否')}
+        </span>
+      );
+    case 'annualPlanNo':
+      return plan.annualPlanNo ? (
+        <span className="font-mono text-xs text-primary-700 whitespace-nowrap">{plan.annualPlanNo}</span>
+      ) : (
+        <span className="text-steel-300">—</span>
+      );
     case 'budgetAmount':
       return <span className="whitespace-nowrap font-medium text-steel-800">{plan.budgetAmount.toFixed(2)}</span>;
     case 'benefit':
@@ -91,10 +103,51 @@ function renderCell(col: ColumnDef, plan: ProjectPlan): React.ReactNode {
     }
     case 'applicant':
       return <span className="whitespace-nowrap text-steel-600">{plan.applicant}</span>;
+    case 'projectPeriod': {
+      const period =
+        plan.startDate && plan.endDate
+          ? `${plan.startDate} ~ ${plan.endDate}`
+          : plan.startDate || plan.endDate || '—';
+      return <span className="whitespace-nowrap text-steel-500 text-xs">{period}</span>;
+    }
     case 'startDate':
-      return <span className="whitespace-nowrap text-steel-500">{plan.startDate}</span>;
+      return <span className="whitespace-nowrap text-steel-500">{plan.startDate || '—'}</span>;
     case 'endDate':
-      return <span className="whitespace-nowrap text-steel-500">{plan.endDate}</span>;
+      return <span className="whitespace-nowrap text-steel-500">{plan.endDate || '—'}</span>;
+    case 'projectDuration':
+      return (
+        <span className="whitespace-nowrap text-steel-600">
+          {plan.projectDuration ? `${plan.projectDuration} 月` : '—'}
+        </span>
+      );
+    case 'implementUnit':
+      return <span className="whitespace-nowrap text-steel-600">{plan.implementUnit || '—'}</span>;
+    case 'professionalUnit':
+      return <span className="whitespace-nowrap text-steel-600">{plan.professionalUnit || '—'}</span>;
+    case 'ownerUnit':
+      return <span className="whitespace-nowrap text-steel-600">{plan.ownerUnit || '—'}</span>;
+    case 'declareFee':
+      return (
+        <span className="whitespace-nowrap text-steel-600">
+          {plan.declareFee != null ? Number(plan.declareFee).toFixed(2) : '—'}
+        </span>
+      );
+    case 'isCapitalOverhaul':
+      return <span className="whitespace-nowrap text-steel-600">{plan.isCapitalOverhaul || '—'}</span>;
+    case 'argumentApplyNo':
+      return plan.argumentApplyNo ? (
+        <span className="font-mono text-xs text-steel-700 whitespace-nowrap">{plan.argumentApplyNo}</span>
+      ) : (
+        <span className="text-steel-300">—</span>
+      );
+    case 'isScrapRenew':
+      return <span className="whitespace-nowrap text-steel-600">{plan.isScrapRenew || '—'}</span>;
+    case 'hasJobChange': {
+      const v = plan.hasJobChange || '无';
+      const count = plan.jobChangeCount || 0;
+      const text = v === '无' ? '无' : `${v}${count > 0 ? ` ${count}人` : ''}`;
+      return <span className="whitespace-nowrap text-steel-600">{text}</span>;
+    }
     case 'supplementNote':
       return plan.supplementNote ? (
         <span className="text-steel-500 text-xs line-clamp-1" title={plan.supplementNote}>

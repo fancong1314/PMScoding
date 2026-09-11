@@ -7,12 +7,160 @@ export interface PaymentPlanRow {
   remark: string;
 }
 
+export interface ResearchPersonRow {
+  id: string;
+  seq: number;
+  empNo: string;
+  name: string;
+  title: string;
+  unit: string;
+  position: string;
+  partyDuty: string;
+  remark: string;
+}
+
+export const defaultResearchPersons: ResearchPersonRow[] = [
+  { id: 'rp1', seq: 1, empNo: 'EMP001', name: '张建国', title: '高级工程师', unit: '炼钢事业部', position: '项目经理', partyDuty: '负责与甲方沟通项目整体推进和决策协调', remark: '负责整体方案设计' },
+  { id: 'rp2', seq: 2, empNo: 'EMP002', name: '李明华', title: '工程师', unit: '设备管理部', position: '技术负责人', partyDuty: '对接甲方设备管理部门，协调设备选型需求', remark: '负责设备选型' },
+  { id: 'rp3', seq: 3, empNo: 'EMP003', name: '王志远', title: '助理工程师', unit: '科技质量部', position: '成员', partyDuty: '配合甲方质量管控工作，参与质量验收', remark: '负责质量管控' },
+  { id: 'rp4', seq: 4, empNo: 'EMP004', name: '陈建华', title: '高级工程师', unit: '安全环保部', position: '安全专员', partyDuty: '对接甲方安全管理部门，落实安全三同时要求', remark: '负责安全管理' },
+  { id: 'rp5', seq: 5, empNo: 'EMP005', name: '赵敏', title: '工程师', unit: '工程管理部', position: '成员', partyDuty: '参与可研报告编制与资料整理', remark: '研究报告编写' },
+];
+
+export interface RiskAssessRow {
+  id: string;
+  seq: number;
+  risk: string;
+  riskLevel: string;
+  riskStatus: string;
+  riskCategory: string;
+  impactLevel: string;
+  severity: string;
+  riskType: string;
+  riskDesc: string;
+  cause: string;
+  currentMeasure: string;
+  strategy: string;
+  suggestMeasure: string;
+  execDept: string;
+}
+
+export const defaultRiskAssessRows: RiskAssessRow[] = [
+  {
+    id: 'risk1', seq: 1, risk: '设备采购延期', riskLevel: '高', riskStatus: '处理中', riskCategory: '进度风险',
+    impactLevel: '重大', severity: '高', riskType: '外部风险',
+    riskDesc: '主要设备供货周期长，可能导致项目延期',
+    cause: '供应商产能不足，原材料短缺',
+    currentMeasure: '提前签订采购合同，备选供应商', strategy: '减轻',
+    suggestMeasure: '增加备选供应商，建立应急采购机制', execDept: '采购部',
+  },
+  {
+    id: 'risk2', seq: 2, risk: '施工安全事故', riskLevel: '中', riskStatus: '已识别', riskCategory: '安全风险',
+    impactLevel: '严重', severity: '中', riskType: '内部风险',
+    riskDesc: '高空作业、动火作业存在安全隐患',
+    cause: '施工人员安全意识不足',
+    currentMeasure: '安全培训、安全检查', strategy: '减轻',
+    suggestMeasure: '加强安全监督，配备专职安全员', execDept: '安全环保部',
+  },
+];
+
+/** 大修内容明细行 */
+export interface OverhaulContentRow {
+  id: string;
+  seq: number;
+  category: string;
+  partCode: string;
+  partName: string;
+  content: string;
+}
+
+export const overhaulContentCategories = ['主体设备', '辅助设备', '电气仪表', '土建结构', '其他'];
+
+export const defaultOverhaulContentRows: OverhaulContentRow[] = [
+  { id: 'oc1', seq: 1, category: '主体设备', partCode: 'EQ-GT-HF-001', partName: '1#加热炉', content: '炉体耐材更换、燃烧系统检修' },
+  { id: 'oc2', seq: 2, category: '辅助设备', partCode: 'EQ-GT-FAN-012', partName: '引风机A', content: '叶轮动平衡校验、轴承更换' },
+];
+
+/** 零固内容明细行 */
+export interface MinorContentRow {
+  id: string;
+  seq: number;
+  name: string;
+  specModel: string;
+  unitPrice: number;
+  qty: number;
+  measureUnit: string;
+  otherFee: number;
+  remark: string;
+}
+
+export function calcMinorContentSubtotal(row: Pick<MinorContentRow, 'unitPrice' | 'qty' | 'otherFee'>): number {
+  return Math.round(((Number(row.unitPrice) || 0) * (Number(row.qty) || 0) + (Number(row.otherFee) || 0)) * 100) / 100;
+}
+
+export function calcMinorContentTotal(rows: MinorContentRow[]): number {
+  return Math.round(rows.reduce((s, r) => s + calcMinorContentSubtotal(r), 0) * 100) / 100;
+}
+
+export const defaultMinorContentRows: MinorContentRow[] = [
+  {
+    id: 'mc1', seq: 1, name: '智能检测仪', specModel: 'JD-AI-300',
+    unitPrice: 100, qty: 33, measureUnit: '台', otherFee: 200, remark: '含安装调试',
+  },
+];
+
+/** 大修表单 · 事业部→单位级联选项 */
+export const overhaulDivisionUnitMap: Record<string, string[]> = {
+  '炼铁厂': ['高炉分厂', '烧结厂', '球团分厂'],
+  '炼钢厂': ['第一炼钢厂', '第二炼钢厂', '连铸分厂'],
+  '热轧厂': ['热轧一厂', '热轧二厂', '加热炉车间'],
+  '冷轧厂': ['冷轧一厂', '酸轧车间', '镀锌车间'],
+  '原料厂': ['原料场', '码头装卸车间'],
+  '动力厂': ['发电分厂', '制氧分厂', '供水车间'],
+  '建材厂': ['建材一厂', '建材二厂'],
+  '物流厂': ['运输一队', '仓储中心'],
+};
+
+/** 由计划开工/完工日期计算项目工期（月，含首尾月） */
+export function calcProjectDurationMonths(startDate?: string, endDate?: string): number {
+  if (!startDate || !endDate) return 0;
+  const toYmd = (v: string) => (v.length === 7 ? `${v}-01` : v);
+  const s = new Date(toYmd(startDate));
+  const e = new Date(toYmd(endDate));
+  if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime()) || e < s) return 0;
+  return (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth()) + 1;
+}
+
+export const initiationImplementUnits = [
+  '炼钢事业部', '炼铁事业部', '热轧事业部', '冷轧事业部', '原料事业部',
+  '动力事业部', '科技质量部', '安全环保部', '设备管理部', '工程管理部',
+];
+
+export const initiationProfessionalUnits = [
+  '机械设备部', '电气自动化部', '土建工程部', '工艺技术部', '安全环保部', '信息技术部', '能源管理部',
+];
+
 export interface ProjectPlan {
   id: string;
   planYear: string;
+  /** 项目提报单位（末级组织，如烧结厂） */
   businessDivision: string;
+  /** 提报部门（由提报单位自动带出上级，如炼铁厂） */
+  submitDept?: string;
+  /** 实施主管部门（手动选择组织） */
+  implementDept?: string;
   /** 业主单位（大修等表单可选） */
   ownerUnit?: string;
+  /** 申报费用（万元）·大修/零固立项 */
+  declareFee?: number;
+  /** 论证申请单号 · 零固立项 */
+  argumentApplyNo?: string;
+  /** 是否报废更新 · 零固立项 */
+  isScrapRenew?: string;
+  /** 大修内容明细 */
+  overhaulContentRows?: OverhaulContentRow[];
+  /** 零固内容明细 */
+  minorContentRows?: MinorContentRow[];
   /** 项目大类：新建 / 技改 / 大修 / 零固 */
   projectMajorType: ProjectMajorType;
   projectCategory: string;
@@ -33,7 +181,7 @@ export interface ProjectPlan {
   startDate: string;
   endDate: string;
   supplementNote: string;
-  // detail info（新建/技改）
+  // detail info（新建/技改 · 立项申请）
   currentSituation: string;
   necessity: string;
   innovation: string;
@@ -42,13 +190,64 @@ export interface ProjectPlan {
   modificationContent?: string;
   modificationPurpose?: string;
   effectDescription?: string;
+  /** 项目总体结论（原项目概要总体描述） */
   projectSummary?: string;
-  // extra basic info
+  /** 设备装备描述（新建/技改详细信息） */
+  equipmentDesc?: string;
+  /** 项目可行性 */
+  projectFeasibility?: string;
+  /** 主要设备/设施 */
+  deviceFacility?: string;
+  /** 公辅配套 */
+  auxWater?: string;
+  auxElec?: string;
+  auxGas?: string;
+  auxOxygen?: string;
+  auxOther?: string;
+  /** 项目目标 */
+  techTarget?: string;
+  benefitTarget?: string;
+  otherTarget?: string;
+  /** 能源提升与评估 */
+  energyAssess?: string;
+  /** 费用估算/需求分析 */
+  costAnalysis?: string;
+  /** 项目研究报告人员 */
+  researchPersons?: ResearchPersonRow[];
+  /** 风险与机遇评估 */
+  riskAssessRows?: RiskAssessRow[];
+  // extra basic info / 年度计划投资估算分项
+  /** 设计费（万元） */
+  designFee?: number;
+  /** 建安费（万元） */
   jianAnFee: number;
+  /** @deprecated 历史「安装工程费用」，迁移至 designFee */
+  installFee?: number;
+  /** 设备费（万元） */
   equipmentFee: number;
+  /** 其他（万元） */
   otherFee: number;
+  designFeeRemark?: string;
+  jianAnFeeRemark?: string;
+  /** @deprecated 随 installFee 迁移至 designFeeRemark */
+  installFeeRemark?: string;
+  equipmentFeeRemark?: string;
+  otherFeeRemark?: string;
+  /** 是否涉及岗位增减：无 / 增加 / 减少 */
   hasJobChange: string;
   jobChangeCount: number;
+  /** 实施主管单位 */
+  implementUnit?: string;
+  /** 专业主管单位 */
+  professionalUnit?: string;
+  /** 项目工期（月，由开工/完工日期自动计算） */
+  projectDuration?: number;
+  /** 是否计划内项目（立项申请·新建/技改） */
+  isInPlanProject?: '是' | '否';
+  /** 关联年度计划号（计划内项目时必填） */
+  annualPlanNo?: string;
+  /** 关联年度计划 ID */
+  annualPlanId?: string;
   // 大修专属字段
   isCapitalOverhaul?: string;
   fixedAssetCode?: string;
@@ -65,7 +264,13 @@ export interface ProjectPlan {
   // 零固专属字段
   specModel?: string;
   measureUnit?: string;
+  /** 需求数量（原更新数量） */
   updateQty?: number;
+  /** 设备库存数量（选择设备后自动带出） */
+  equipmentStockQty?: number;
+  /** 申请采购数量 */
+  purchaseApplyQty?: number;
+  /** @deprecated 零固表单已删除「在用数量」 */
   inUseQty?: number;
   unitPrice?: number;
   isNewMinor?: string;
@@ -125,6 +330,133 @@ export function withPaymentPlans(plan: ProjectPlan): ProjectPlan {
   return { ...normalized, paymentPlans: derivePaymentPlans(normalized) };
 }
 
+/** 立项申请·新建/技改：补齐详细信息与研究报告人员演示字段 */
+export function withInitiationDetailFields(plan: ProjectPlan): ProjectPlan {
+  const major = plan.projectMajorType || '技改';
+  if (major === '大修') {
+    const seed = Number(plan.id) || 0;
+    const jobChangeRaw = plan.hasJobChange || '无';
+    const hasJobChange =
+      jobChangeRaw === '是' ? '增加' :
+      jobChangeRaw === '否' ? '无' :
+      jobChangeRaw;
+    return {
+      ...plan,
+      isInPlanProject: plan.isInPlanProject || (plan.annualPlanNo ? '是' : (seed % 2 === 0 ? '是' : '否')),
+      annualPlanNo: plan.annualPlanNo || (seed % 2 === 0 ? `NDJH-2026-D${String(100 + seed).slice(-3)}` : ''),
+      annualPlanId: plan.annualPlanId || (seed % 2 === 0 ? `ap_oh_${plan.id}` : ''),
+      isCapitalOverhaul: plan.isCapitalOverhaul || '是',
+      declareFee: plan.declareFee ?? Math.round((plan.budgetAmount || 0) * 0.9 * 100) / 100,
+      ownerUnit: plan.ownerUnit || (overhaulDivisionUnitMap[plan.businessDivision || '']?.[0] || ''),
+      researchPersons:
+        plan.researchPersons && plan.researchPersons.length > 0
+          ? plan.researchPersons
+          : defaultResearchPersons.map((r) => ({ ...r, id: `${plan.id}_${r.id}` })),
+      overhaulContentRows:
+        plan.overhaulContentRows && plan.overhaulContentRows.length > 0
+          ? plan.overhaulContentRows
+          : defaultOverhaulContentRows.map((r) => ({ ...r, id: `${plan.id}_${r.id}` })),
+      hasJobChange,
+    };
+  }
+  if (major === '零固') {
+    const seed = Number(plan.id) || 0;
+    const inPlan = plan.isInPlanProject || (plan.annualPlanNo ? '是' : (seed % 2 === 0 ? '是' : '否'));
+    return {
+      ...plan,
+      isInPlanProject: inPlan,
+      annualPlanNo: plan.annualPlanNo || (inPlan === '是' ? `NDJH-2026-L${String(100 + seed).slice(-3)}` : ''),
+      annualPlanId: plan.annualPlanId || (inPlan === '是' ? `ap_mn_${plan.id}` : ''),
+      argumentApplyNo: plan.argumentApplyNo || `B2026${String(90000 + seed).slice(-5)}`,
+      isScrapRenew: plan.isScrapRenew || (seed % 2 === 0 ? '是' : '否'),
+      declareFee: plan.declareFee ?? Math.round((plan.budgetAmount || 0) * 1.1 * 100) / 100,
+      ownerUnit: plan.ownerUnit || (overhaulDivisionUnitMap[plan.businessDivision || '']?.[0] || ''),
+      researchPersons:
+        plan.researchPersons && plan.researchPersons.length > 0
+          ? plan.researchPersons
+          : defaultResearchPersons.map((r) => ({ ...r, id: `${plan.id}_${r.id}` })),
+      minorContentRows:
+        plan.minorContentRows && plan.minorContentRows.length > 0
+          ? plan.minorContentRows
+          : defaultMinorContentRows.map((r) => ({
+              ...r,
+              id: `${plan.id}_${r.id}`,
+              unitPrice: Math.round(((plan.budgetAmount || 100) / 35) * 100) / 100,
+              qty: 30 + (seed % 5),
+              otherFee: Math.round((plan.budgetAmount || 100) * 0.05 * 100) / 100,
+            })),
+    };
+  }
+  if (major !== '新建' && major !== '技改') {
+    return {
+      ...plan,
+      isInPlanProject: plan.isInPlanProject || (plan.annualPlanNo ? '是' : '否'),
+      annualPlanNo: plan.annualPlanNo || '',
+      annualPlanId: plan.annualPlanId || '',
+    };
+  }
+
+  const seed = Number(plan.id) || 0;
+  const filled = (v: string | undefined, fallback: string) => (v && v.trim() ? v : fallback);
+  const startDate = plan.startDate?.length === 7 ? `${plan.startDate}-01` : (plan.startDate || '2026-04-01');
+  const endDate = plan.endDate?.length === 7 ? `${plan.endDate}-28` : (plan.endDate || '2026-10-31');
+  const jobChangeRaw = plan.hasJobChange || '无';
+  const hasJobChange =
+    jobChangeRaw === '是' ? '增加' :
+    jobChangeRaw === '否' ? '无' :
+    jobChangeRaw;
+
+  return {
+    ...plan,
+    startDate,
+    endDate,
+    projectDuration: plan.projectDuration || calcProjectDurationMonths(startDate, endDate),
+    implementUnit: filled(plan.implementUnit, plan.businessDivision || initiationImplementUnits[seed % initiationImplementUnits.length]),
+    professionalUnit: filled(plan.professionalUnit, initiationProfessionalUnits[seed % initiationProfessionalUnits.length]),
+    hasJobChange,
+    jobChangeCount: hasJobChange === '无' ? 0 : (plan.jobChangeCount || (seed % 5) + 1),
+    isInPlanProject: plan.isInPlanProject || (plan.annualPlanNo ? '是' : (seed % 3 === 0 ? '是' : '否')),
+    annualPlanNo: plan.annualPlanNo || (seed % 3 === 0 ? `NDJH-2026-${String(1000 + seed).slice(-4)}` : ''),
+    annualPlanId: plan.annualPlanId || (seed % 3 === 0 ? `ap_${plan.id}` : ''),
+    projectFeasibility: filled(
+      plan.projectFeasibility,
+      plan.overallIdea || '经方案对比与现场考察，推荐方案技术成熟、实施路径清晰，具备可研条件。'
+    ),
+    modificationContent: filled(
+      plan.modificationContent,
+      plan.processDesc || '含工艺布置优化、关键设备选型及安全三同时相关内容。'
+    ),
+    deviceFacility: filled(plan.deviceFacility, '关键主机及配套设施，材质与寿命满足连续生产要求。'),
+    auxWater: filled(plan.auxWater, '循环水系统需复核供水能力，必要时增设冷却塔。'),
+    auxElec: filled(plan.auxElec, '需复核配电容量，预留变频控制回路。'),
+    auxGas: filled(plan.auxGas, '煤气/天然气用量按设计负荷核算，管道需局部改造。'),
+    auxOxygen: filled(plan.auxOxygen, seed % 2 === 0 ? '暂无新增氧气/氩气需求。' : '需复核氧气站富裕量。'),
+    auxOther: filled(plan.auxOther, '压缩空气及工业网络按现场条件配套。'),
+    techTarget: filled(plan.techTarget, '提升设备可靠性与工艺稳定性，达到设计产能指标。'),
+    benefitTarget: filled(
+      plan.benefitTarget,
+      plan.benefit ? `预计年效益约 ${plan.benefit} 万元，回收期控制在合理区间。` : '形成可量化的成本节约与质量提升效益。'
+    ),
+    otherTarget: filled(plan.otherTarget, '同步落实安全、环保合规目标。'),
+    energyAssess: filled(
+      plan.energyAssess,
+      '实施后单位产品能耗预计下降，采取余热利用/变频等节能措施。'
+    ),
+    costAnalysis: filled(
+      plan.costAnalysis,
+      `投资总估算约 ${plan.budgetAmount || 0} 万元，含建安、设备及其他费用。`
+    ),
+    researchPersons:
+      plan.researchPersons && plan.researchPersons.length > 0
+        ? plan.researchPersons
+        : defaultResearchPersons.map((r) => ({ ...r, id: `${plan.id}_${r.id}` })),
+    riskAssessRows:
+      plan.riskAssessRows && plan.riskAssessRows.length > 0
+        ? plan.riskAssessRows
+        : defaultRiskAssessRows.map((r) => ({ ...r, id: `${plan.id}_${r.id}` })),
+  };
+}
+
 export const projectMajorTypes: ProjectMajorType[] = ['新建', '技改', '大修', '零固'];
 
 export const projectMajorTypeFormPath: Record<ProjectMajorType, string> = {
@@ -142,15 +474,16 @@ export const initiationMajorTypeFormPath: Record<ProjectMajorType, string> = {
   零固: '/project-initiation/declaration/form/minor',
 };
 
+/** 厂级（提报部门候选 / 筛选常用） */
 export const businessDivisions = [
-  '炼铁事业部',
-  '炼钢事业部',
-  '热轧事业部',
-  '冷轧事业部',
-  '原料事业部',
-  '动力事业部',
-  '建材事业部',
-  '物流事业部',
+  '炼铁厂',
+  '炼钢厂',
+  '热轧厂',
+  '冷轧厂',
+  '原料厂',
+  '动力厂',
+  '建材厂',
+  '物流厂',
 ];
 
 /** 建设部门组织架构（演示数据，用于表单选择） */
@@ -160,6 +493,84 @@ export interface OrgNode {
   children?: OrgNode[];
 }
 
+/** 生产制造：厂级 → 提报单位（末级） */
+const productionOrgChildren: OrgNode[] = [
+  {
+    id: 'org-iron',
+    name: '炼铁厂',
+    children: [
+      { id: 'org-iron-1', name: '高炉分厂' },
+      { id: 'org-iron-2', name: '烧结厂' },
+      { id: 'org-iron-3', name: '球团分厂' },
+    ],
+  },
+  {
+    id: 'org-steel',
+    name: '炼钢厂',
+    children: [
+      { id: 'org-steel-1', name: '第一炼钢厂' },
+      { id: 'org-steel-2', name: '第二炼钢厂' },
+      { id: 'org-steel-3', name: '连铸分厂' },
+    ],
+  },
+  {
+    id: 'org-hr',
+    name: '热轧厂',
+    children: [
+      { id: 'org-hr-1', name: '热轧一厂' },
+      { id: 'org-hr-2', name: '热轧二厂' },
+      { id: 'org-hr-3', name: '加热炉车间' },
+    ],
+  },
+  {
+    id: 'org-cr',
+    name: '冷轧厂',
+    children: [
+      { id: 'org-cr-1', name: '冷轧一厂' },
+      { id: 'org-cr-2', name: '酸轧车间' },
+      { id: 'org-cr-3', name: '镀锌车间' },
+    ],
+  },
+  {
+    id: 'org-raw',
+    name: '原料厂',
+    children: [
+      { id: 'org-raw-1', name: '原料场' },
+      { id: 'org-raw-2', name: '码头装卸车间' },
+    ],
+  },
+  {
+    id: 'org-power',
+    name: '动力厂',
+    children: [
+      { id: 'org-power-1', name: '发电分厂' },
+      { id: 'org-power-2', name: '制氧分厂' },
+      { id: 'org-power-3', name: '供水车间' },
+    ],
+  },
+  {
+    id: 'org-build',
+    name: '建材厂',
+    children: [
+      { id: 'org-build-1', name: '建材一厂' },
+      { id: 'org-build-2', name: '建材二厂' },
+    ],
+  },
+  {
+    id: 'org-log',
+    name: '物流厂',
+    children: [
+      { id: 'org-log-1', name: '运输一队' },
+      { id: 'org-log-2', name: '仓储中心' },
+    ],
+  },
+];
+
+/** 项目提报单位（末级）选项，用于列表筛选 */
+export const reportUnits = productionOrgChildren.flatMap((plant) =>
+  (plant.children || []).map((u) => u.name)
+);
+
 export const constructionOrgTree: OrgNode[] = [
   {
     id: 'org-root',
@@ -168,7 +579,7 @@ export const constructionOrgTree: OrgNode[] = [
       {
         id: 'org-prod',
         name: '生产制造体系',
-        children: businessDivisions.map((name, i) => ({ id: `org-div-${i}`, name })),
+        children: productionOrgChildren,
       },
       {
         id: 'org-eng',
@@ -193,6 +604,133 @@ export const constructionOrgTree: OrgNode[] = [
   },
 ];
 
+/** 查找组织节点的直接上级名称（用于提报部门自动带出） */
+export function findOrgParentName(targetName: string, nodes: OrgNode[] = constructionOrgTree, parentName = ''): string {
+  for (const node of nodes) {
+    if (node.name === targetName) return parentName;
+    if (node.children?.length) {
+      const found = findOrgParentName(targetName, node.children, node.name);
+      if (found || node.children.some((c) => c.name === targetName)) {
+        return found || node.name;
+      }
+    }
+  }
+  return '';
+}
+
+/** 历史事业部名称 → 新厂级提报部门 */
+const legacyDivisionToPlant: Record<string, string> = {
+  炼铁事业部: '炼铁厂',
+  炼钢事业部: '炼钢厂',
+  热轧事业部: '热轧厂',
+  冷轧事业部: '冷轧厂',
+  原料事业部: '原料厂',
+  动力事业部: '动力厂',
+  建材事业部: '建材厂',
+  物流事业部: '物流厂',
+};
+
+const plantDefaultUnit: Record<string, string> = {
+  炼铁厂: '烧结厂',
+  炼钢厂: '第一炼钢厂',
+  热轧厂: '热轧一厂',
+  冷轧厂: '冷轧一厂',
+  原料厂: '原料场',
+  动力厂: '发电分厂',
+  建材厂: '建材一厂',
+  物流厂: '运输一队',
+};
+
+/** 年度计划投资估算四项合计 → 投资总估算（设计费+建安费+设备费+其他） */
+export function calcInvestmentEstimateTotal(
+  plan: Pick<ProjectPlan, 'designFee' | 'jianAnFee' | 'equipmentFee' | 'otherFee' | 'installFee'>
+): number {
+  const design = Number(plan.designFee ?? plan.installFee) || 0;
+  const total =
+    design +
+    (Number(plan.jianAnFee) || 0) +
+    (Number(plan.equipmentFee) || 0) +
+    (Number(plan.otherFee) || 0);
+  return Math.round(total * 100) / 100;
+}
+
+/** 补齐投资估算分项演示数据，并回写 budgetAmount */
+export function withInvestmentEstimateFields(plan: ProjectPlan): ProjectPlan {
+  const hasDesign =
+    (plan.designFee != null && !Number.isNaN(Number(plan.designFee))) ||
+    (plan.installFee != null && !Number.isNaN(Number(plan.installFee)));
+  let design = Number(plan.designFee ?? plan.installFee) || 0;
+  let jianAn = Number(plan.jianAnFee) || 0;
+  let equip = Number(plan.equipmentFee) || 0;
+  let other = Number(plan.otherFee) || 0;
+  const budget = Number(plan.budgetAmount) || 0;
+
+  if (!hasDesign) {
+    const known = jianAn + equip + other;
+    if (budget > 0 && known > 0 && known <= budget) {
+      design = Math.round((budget - known) * 100) / 100;
+    } else if (budget > 0 && known === 0) {
+      design = Math.round(budget * 0.1 * 100) / 100;
+      jianAn = Math.round(budget * 0.3 * 100) / 100;
+      equip = Math.round(budget * 0.5 * 100) / 100;
+      other = Math.round((budget - design - jianAn - equip) * 100) / 100;
+    } else if (known > 0) {
+      design = 0;
+    }
+  }
+
+  const next = {
+    ...plan,
+    designFee: design,
+    jianAnFee: jianAn,
+    equipmentFee: equip,
+    otherFee: other,
+    designFeeRemark: plan.designFeeRemark || plan.installFeeRemark || '',
+    jianAnFeeRemark: plan.jianAnFeeRemark || '',
+    equipmentFeeRemark: plan.equipmentFeeRemark || '',
+    otherFeeRemark: plan.otherFeeRemark || '',
+  };
+  return {
+    ...next,
+    budgetAmount: calcInvestmentEstimateTotal(next) || budget,
+  };
+}
+
+/** 补齐年度计划提报单位/提报部门/实施主管部门演示字段 */
+export function withAnnualPlanOrgFields(plan: ProjectPlan): ProjectPlan {
+  let unit = plan.businessDivision || '';
+  let dept = plan.submitDept || '';
+
+  if (legacyDivisionToPlant[unit]) {
+    dept = dept || legacyDivisionToPlant[unit];
+    unit = plantDefaultUnit[dept] || unit;
+  } else if (!dept && unit) {
+    const parent = findOrgParentName(unit);
+    if (parent && !['生产制造体系', '工程建设体系', '职能支持体系', '贵港钢铁集团', ''].includes(parent)) {
+      dept = parent;
+    } else if (businessDivisions.includes(unit)) {
+      dept = unit;
+      unit = plantDefaultUnit[unit] || unit;
+    }
+  }
+
+  const implementCandidates = ['工程管理部', '项目管理部', '设备技术部', '安全环保部', '信息化中心'];
+  const seed = Number(String(plan.id).replace(/\D/g, '')) || 0;
+  const enriched = withInvestmentEstimateFields({
+    ...plan,
+    businessDivision: unit,
+    submitDept: dept || plan.submitDept || '',
+    implementDept: plan.implementDept || implementCandidates[seed % implementCandidates.length],
+    equipmentDesc: plan.equipmentDesc
+      || ((plan.projectMajorType === '新建' || plan.projectMajorType === '技改')
+        ? '主要设备及配套设施按可研方案配置，含工艺主机、公辅系统及智能控制装置。'
+        : undefined),
+    equipmentStockQty: plan.equipmentStockQty ?? (plan.projectMajorType === '零固' ? (plan.inUseQty ?? 8) : undefined),
+    purchaseApplyQty: plan.purchaseApplyQty ?? (plan.projectMajorType === '零固' ? (plan.updateQty ?? 1) : undefined),
+  });
+  return enriched;
+}
+
 export const projectCategories = [
   '设备大修',
   '环保改造',
@@ -215,6 +753,27 @@ export const reviewStatusMap: Record<string, { label: string; dotColor: string; 
   returned:        { label: '已退回',   dotColor: '#f97316', bgColor: '#fff7ed', textColor: '#ea580c' },
   transferred:     { label: '已转计划', dotColor: '#22c55e', bgColor: '#f0fdf4', textColor: '#16a34a' },
 };
+
+export const ANNUAL_DECL_STORAGE_KEY = 'ng_decl_plans_v12';
+
+/** 立项申请可选：已申请通过（已转计划）的年度计划 */
+export function getApprovedAnnualPlans(): ProjectPlan[] {
+  let list: ProjectPlan[] = projectPlans;
+  try {
+    const s = localStorage.getItem(ANNUAL_DECL_STORAGE_KEY)
+      || localStorage.getItem('ng_decl_plans_v11')
+      || localStorage.getItem('ng_decl_plans_v10')
+      || localStorage.getItem('ng_decl_plans_v9');
+    if (s) list = JSON.parse(s) as ProjectPlan[];
+  } catch { /* use seed */ }
+  return list
+    .map((p) => withPaymentPlans(withAnnualPlanOrgFields({
+      ...p,
+      reviewStatus: normalizeReviewStatus(p.reviewStatus as string),
+      planNo: p.planNo || `JH-${p.planYear || '2026'}-${String(p.id).padStart(3, '0')}`,
+    })))
+    .filter((p) => p.reviewStatus === 'transferred');
+}
 
 export const stageOptions = ['申报阶段', '初审阶段', '复审阶段', '终审阶段', '审批完成'];
 

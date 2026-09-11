@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { planDeferralRecords, divisions, projectCategories, projectMajorCategories, reportYears } from '@/mocks/planDeferralMocks';
@@ -122,13 +122,13 @@ export default function PlanDeferralPage() {
               />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-xs text-steel-500 whitespace-nowrap w-24 text-right flex-shrink-0">项目单位</label>
+              <label className="text-xs text-steel-500 whitespace-nowrap w-24 text-right flex-shrink-0">项目提报单位</label>
               <select
                 value={filterDivision}
                 onChange={(e) => setFilterDivision(e.target.value)}
                 className={inputCls + ' cursor-pointer'}
               >
-                <option value="">全部项目单位</option>
+                <option value="">全部项目提报单位</option>
                 {divisions.map((d) => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>

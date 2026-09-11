@@ -1,7 +1,10 @@
 import type { ProjectPlan } from '@/mocks/projectPlans';
-import { withPaymentPlans } from '@/mocks/projectPlans';
+import { withPaymentPlans, withAnnualPlanOrgFields } from '@/mocks/projectPlans';
 import type { ApprovalRecord } from '@/mocks/approvalMocks';
 import { getPlanDeclarationAttachmentConfigs } from '@/mocks/archiveConfigMocks';
+import { FormViewBlock, FormViewItem } from '@/components/feature/FormLayout';
+import { InvestmentEstimateView } from '../form/components/InvestmentEstimateSection';
+import { canWithdrawDeclaration } from '@/mocks/approvalMocks';
 
 interface ApprovalResultModalProps {
   open: boolean;
@@ -35,12 +38,12 @@ const NODE_TYPE_LABELS: Record<string, { label: string; color: string }> = {
 export default function ApprovalResultModal({ open, plan, approvalRecord, onClose, onWithdraw, onGoProcess }: ApprovalResultModalProps) {
   if (!open || !plan || !approvalRecord) return null;
 
-  const planView = withPaymentPlans(plan);
+  const planView = withPaymentPlans(withAnnualPlanOrgFields(plan));
   const paymentRows = planView.paymentPlans || [];
   const paymentTotal = paymentRows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
   const statusInfo = STATUS_CONFIG[approvalRecord.status] ?? STATUS_CONFIG.approving;
   const isApplicant = true;
-  const canWithdraw = approvalRecord.status === 'approving' && isApplicant;
+  const canWithdraw = isApplicant && canWithdrawDeclaration(plan, approvalRecord);
 
   const renderNodeIcon = (nodeType: string, status: string) => {
     const baseCls = 'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0';
@@ -118,165 +121,83 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
             </div>
           </div>
 
-          {/* Business Info */}
-          <div>
-            <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-              <div className="w-1 h-4 rounded-full bg-primary-500" />
-              业务信息
-            </h4>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-3 p-4 rounded-lg border border-slate-200 bg-slate-50/50">
-              <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">年度计划名称</span>
-                <span className="text-sm font-medium text-slate-800 text-right max-w-[250px] truncate">{plan.planName}</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">计划年度</span>
-                <span className="text-sm font-medium text-slate-800">{plan.planYear}年</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">项目单位</span>
-                <span className="text-sm font-medium text-slate-800">{plan.businessDivision}</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">项目类别</span>
-                <span className="text-sm font-medium text-slate-800">{plan.projectCategory}</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">投资总估算</span>
-                <span className="text-sm font-semibold text-slate-800">{plan.budgetAmount.toFixed(2)} 万元</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">项目负责人</span>
-                <span className="text-sm font-medium text-slate-800">{plan.projectManager}</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">负责人电话</span>
-                <span className="text-sm font-medium text-slate-800">{plan.projectManagerPhone || '—'}</span>
-              </div>
-              {plan.projectMajorType !== '大修' && plan.projectMajorType !== '零固' && (
-                <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                  <span className="text-sm text-slate-500">效益</span>
-                  <span className="text-sm font-medium text-slate-800">{plan.benefit.toFixed(2)} 万元</span>
-                </div>
-              )}
-              <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">计划开工时间</span>
-                <span className="text-sm font-medium text-slate-800">{plan.startDate}</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">计划完工时间</span>
-                <span className="text-sm font-medium text-slate-800">{plan.endDate}</span>
-              </div>
-              {plan.projectMajorType === '大修' && (
-                <>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">是否资本性大修</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.isCapitalOverhaul || '—'}</span>
-                  </div>
-                  {plan.isCapitalOverhaul === '是' && (
-                    <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                      <span className="text-sm text-slate-500">固定资产编码</span>
-                      <span className="text-sm font-medium text-slate-800">{plan.fixedAssetCode || '—'}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">设备编码</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.equipmentCode || '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">设备名称</span>
-                    <span className="text-sm font-medium text-slate-800 text-right max-w-[250px]">{plan.equipmentName || '—'}</span>
-                  </div>
-                  <div className="col-span-2 flex items-start justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500 flex-shrink-0">设备大修理由</span>
-                    <span className="text-sm text-slate-700 text-right">{plan.overhaulReason || '—'}</span>
-                  </div>
-                </>
-              )}
-              {plan.projectMajorType === '零固' && (
-                <>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">设备编码</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.equipmentCode || '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">设备名称</span>
-                    <span className="text-sm font-medium text-slate-800 text-right max-w-[250px]">{plan.equipmentName || '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">规格型号</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.specModel || '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">计量单位</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.measureUnit || '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">更新数量</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.updateQty ?? '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">在用数量</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.inUseQty ?? '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">预估单价(万元)</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.unitPrice != null ? plan.unitPrice.toFixed(2) : '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">是否新增零固</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.isNewMinor || '—'}</span>
-                  </div>
-                  {(plan.isNewMinor || '否') === '否' && (
-                    <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                      <span className="text-sm text-slate-500">固定资产编码</span>
-                      <span className="text-sm font-medium text-slate-800">{plan.fixedAssetCode || '—'}</span>
-                    </div>
-                  )}
-                  <div className="col-span-2 flex items-start justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500 flex-shrink-0">更新理由</span>
-                    <span className="text-sm text-slate-700 text-right">{plan.updateReason || '—'}</span>
-                  </div>
-                </>
-              )}
-              {plan.projectMajorType !== '大修' && plan.projectMajorType !== '零固' && (
-                <div className="col-span-2 flex items-start justify-between py-1.5 px-3 rounded bg-white">
-                  <span className="text-sm text-slate-500 flex-shrink-0">补充实施理由</span>
-                  <span className="text-sm text-slate-700 text-right">{plan.supplementNote || '—'}</span>
-                </div>
-              )}
-            </div>
-          </div>
+          <FormViewBlock title="业务信息">
+            <FormViewItem label="年度计划名称" value={plan.planName} fullWidth />
+            <FormViewItem label="计划年度" value={`${plan.planYear}年`} />
+            <FormViewItem label="项目提报单位" value={plan.businessDivision} />
+            <FormViewItem label="提报部门" value={plan.submitDept} />
+            <FormViewItem label="实施主管部门" value={plan.implementDept} />
+            <FormViewItem label="项目类别" value={plan.projectCategory} />
+            <FormViewItem label="投资总估算" value={`${plan.budgetAmount.toFixed(2)} 万元`} />
+            <FormViewItem label="项目负责人" value={plan.projectManager} />
+            <FormViewItem label="负责人电话" value={plan.projectManagerPhone} />
+            {plan.projectMajorType !== '大修' && plan.projectMajorType !== '零固' && (
+              <FormViewItem label="效益" value={`${plan.benefit.toFixed(2)} 万元`} />
+            )}
+            <FormViewItem label="计划开工时间" value={plan.startDate} />
+            <FormViewItem label="计划完工时间" value={plan.endDate} />
+            {plan.projectMajorType === '大修' && (
+              <>
+                <FormViewItem label="是否资本性大修" value={plan.isCapitalOverhaul} />
+                {plan.isCapitalOverhaul === '是' && (
+                  <FormViewItem label="固定资产编码" value={plan.fixedAssetCode} />
+                )}
+                <FormViewItem label="设备编码" value={plan.equipmentCode} />
+                <FormViewItem label="设备名称" value={plan.equipmentName} />
+                <FormViewItem label="设备大修理由" value={plan.overhaulReason} multiline fullWidth />
+              </>
+            )}
+            {plan.projectMajorType === '零固' && (
+              <>
+                <FormViewItem label="设备编码" value={plan.equipmentCode} />
+                <FormViewItem label="设备名称" value={plan.equipmentName} />
+                <FormViewItem label="设备库存数量" value={plan.equipmentStockQty} />
+                <FormViewItem label="规格型号" value={plan.specModel} />
+                <FormViewItem label="计量单位" value={plan.measureUnit} />
+                <FormViewItem label="需求数量" value={plan.updateQty} />
+                <FormViewItem label="申请采购数量" value={plan.purchaseApplyQty} />
+                <FormViewItem
+                  label="预估单价(万元)"
+                  value={plan.unitPrice != null ? plan.unitPrice.toFixed(2) : undefined}
+                />
+                <FormViewItem label="是否新增零固" value={plan.isNewMinor} />
+                {(plan.isNewMinor || '否') === '否' && (
+                  <FormViewItem label="固定资产编码" value={plan.fixedAssetCode} />
+                )}
+                <FormViewItem label="更新理由" value={plan.updateReason} multiline fullWidth />
+              </>
+            )}
+            {plan.projectMajorType !== '大修' && plan.projectMajorType !== '零固' && (
+              <FormViewItem label="补充实施理由" value={plan.supplementNote} multiline fullWidth />
+            )}
+          </FormViewBlock>
 
-          {/* 项目详细信息（新建/技改） */}
           {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改') && (
-            <div>
-              <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                <div className="w-1 h-4 rounded-full bg-primary-500" />
-                项目详细信息
-              </h4>
-              <div className="space-y-2 p-4 rounded-lg border border-slate-200 bg-slate-50/50">
-                {([
-                  ['currentSituation', '现状'],
-                  ['necessity', '改造必要性'],
-                  ['innovation', '项目创新性'],
-                  ['processDesc', '工艺描述'],
-                  ['overallIdea', '改造总体思路'],
-                  ['modificationContent', '改造主要内容'],
-                  ['modificationPurpose', '改造目的'],
-                  ['effectDescription', '效果说明/效益计算'],
-                  ['projectSummary', '项目概要总体描述'],
-                ] as const).map(([field, label]) => (
-                  <div key={field} className="flex items-start gap-4 py-2 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500 w-36 flex-shrink-0 pt-0.5">{label}</span>
-                    <span className="text-sm text-slate-700 flex-1 whitespace-pre-wrap leading-relaxed">
-                      {(plan[field] as string) || '—'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <FormViewBlock title="项目详细信息">
+              {([
+                ['currentSituation', '现状'],
+                ['necessity', '改造必要性'],
+                ['innovation', '项目创新性'],
+                ['processDesc', '工艺描述'],
+                ['overallIdea', '改造总体思路'],
+                ['modificationContent', '改造主要内容'],
+                ['modificationPurpose', '改造目的'],
+                ['effectDescription', '效果说明/效益计算'],
+                ['equipmentDesc', '设备装备描述'],
+                ['projectSummary', '项目总体结论'],
+              ] as const).map(([field, label]) => (
+                <FormViewItem
+                  key={field}
+                  label={label}
+                  value={plan[field] as string}
+                  multiline
+                  fullWidth
+                />
+              ))}
+            </FormViewBlock>
           )}
+
+          <InvestmentEstimateView plan={planView} />
 
           {/* 付款计划（四大类通用） */}
           <div>

@@ -40,7 +40,7 @@ function getDefaultColumns(_reviewDept: ReviewDept): ColumnDef[] {
     { id: 'businessUnit',           label: '项目单位',        visible: true,  width: 120 },
     { id: 'projectCategory',        label: '项目类别',        visible: true,  width: 120 },
     { id: 'planName',               label: '项目名称',    visible: true,  width: 260 },
-    { id: 'budget',                 label: '投资总估算(万元)', visible: true,  width: 130 },
+    { id: 'budget',                 label: '概算总额(万元)', visible: true,  width: 130 },
     { id: 'benefit',                label: '效益(万元)',       visible: true,  width: 100 },
     { id: 'payment2',               label: '第二年付款(万元)', visible: false, width: 130 },
     { id: 'payment3',               label: '第三年付款(万元)', visible: false, width: 130 },
@@ -83,7 +83,7 @@ export default function PlanReviewPage({ reviewDept }: Props) {
   const location = useLocation();
   const isJointReview = reviewDept === 'zhongte-stage';
   const storageKey = `ng_init_plan_review_${reviewDept}_v5`;
-  const colKey = `init-plan-review-cols-${reviewDept}-v1`;
+  const colKey = `init-plan-review-cols-${reviewDept}-v2`;
 
   const [records, setRecords] = useState<PlanReviewRecord[]>(() => getStored(storageKey));
   const [activeTab, setActiveTab] = useState<JointTab>('pending_joint');
@@ -242,6 +242,7 @@ export default function PlanReviewPage({ reviewDept }: Props) {
     const meeting = {
       reviewTime: payload.reviewTime,
       location: payload.location,
+      opinionDeadline: '',
       participants: payload.participants.map((p) => ({ ...p, opinion: '' })),
       opinionSummary: '',
     };

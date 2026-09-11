@@ -53,6 +53,7 @@ function cloneMeeting(src: JointReviewMeetingInfo): JointReviewMeetingInfo {
   return {
     reviewTime: src.reviewTime,
     location: src.location,
+    opinionDeadline: src.opinionDeadline || '',
     opinionSummary: src.opinionSummary || '',
     participants: src.participants.map((p) => ({ ...p, opinion: p.opinion || '' })),
   };
@@ -181,6 +182,7 @@ export default function JointReviewPassModal({ open, record, onClose, onConfirm 
       meeting: {
         reviewTime,
         location: location.trim(),
+        opinionDeadline: record.jointMeeting?.opinionDeadline || '',
         participants: rows.map((r) => ({ ...r, opinion: (r.opinion || '').trim() })),
         opinionSummary: opinionSummary.trim(),
       },

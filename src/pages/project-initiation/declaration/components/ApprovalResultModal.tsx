@@ -1,7 +1,7 @@
 import type { ProjectPlan } from '@/mocks/projectPlans';
-import { withPaymentPlans } from '@/mocks/projectPlans';
+import { withPaymentPlans, withInitiationDetailFields } from '@/mocks/projectPlans';
 import type { ApprovalRecord } from '@/mocks/approvalMocks';
-import { getPlanDeclarationAttachmentConfigs } from '@/mocks/archiveConfigMocks';
+import { getInitiationDeclarationAttachmentConfigs } from '@/mocks/archiveConfigMocks';
 
 interface ApprovalResultModalProps {
   open: boolean;
@@ -32,11 +32,11 @@ const NODE_TYPE_LABELS: Record<string, { label: string; color: string }> = {
   cc: { label: '抄送', color: '#6b7280' },
 };
 
-export default function ApprovalResultModal({ open, plan, approvalRecord, onClose, onWithdraw, onGoProcess }: ApprovalResultModalProps) {
-  if (!open || !plan || !approvalRecord) return null;
+export default function ApprovalResultModal({ open, plan: planRaw, approvalRecord, onClose, onWithdraw, onGoProcess }: ApprovalResultModalProps) {
+  if (!open || !planRaw || !approvalRecord) return null;
 
-  const planView = withPaymentPlans(plan);
-  const paymentRows = planView.paymentPlans || [];
+  const plan = withPaymentPlans(withInitiationDetailFields(planRaw));
+  const paymentRows = plan.paymentPlans || [];
   const paymentTotal = paymentRows.reduce((s, r) => s + (Number(r.amount) || 0), 0);
   const statusInfo = STATUS_CONFIG[approvalRecord.status] ?? STATUS_CONFIG.approving;
   const isApplicant = true;
@@ -125,6 +125,26 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
               业务信息
             </h4>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 p-4 rounded-lg border border-slate-200 bg-slate-50/50">
+              {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改' || plan.projectMajorType === '大修') && (
+                <>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">
+                      {plan.projectMajorType === '大修' ? '是否计划内' : '是否计划内项目'}
+                    </span>
+                    <span className="text-sm font-medium text-slate-800">
+                      {plan.isInPlanProject || (plan.annualPlanNo ? '是' : '否')}
+                    </span>
+                  </div>
+                  {(plan.isInPlanProject === '是' || !!plan.annualPlanNo) && (
+                    <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                      <span className="text-sm text-slate-500">
+                        {plan.projectMajorType === '大修' ? '项目计划号' : '年度计划号'}
+                      </span>
+                      <span className="text-sm font-medium text-slate-800 font-mono">{plan.annualPlanNo || '—'}</span>
+                    </div>
+                  )}
+                </>
+              )}
               <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
                 <span className="text-sm text-slate-500">项目名称</span>
                 <span className="text-sm font-medium text-slate-800 text-right max-w-[250px] truncate">{plan.planName}</span>
@@ -142,100 +162,128 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
                 <span className="text-sm font-medium text-slate-800">{plan.projectCategory}</span>
               </div>
               <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">投资总估算</span>
+                <span className="text-sm text-slate-500">
+                  {plan.projectMajorType === '大修' || plan.projectMajorType === '零固' ? '项目计划金额' : '概算总额'}
+                </span>
                 <span className="text-sm font-semibold text-slate-800">{plan.budgetAmount.toFixed(2)} 万元</span>
               </div>
-              <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">项目负责人</span>
-                <span className="text-sm font-medium text-slate-800">{plan.projectManager}</span>
-              </div>
-              <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">负责人电话</span>
-                <span className="text-sm font-medium text-slate-800">{plan.projectManagerPhone || '—'}</span>
-              </div>
-              {plan.projectMajorType !== '大修' && plan.projectMajorType !== '零固' && (
+              {(plan.projectMajorType === '大修' || plan.projectMajorType === '零固') && (
+                <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                  <span className="text-sm text-slate-500">申报费用</span>
+                  <span className="text-sm font-medium text-slate-800">
+                    {plan.declareFee != null ? `${Number(plan.declareFee).toFixed(2)} 万元` : '—'}
+                  </span>
+                </div>
+              )}
+              {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改') && (
                 <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
                   <span className="text-sm text-slate-500">效益</span>
                   <span className="text-sm font-medium text-slate-800">{plan.benefit.toFixed(2)} 万元</span>
                 </div>
               )}
               <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">计划开工时间</span>
-                <span className="text-sm font-medium text-slate-800">{plan.startDate}</span>
+                <span className="text-sm text-slate-500">
+                  {plan.projectMajorType === '大修' || plan.projectMajorType === '零固' ? '项目负责人' : (plan.projectMajorType === '新建' || plan.projectMajorType === '技改') ? '项目经理' : '项目负责人'}
+                </span>
+                <span className="text-sm font-medium text-slate-800">{plan.projectManager}</span>
               </div>
               <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                <span className="text-sm text-slate-500">计划完工时间</span>
-                <span className="text-sm font-medium text-slate-800">{plan.endDate}</span>
+                <span className="text-sm text-slate-500">
+                  {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改') ? '项目经理电话' : '负责人电话'}
+                </span>
+                <span className="text-sm font-medium text-slate-800">{plan.projectManagerPhone || '—'}</span>
               </div>
+              {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改') ? (
+                <>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">实施主管单位</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.implementUnit || '—'}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">专业主管单位</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.professionalUnit || '—'}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">计划开工日期</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.startDate || '—'}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">计划完工日期</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.endDate || '—'}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">项目工期</span>
+                    <span className="text-sm font-medium text-slate-800">
+                      {plan.projectDuration ? `${plan.projectDuration} 月` : '—'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">是否涉及岗位增减</span>
+                    <span className="text-sm font-medium text-slate-800">
+                      {(plan.hasJobChange || '无') === '无'
+                        ? '无'
+                        : `${plan.hasJobChange}${plan.jobChangeCount ? ` ${plan.jobChangeCount}人` : ''}`}
+                    </span>
+                  </div>
+                </>
+              ) : null}
               {plan.projectMajorType === '大修' && (
                 <>
                   <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">是否资本性大修</span>
+                    <span className="text-sm text-slate-500">是否计划内</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.isInPlanProject || '—'}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">项目计划号</span>
+                    <span className="text-sm font-medium text-slate-800 font-mono">{plan.annualPlanNo || '—'}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">事业部</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.businessDivision || '—'}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">单位</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.ownerUnit || '—'}</span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">是否为资本性大修</span>
                     <span className="text-sm font-medium text-slate-800">{plan.isCapitalOverhaul || '—'}</span>
                   </div>
-                  {plan.isCapitalOverhaul === '是' && (
-                    <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                      <span className="text-sm text-slate-500">固定资产编码</span>
-                      <span className="text-sm font-medium text-slate-800">{plan.fixedAssetCode || '—'}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">设备编码</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.equipmentCode || '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">设备名称</span>
-                    <span className="text-sm font-medium text-slate-800 text-right max-w-[250px]">{plan.equipmentName || '—'}</span>
-                  </div>
-                  <div className="col-span-2 flex items-start justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500 flex-shrink-0">设备大修理由</span>
-                    <span className="text-sm text-slate-700 text-right">{plan.overhaulReason || '—'}</span>
+                  <div className="col-span-2 flex items-start gap-4 py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500 w-28 flex-shrink-0">项目必要性</span>
+                    <span className="text-sm text-slate-700 flex-1 whitespace-pre-wrap">{plan.necessity || '—'}</span>
                   </div>
                 </>
               )}
               {plan.projectMajorType === '零固' && (
                 <>
                   <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">设备编码</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.equipmentCode || '—'}</span>
+                    <span className="text-sm text-slate-500">是否计划内</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.isInPlanProject || '—'}</span>
                   </div>
                   <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">设备名称</span>
-                    <span className="text-sm font-medium text-slate-800 text-right max-w-[250px]">{plan.equipmentName || '—'}</span>
+                    <span className="text-sm text-slate-500">项目计划号</span>
+                    <span className="text-sm font-medium text-slate-800 font-mono">{plan.annualPlanNo || '—'}</span>
                   </div>
                   <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">规格型号</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.specModel || '—'}</span>
+                    <span className="text-sm text-slate-500">论证申请单号</span>
+                    <span className="text-sm font-medium text-slate-800 font-mono">{plan.argumentApplyNo || '—'}</span>
                   </div>
                   <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">计量单位</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.measureUnit || '—'}</span>
+                    <span className="text-sm text-slate-500">事业部</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.businessDivision || '—'}</span>
                   </div>
                   <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">更新数量</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.updateQty ?? '—'}</span>
+                    <span className="text-sm text-slate-500">单位</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.ownerUnit || '—'}</span>
                   </div>
                   <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">在用数量</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.inUseQty ?? '—'}</span>
+                    <span className="text-sm text-slate-500">是否报废更新</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.isScrapRenew || '—'}</span>
                   </div>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">预估单价(万元)</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.unitPrice != null ? plan.unitPrice.toFixed(2) : '—'}</span>
-                  </div>
-                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500">是否新增零固</span>
-                    <span className="text-sm font-medium text-slate-800">{plan.isNewMinor || '—'}</span>
-                  </div>
-                  {(plan.isNewMinor || '否') === '否' && (
-                    <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
-                      <span className="text-sm text-slate-500">固定资产编码</span>
-                      <span className="text-sm font-medium text-slate-800">{plan.fixedAssetCode || '—'}</span>
-                    </div>
-                  )}
-                  <div className="col-span-2 flex items-start justify-between py-1.5 px-3 rounded bg-white">
-                    <span className="text-sm text-slate-500 flex-shrink-0">更新理由</span>
-                    <span className="text-sm text-slate-700 text-right">{plan.updateReason || '—'}</span>
+                  <div className="col-span-2 flex items-start gap-4 py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500 w-28 flex-shrink-0">项目必要性</span>
+                    <span className="text-sm text-slate-700 flex-1 whitespace-pre-wrap">{plan.necessity || '—'}</span>
                   </div>
                 </>
               )}
@@ -248,6 +296,97 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
             </div>
           </div>
 
+          {/* 大修内容明细 */}
+          {plan.projectMajorType === '大修' && (
+            <div>
+              <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <div className="w-1 h-4 rounded-full bg-primary-500" />
+                大修内容明细
+              </h4>
+              <div className="rounded-lg border border-slate-200 overflow-x-auto">
+                <table className="w-full text-left" style={{ minWidth: 720 }}>
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      {['序号', '类别', '设备部件/零件编码', '设备部件/零件名称', '大修内容'].map((h) => (
+                        <th key={h} className="px-3 py-2 text-xs font-medium text-slate-500 whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(plan.overhaulContentRows && plan.overhaulContentRows.length > 0) ? (
+                      plan.overhaulContentRows.map((r) => (
+                        <tr key={r.id} className="border-b border-slate-100">
+                          <td className="px-3 py-2 text-sm text-slate-500">{r.seq}</td>
+                          <td className="px-3 py-2 text-sm text-slate-700">{r.category || '—'}</td>
+                          <td className="px-3 py-2 text-sm font-mono text-slate-600">{r.partCode || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-800">{r.partName || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.content || '—'}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="px-3 py-4 text-center text-sm text-slate-400">暂无大修内容明细</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* 零固内容明细 */}
+          {plan.projectMajorType === '零固' && (
+            <div>
+              <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <div className="w-1 h-4 rounded-full bg-primary-500" />
+                零固内容明细
+                <span className="ml-auto text-sm font-semibold text-emerald-600">
+                  合计：{(
+                    (plan.minorContentRows || []).reduce(
+                      (s, r) => s + ((Number(r.unitPrice) || 0) * (Number(r.qty) || 0) + (Number(r.otherFee) || 0)),
+                      0
+                    )
+                  ).toFixed(2)}万元
+                </span>
+              </h4>
+              <div className="rounded-lg border border-slate-200 overflow-x-auto">
+                <table className="w-full text-left" style={{ minWidth: 960 }}>
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      {['序号', '名称', '规格型号', '预估单价(万元)', '数量', '计量单位', '其他费用(万元)', '备注', '小计(万元)'].map((h) => (
+                        <th key={h} className="px-3 py-2 text-xs font-medium text-slate-500 whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(plan.minorContentRows && plan.minorContentRows.length > 0) ? (
+                      plan.minorContentRows.map((r) => {
+                        const sub = Math.round(((Number(r.unitPrice) || 0) * (Number(r.qty) || 0) + (Number(r.otherFee) || 0)) * 100) / 100;
+                        return (
+                          <tr key={r.id} className="border-b border-slate-100">
+                            <td className="px-3 py-2 text-sm text-slate-500">{r.seq}</td>
+                            <td className="px-3 py-2 text-sm text-slate-800">{r.name || '—'}</td>
+                            <td className="px-3 py-2 text-sm text-slate-600">{r.specModel || '—'}</td>
+                            <td className="px-3 py-2 text-sm text-slate-700">{Number(r.unitPrice || 0).toFixed(2)}</td>
+                            <td className="px-3 py-2 text-sm text-slate-700">{r.qty}</td>
+                            <td className="px-3 py-2 text-sm text-slate-600">{r.measureUnit || '—'}</td>
+                            <td className="px-3 py-2 text-sm text-slate-700">{Number(r.otherFee || 0).toFixed(2)}</td>
+                            <td className="px-3 py-2 text-sm text-slate-500">{r.remark || '—'}</td>
+                            <td className="px-3 py-2 text-sm font-medium text-slate-800">{sub.toFixed(2)}</td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={9} className="px-3 py-4 text-center text-sm text-slate-400">暂无零固内容明细</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* 项目详细信息（新建/技改） */}
           {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改') && (
             <div>
@@ -257,15 +396,11 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
               </h4>
               <div className="space-y-2 p-4 rounded-lg border border-slate-200 bg-slate-50/50">
                 {([
-                  ['currentSituation', '现状'],
-                  ['necessity', '改造必要性'],
-                  ['innovation', '项目创新性'],
-                  ['processDesc', '工艺描述'],
-                  ['overallIdea', '改造总体思路'],
-                  ['modificationContent', '改造主要内容'],
-                  ['modificationPurpose', '改造目的'],
-                  ['effectDescription', '效果说明/效益计算'],
-                  ['projectSummary', '项目概要总体描述'],
+                  ['necessity', '项目必要性'],
+                  ['projectFeasibility', '项目可行性'],
+                  ['modificationContent', '项目主要内容'],
+                  ['deviceFacility', '主要设备/设施'],
+                  ['costAnalysis', '费用估算/需求分析'],
                 ] as const).map(([field, label]) => (
                   <div key={field} className="flex items-start gap-4 py-2 px-3 rounded bg-white">
                     <span className="text-sm text-slate-500 w-36 flex-shrink-0 pt-0.5">{label}</span>
@@ -274,6 +409,102 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
                     </span>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改') && (
+            <div>
+              <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <div className="w-1 h-4 rounded-full bg-primary-500" />
+                公辅配套
+              </h4>
+              <div className="space-y-2 p-4 rounded-lg border border-slate-200 bg-slate-50/50">
+                {([
+                  ['auxWater', '水'],
+                  ['auxElec', '电'],
+                  ['auxGas', '燃气'],
+                  ['auxOxygen', '氧气/氩气（汽）'],
+                  ['auxOther', '其他'],
+                ] as const).map(([field, label]) => (
+                  <div key={field} className="flex items-start gap-4 py-2 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500 w-36 flex-shrink-0 pt-0.5">{label}</span>
+                    <span className="text-sm text-slate-700 flex-1 whitespace-pre-wrap leading-relaxed">
+                      {(plan[field] as string) || '—'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改') && (
+            <div>
+              <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <div className="w-1 h-4 rounded-full bg-primary-500" />
+                项目目标
+              </h4>
+              <div className="space-y-2 p-4 rounded-lg border border-slate-200 bg-slate-50/50">
+                {([
+                  ['techTarget', '技术目标'],
+                  ['benefitTarget', '效益效果'],
+                  ['otherTarget', '其它目标'],
+                  ['innovation', '创新性、智能数字化'],
+                  ['energyAssess', '能源提升与评估'],
+                ] as const).map(([field, label]) => (
+                  <div key={field} className="flex items-start gap-4 py-2 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500 w-36 flex-shrink-0 pt-0.5">{label}</span>
+                    <span className="text-sm text-slate-700 flex-1 whitespace-pre-wrap leading-relaxed">
+                      {(plan[field] as string) || '—'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 研究报告人员（新建/技改/大修/零固） */}
+          {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改' || plan.projectMajorType === '大修' || plan.projectMajorType === '零固') && (
+            <div>
+              <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <div className="w-1 h-4 rounded-full bg-primary-500" />
+                项目研究报告人员
+              </h4>
+              <div className="rounded-lg border border-slate-200 overflow-x-auto">
+                <table className="w-full text-left" style={{ minWidth: 760 }}>
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      <th className="px-3 py-2 text-xs font-medium text-slate-500">序号</th>
+                      <th className="px-3 py-2 text-xs font-medium text-slate-500">工号</th>
+                      <th className="px-3 py-2 text-xs font-medium text-slate-500">姓名</th>
+                      <th className="px-3 py-2 text-xs font-medium text-slate-500">职称</th>
+                      <th className="px-3 py-2 text-xs font-medium text-slate-500">单位</th>
+                      <th className="px-3 py-2 text-xs font-medium text-slate-500">职务</th>
+                      <th className="px-3 py-2 text-xs font-medium text-slate-500">甲方工作职责</th>
+                      <th className="px-3 py-2 text-xs font-medium text-slate-500">备注</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(plan.researchPersons && plan.researchPersons.length > 0) ? (
+                      plan.researchPersons.map((r) => (
+                        <tr key={r.id} className="border-b border-slate-100">
+                          <td className="px-3 py-2 text-sm text-slate-500">{r.seq}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.empNo || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-800">{r.name || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.title || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.unit || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.position || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600 max-w-[200px]">{r.partyDuty || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-500">{r.remark || '—'}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={8} className="px-3 py-4 text-center text-sm text-slate-400">暂无研究报告人员</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
@@ -317,7 +548,7 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
                       <td colSpan={3} className="px-3 py-2 text-sm font-medium text-slate-700 text-right">合计</td>
                       <td className="px-3 py-2 text-sm font-semibold text-slate-800 text-right">{paymentTotal.toFixed(2)}</td>
                       <td className="px-3 py-2 text-xs text-slate-400">
-                        投资总估算 {plan.budgetAmount.toFixed(2)} 万元
+                        概算/计划金额 {plan.budgetAmount.toFixed(2)} 万元
                       </td>
                     </tr>
                   </tfoot>
@@ -326,6 +557,52 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
             </div>
           </div>
 
+          {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改') && (
+            <div>
+              <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <div className="w-1 h-4 rounded-full bg-primary-500" />
+                风险与机遇评估
+              </h4>
+              <div className="rounded-lg border border-slate-200 overflow-x-auto">
+                <table className="w-full text-left" style={{ minWidth: 1200 }}>
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      {['序号', '风险', '风险等级', '风险状态', '风险分类', '影响等级/后果', '严重程度', '风险类别', '应对策略', '执行部门'].map((h) => (
+                        <th key={h} className="px-3 py-2 text-xs font-medium text-slate-500 whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(plan.riskAssessRows && plan.riskAssessRows.length > 0) ? (
+                      plan.riskAssessRows.map((r) => (
+                        <tr key={r.id} className="border-b border-slate-100">
+                          <td className="px-3 py-2 text-sm text-slate-500">{r.seq}</td>
+                          <td className="px-3 py-2 text-sm text-slate-800">{r.risk || '—'}</td>
+                          <td className="px-3 py-2 text-sm">
+                            <span className={`px-1.5 py-0.5 text-xs rounded-full ${r.riskLevel === '高' ? 'bg-red-100 text-red-700' : r.riskLevel === '中' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
+                              {r.riskLevel}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.riskStatus || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.riskCategory || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.impactLevel || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.severity || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.riskType || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.strategy || '—'}</td>
+                          <td className="px-3 py-2 text-sm text-slate-600">{r.execDept || '—'}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={10} className="px-3 py-4 text-center text-sm text-slate-400">暂无风险评估数据</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* 附件上传要求（档案配置） */}
           <div>
             <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
@@ -333,7 +610,7 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
               附件上传
             </h4>
             <div className="space-y-2">
-              {getPlanDeclarationAttachmentConfigs(plan.projectMajorType || '技改').map((cfg) => (
+              {getInitiationDeclarationAttachmentConfigs(plan.projectMajorType || '技改').map((cfg) => (
                 <div key={cfg.id} className="rounded-lg border border-slate-200 p-3 bg-slate-50/50">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <span className="text-sm font-medium text-slate-800">{cfg.docName}</span>
@@ -355,7 +632,7 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
                   {cfg.remark && <p className="text-xs text-amber-700 mt-1">{cfg.remark}</p>}
                 </div>
               ))}
-              {getPlanDeclarationAttachmentConfigs(plan.projectMajorType || '技改').length === 0 && (
+              {getInitiationDeclarationAttachmentConfigs(plan.projectMajorType || '技改').length === 0 && (
                 <p className="text-sm text-slate-400 py-2">当前项目大类暂无附件配置</p>
               )}
             </div>

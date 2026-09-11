@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import Layout from '@/components/feature/Layout';
 import {
   planArchiveRecords,
@@ -12,11 +12,15 @@ import {
 import type { PlanArchiveRecord } from '@/mocks/planArchiveMocks';
 import ArchiveSummaryCharts from './components/ArchiveSummaryCharts';
 import ArchiveTable from './components/ArchiveTable';
+import EditControlAmountModal from './components/EditControlAmountModal';
+import OccupyDetailModal from './components/OccupyDetailModal';
 import PlanReviewDetailModal from '@/pages/project-plan/plan-review/components/PlanReviewDetailModal';
 import DeclOperationLogModal from '@/pages/project-plan/declaration/components/DeclOperationLogModal';
 
 export default function PlanArchivePage() {
-  const [records] = useState<PlanArchiveRecord[]>(planArchiveRecords);
+  const [records, setRecords] = useState<PlanArchiveRecord[]>(() =>
+    planArchiveRecords.map((r) => ({ ...r })),
+  );
 
   const [filterYear, setFilterYear] = useState('');
   const [filterMajor, setFilterMajor] = useState('');
@@ -29,7 +33,14 @@ export default function PlanArchivePage() {
   const [pageSize, setPageSize] = useState(10);
   const [detailTarget, setDetailTarget] = useState<PlanArchiveRecord | null>(null);
   const [logTarget, setLogTarget] = useState<PlanArchiveRecord | null>(null);
+  const [editControlTarget, setEditControlTarget] = useState<PlanArchiveRecord | null>(null);
+  const [occupyTarget, setOccupyTarget] = useState<PlanArchiveRecord | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2800);
+  };
 
   const filtered = useMemo(() => {
     let list = records.filter((r) => {
@@ -51,14 +62,26 @@ export default function PlanArchivePage() {
   }, [records, filterYear, filterMajor, filterType, filterName, filterUnit, prioritySortDir]);
 
   const displayList = useMemo(() => {
-    if (filtered.length > 0) return filtered;
-    if (prioritySortDir === 'none') return records;
-    return [...records].sort((a, b) => {
-      const pa = PRIORITY_SORT_ORDER[a.priorityLevel] ?? 99;
-      const pb = PRIORITY_SORT_ORDER[b.priorityLevel] ?? 99;
-      return prioritySortDir === 'desc' ? pb - pa : pa - pb;
-    });
+    const base = filtered.length > 0 ? filtered : records;
+    let list = base.filter((r) => r.reviewOutcome === 'approved');
+    if (list.length === 0) {
+      list = records.filter((r) => r.reviewOutcome === 'approved');
+    }
+    if (prioritySortDir !== 'none') {
+      list = [...list].sort((a, b) => {
+        const pa = PRIORITY_SORT_ORDER[a.priorityLevel] ?? 99;
+        const pb = PRIORITY_SORT_ORDER[b.priorityLevel] ?? 99;
+        return prioritySortDir === 'desc' ? pb - pa : pa - pb;
+      });
+    }
+    return list;
   }, [filtered, records, prioritySortDir]);
+
+  /** 统计用：筛选后含已通过 + 已驳回 */
+  const statsList = useMemo(() => {
+    if (filtered.length > 0) return filtered;
+    return records;
+  }, [filtered, records]);
 
   const usedFallback = filtered.length === 0 && records.length > 0
     && !!(filterYear || filterMajor || filterType || filterName || filterUnit);
@@ -88,14 +111,27 @@ export default function PlanArchivePage() {
   const handleQuery = () => {
     setCurrentPage(1);
     if (filtered.length === 0 && records.length > 0) {
-      setToast('无匹配结果，已展示全部已通过计划');
-      setTimeout(() => setToast(null), 2800);
+      showToast('无匹配结果，已展示全部已通过计划');
     }
   };
 
   const handleExport = () => {
-    setToast(`正在导出 ${displayList.length} 条已通过年度计划...`);
-    setTimeout(() => setToast(null), 2800);
+    showToast(`正在导出 ${displayList.length} 条已通过年度计划...`);
+  };
+
+  const handleSubmitControlAmount = (recordId: string, newControlAmount: number) => {
+    setRecords((prev) =>
+      prev.map((r) =>
+        r.id === recordId
+          ? {
+              ...r,
+              amountStatus: '审批中',
+              pendingControlAmount: newControlAmount,
+            }
+          : r,
+      ),
+    );
+    showToast('费用增补已提交，金额状态为「审批中」');
   };
 
   const renderPagination = () => {
@@ -163,7 +199,7 @@ export default function PlanArchivePage() {
               <input value={filterName} onChange={(e) => setFilterName(e.target.value)} placeholder="模糊搜索计划名称" className={inputCls} />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-xs text-steel-500 whitespace-nowrap w-24 text-right flex-shrink-0">项目单位</label>
+              <label className="text-xs text-steel-500 whitespace-nowrap w-24 text-right flex-shrink-0">项目提报单位</label>
               <select value={filterUnit} onChange={(e) => setFilterUnit(e.target.value)} className={inputCls + ' cursor-pointer'}>
                 <option value="">全部单位</option>
                 {planArchiveUnits.map((u) => <option key={u} value={u}>{u}</option>)}
@@ -187,7 +223,7 @@ export default function PlanArchivePage() {
           <p className="text-xs text-amber-600 -mt-2">当前筛选无匹配结果，已展示全部已通过演示数据</p>
         )}
 
-        <ArchiveSummaryCharts records={displayList} />
+        <ArchiveSummaryCharts records={statsList} />
 
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-steel-800">已通过年度计划清单</h2>
@@ -203,6 +239,8 @@ export default function PlanArchivePage() {
           onPrioritySort={handlePrioritySort}
           onView={setDetailTarget}
           onViewLog={setLogTarget}
+          onEditControlAmount={setEditControlTarget}
+          onViewOccupy={setOccupyTarget}
         />
 
         {displayList.length > 0 && (
@@ -258,6 +296,19 @@ export default function PlanArchivePage() {
         planId={logTarget?.linkedPlanId || ''}
         planName={logTarget?.planName || ''}
         onClose={() => setLogTarget(null)}
+      />
+
+      <EditControlAmountModal
+        open={!!editControlTarget}
+        record={editControlTarget}
+        onClose={() => setEditControlTarget(null)}
+        onSubmit={handleSubmitControlAmount}
+      />
+
+      <OccupyDetailModal
+        open={!!occupyTarget}
+        record={occupyTarget}
+        onClose={() => setOccupyTarget(null)}
       />
 
       {toast && (

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { planDeferralRecords, planAppTypeMap } from '@/mocks/planDeferralMocks';
@@ -209,7 +209,7 @@ export default function PlanDeferralFormPage() {
                     { label: '项目大类', value: plan.projectMajorCategory },
                     { label: '项目类型', value: plan.projectType },
                     { label: '计划年度', value: `${plan.planYear}年` },
-                    { label: '项目单位', value: plan.division },
+                    { label: '项目提报单位', value: plan.division },
                     { label: '申请时间', value: new Date().toLocaleDateString('zh-CN') },
                   ].map(({ label, value }) => (
                     <div key={label} className="flex flex-col gap-1">

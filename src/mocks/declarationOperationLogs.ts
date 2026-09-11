@@ -433,7 +433,33 @@ export const declOperationLogs: DeclOperationLog[] = [
 ];
 
 export function getDeclOperationLogs(planId: string): DeclOperationLog[] {
-  return declOperationLogs
-    .filter((l) => l.planId === planId)
+  const runtime = getRuntimeLogs().filter((l) => l.planId === planId);
+  return [...runtime, ...declOperationLogs.filter((l) => l.planId === planId)]
     .sort((a, b) => (a.operateTime < b.operateTime ? 1 : -1));
+}
+
+const LOG_STORAGE_KEY = 'ng_decl_operation_logs_v1';
+
+function getRuntimeLogs(): DeclOperationLog[] {
+  try {
+    const s = localStorage.getItem(LOG_STORAGE_KEY);
+    if (s) return JSON.parse(s) as DeclOperationLog[];
+  } catch { /* noop */ }
+  return [];
+}
+
+/** 追加运行时操作日志（撤回等） */
+export function appendDeclOperationLog(log: Omit<DeclOperationLog, 'id'> & { id?: string }) {
+  const entry: DeclOperationLog = {
+    id: log.id || `dl_rt_${Date.now()}`,
+    planId: log.planId,
+    operateTime: log.operateTime,
+    operator: log.operator,
+    operation: log.operation,
+    remark: log.remark,
+    approvalNo: log.approvalNo,
+  };
+  const next = [entry, ...getRuntimeLogs()];
+  try { localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(next)); } catch { /* noop */ }
+  return entry;
 }

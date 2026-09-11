@@ -1,13 +1,19 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
-import { projectPlans, withPaymentPlans, normalizeReviewStatus } from '@/mocks/projectPlans';
+import { projectPlans, withPaymentPlans, withInitiationDetailFields, normalizeReviewStatus, defaultResearchPersons, defaultRiskAssessRows, defaultOverhaulContentRows, defaultMinorContentRows } from '@/mocks/projectPlans';
 import type { ProjectPlan, ProjectMajorType, PaymentPlanRow } from '@/mocks/projectPlans';
 import BasicInfoSection from './components/BasicInfoSection';
 import DetailInfoSection from './components/DetailInfoSection';
+import AuxFacilitySection from './components/AuxFacilitySection';
+import ProjectTargetSection from './components/ProjectTargetSection';
+import ResearchPersonSection from './components/ResearchPersonSection';
+import RiskAssessSection from './components/RiskAssessSection';
 import PaymentPlanSection, { validatePaymentPlans } from './components/PaymentPlanSection';
 import OverhaulFormSection from './components/OverhaulFormSection';
+import OverhaulContentSection from './components/OverhaulContentSection';
 import MinorFormSection from './components/MinorFormSection';
+import MinorContentSection from './components/MinorContentSection';
 import AttachmentUploadSection, {
   validateRequiredAttachments,
   type AttachmentUploadMap,
@@ -16,18 +22,26 @@ import AttachmentUploadSection, {
 const NEW_TECH_SECTIONS = [
   { id: 'basic-info', title: '项目基本信息', icon: 'ri-file-info-line' },
   { id: 'detail-info', title: '项目详细信息', icon: 'ri-article-line' },
+  { id: 'aux-facility', title: '公辅配套', icon: 'ri-flashlight-line' },
+  { id: 'project-target', title: '项目目标', icon: 'ri-flag-line' },
+  { id: 'research-person', title: '研究报告人员', icon: 'ri-team-line' },
   { id: 'payment-plan', title: '付款计划', icon: 'ri-calendar-schedule-line' },
+  { id: 'risk-assess', title: '风险与机遇评估', icon: 'ri-shield-check-line' },
   { id: 'attachment-upload', title: '附件上传', icon: 'ri-attachment-2' },
 ];
 
 const OVERHAUL_SECTIONS = [
-  { id: 'overhaul-info', title: '大修项目信息', icon: 'ri-tools-line' },
+  { id: 'overhaul-info', title: '基本信息', icon: 'ri-file-info-line' },
+  { id: 'overhaul-content', title: '大修内容明细', icon: 'ri-list-check-2' },
+  { id: 'research-person', title: '研究报告人员', icon: 'ri-team-line' },
   { id: 'payment-plan', title: '付款计划', icon: 'ri-calendar-schedule-line' },
   { id: 'attachment-upload', title: '附件上传', icon: 'ri-attachment-2' },
 ];
 
 const MINOR_SECTIONS = [
-  { id: 'minor-info', title: '基本资料维护', icon: 'ri-box-3-line' },
+  { id: 'minor-info', title: '基本信息', icon: 'ri-file-info-line' },
+  { id: 'minor-content', title: '零固内容明细', icon: 'ri-list-check-2' },
+  { id: 'research-person', title: '研究报告人员', icon: 'ri-team-line' },
   { id: 'payment-plan', title: '付款计划', icon: 'ri-calendar-schedule-line' },
   { id: 'attachment-upload', title: '附件上传', icon: 'ri-attachment-2' },
 ];
@@ -39,23 +53,21 @@ const PATH_TYPE_MAP: Record<string, ProjectMajorType> = {
   '/project-initiation/declaration/form/minor': '零固',
 };
 
-const STORAGE_KEY = 'ng_init_decl_plans_v1';
+const STORAGE_KEY = 'ng_init_decl_plans_v6';
 const nextPlanYear = String(new Date().getFullYear() + 1);
 
 function getStoredPlans(): ProjectPlan[] {
   try {
-    const s = localStorage.getItem(STORAGE_KEY)
-      || localStorage.getItem('ng_decl_plans_v8')
-      || localStorage.getItem('ng_decl_plans_v7')
-      || localStorage.getItem('ng_decl_plans_v6')
-      || localStorage.getItem('ng_decl_plans_v5');
-    if (!s) return projectPlans.map(withPaymentPlans);
-    return JSON.parse(s).map((p: ProjectPlan) => withPaymentPlans({
+    const s = localStorage.getItem(STORAGE_KEY);
+    const list: ProjectPlan[] = s ? JSON.parse(s) : projectPlans;
+    return list.map((p) => withPaymentPlans(withInitiationDetailFields({
       ...p,
       projectMajorType: p.projectMajorType || '技改',
       reviewStatus: normalizeReviewStatus(p.reviewStatus as string),
-    }));
-  } catch { return projectPlans.map(withPaymentPlans); }
+    })));
+  } catch {
+    return projectPlans.map((p) => withPaymentPlans(withInitiationDetailFields(p)));
+  }
 }
 
 const emptyForm: Partial<ProjectPlan> = {
@@ -91,9 +103,35 @@ const emptyForm: Partial<ProjectPlan> = {
   jianAnFee: 0,
   equipmentFee: 0,
   otherFee: 0,
-  hasJobChange: '否',
+  hasJobChange: '无',
   jobChangeCount: 0,
+  isInPlanProject: '否',
+  annualPlanNo: '',
+  annualPlanId: '',
+  implementUnit: '',
+  professionalUnit: '',
+  projectDuration: 0,
+  projectFeasibility: '',
+  deviceFacility: '',
+  auxWater: '',
+  auxElec: '',
+  auxGas: '',
+  auxOxygen: '',
+  auxOther: '',
+  techTarget: '',
+  benefitTarget: '',
+  otherTarget: '',
+  energyAssess: '',
+  costAnalysis: '',
+  researchPersons: defaultResearchPersons,
+  riskAssessRows: defaultRiskAssessRows,
+  overhaulContentRows: defaultOverhaulContentRows,
+  minorContentRows: defaultMinorContentRows,
+  declareFee: 0,
+  ownerUnit: '',
   isCapitalOverhaul: '是',
+  argumentApplyNo: '',
+  isScrapRenew: '是',
   fixedAssetCode: '',
   equipmentCode: '',
   equipmentName: '',
@@ -200,40 +238,61 @@ export default function DeclarationFormPage() {
     }
   };
 
+  const handlePatch = (patch: Partial<ProjectPlan>) => {
+    setForm((prev) => ({ ...prev, ...patch }));
+    setDirty(true);
+    setErrors((prev) => {
+      const next = { ...prev };
+      Object.keys(patch).forEach((k) => { delete next[k]; });
+      return next;
+    });
+  };
+
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!form.businessDivision) e.businessDivision = '请选择项目单位';
-    if (!form.projectCategory) e.projectCategory = '请选择项目类别';
+    if (!form.businessDivision) e.businessDivision = overhaulMode || minorMode ? '请选择事业部' : '请选择项目单位';
+    if (!overhaulMode && !minorMode && !form.projectCategory) e.projectCategory = '请选择项目类别';
     if (!form.planName?.trim()) e.planName = '请输入项目名称';
-    if (!form.budgetAmount || Number(form.budgetAmount) <= 0) e.budgetAmount = '请填写投资总估算';
-    if (!form.projectManager) e.projectManager = '请选择项目负责人';
-    if (!form.planYear) e.planYear = '请选择计划年度';
+    if (!form.budgetAmount || Number(form.budgetAmount) <= 0) {
+      e.budgetAmount = overhaulMode || minorMode ? '请填写项目计划金额' : '请填写概算总额';
+    }
+    if (!form.projectManager) e.projectManager = overhaulMode || minorMode ? '请选择项目负责人' : '请选择项目经理';
+    if (!overhaulMode && !minorMode && !form.planYear) e.planYear = '请选择计划年度';
     if (form.startDate && form.endDate && form.startDate >= form.endDate) {
-      e.endDate = '完工时间须晚于开工时间';
+      e.endDate = '完工日期须晚于开工日期';
+    }
+
+    if (!overhaulMode && !minorMode) {
+      if (!form.isInPlanProject) e.isInPlanProject = '请选择是否计划内项目';
+      if (form.isInPlanProject === '是' && !form.annualPlanNo?.trim()) {
+        e.annualPlanNo = '请选择年度计划号';
+      }
+      if (!form.implementUnit) e.implementUnit = '请选择实施主管单位';
+      if (!form.professionalUnit) e.professionalUnit = '请选择专业主管单位';
+      if (!form.startDate) e.startDate = '请选择计划开工日期';
+      if (!form.endDate) e.endDate = '请选择计划完工日期';
+      if (!form.hasJobChange) e.hasJobChange = '请选择是否涉及岗位增减';
+      if ((form.hasJobChange === '增加' || form.hasJobChange === '减少') && (!form.jobChangeCount || Number(form.jobChangeCount) <= 0)) {
+        e.jobChangeCount = '请填写岗位增减人数';
+      }
     }
 
     if (overhaulMode) {
-      if (!form.startDate) e.startDate = '请选择计划开工时间';
-      if (!form.endDate) e.endDate = '请选择计划完工时间';
-      if ((form.isCapitalOverhaul || '是') === '是' && !form.fixedAssetCode?.trim()) {
-        e.fixedAssetCode = '请输入固定资产编码';
+      if (!form.isInPlanProject) e.isInPlanProject = '请选择是否计划内';
+      if (form.isInPlanProject === '是' && !form.annualPlanNo?.trim()) {
+        e.annualPlanNo = '请选择项目计划号';
       }
-      if (!form.lastOverhaulDate) e.lastOverhaulDate = '请选择上次大修竣工日期';
-      if (!form.lastOverhaulContent?.trim()) e.lastOverhaulContent = '请填写上次大修主要内容';
-      if (!form.overhaulReason?.trim()) e.overhaulReason = '请填写设备大修理由';
-      if (!form.overhaulPlanEffect?.trim()) e.overhaulPlanEffect = '请填写大修方案及效果';
+      if (!form.ownerUnit) e.ownerUnit = '请选择单位';
+      if (!form.isCapitalOverhaul) e.isCapitalOverhaul = '请选择是否为资本性大修';
+      if (!form.necessity?.trim()) e.necessity = '请填写项目必要性';
     } else if (minorMode) {
-      if (!form.startDate) e.startDate = '请选择计划开工时间';
-      if (!form.endDate) e.endDate = '请选择计划完工时间';
-      if (!form.specModel?.trim()) e.specModel = '请输入规格型号';
-      if (!form.measureUnit?.trim()) e.measureUnit = '请输入计量单位';
-      if (!form.updateQty || Number(form.updateQty) <= 0) e.updateQty = '请填写更新数量';
-      if (form.inUseQty == null || Number(form.inUseQty) < 0) e.inUseQty = '请填写在用数量';
-      if (!form.unitPrice || Number(form.unitPrice) <= 0) e.unitPrice = '请填写预估单价';
-      if ((form.isNewMinor || '否') === '否' && !form.fixedAssetCode?.trim()) {
-        e.fixedAssetCode = '请输入固定资产编码';
+      if (!form.isInPlanProject) e.isInPlanProject = '请选择是否计划内';
+      if (form.isInPlanProject === '是' && !form.annualPlanNo?.trim()) {
+        e.annualPlanNo = '请选择项目计划号';
       }
-      if (!form.updateReason?.trim()) e.updateReason = '请填写更新理由';
+      if (!form.ownerUnit) e.ownerUnit = '请选择单位';
+      if (!form.isScrapRenew) e.isScrapRenew = '请选择是否报废更新';
+      if (!form.necessity?.trim()) e.necessity = '请填写项目必要性';
     }
 
     Object.assign(e, validatePaymentPlans(paymentPlans, Number(form.budgetAmount) || 0));
@@ -394,31 +453,88 @@ export default function DeclarationFormPage() {
 
           <div className="space-y-4">
             {overhaulMode ? (
-              <OverhaulFormSection
-                data={form}
-                errors={errors}
-                onChange={handleChange}
-                sectionRef={(el) => { sectionRefs.current['overhaul-info'] = el; }}
-              />
+              <>
+                <OverhaulFormSection
+                  data={form}
+                  errors={errors}
+                  onChange={handleChange}
+                  onPatch={handlePatch}
+                  sectionRef={(el) => { sectionRefs.current['overhaul-info'] = el; }}
+                />
+                <OverhaulContentSection
+                  rows={form.overhaulContentRows}
+                  onChange={(rows) => {
+                    setForm((prev) => ({ ...prev, overhaulContentRows: rows }));
+                    setDirty(true);
+                  }}
+                  sectionRef={(el) => { sectionRefs.current['overhaul-content'] = el; }}
+                />
+                <ResearchPersonSection
+                  rows={form.researchPersons}
+                  onChange={(rows) => {
+                    setForm((prev) => ({ ...prev, researchPersons: rows }));
+                    setDirty(true);
+                  }}
+                  sectionRef={(el) => { sectionRefs.current['research-person'] = el; }}
+                />
+              </>
             ) : minorMode ? (
-              <MinorFormSection
-                data={form}
-                errors={errors}
-                onChange={handleChange}
-                sectionRef={(el) => { sectionRefs.current['minor-info'] = el; }}
-              />
+              <>
+                <MinorFormSection
+                  data={form}
+                  errors={errors}
+                  onChange={handleChange}
+                  onPatch={handlePatch}
+                  sectionRef={(el) => { sectionRefs.current['minor-info'] = el; }}
+                />
+                <MinorContentSection
+                  rows={form.minorContentRows}
+                  onChange={(rows) => {
+                    setForm((prev) => ({ ...prev, minorContentRows: rows }));
+                    setDirty(true);
+                  }}
+                  sectionRef={(el) => { sectionRefs.current['minor-content'] = el; }}
+                />
+                <ResearchPersonSection
+                  rows={form.researchPersons}
+                  onChange={(rows) => {
+                    setForm((prev) => ({ ...prev, researchPersons: rows }));
+                    setDirty(true);
+                  }}
+                  sectionRef={(el) => { sectionRefs.current['research-person'] = el; }}
+                />
+              </>
             ) : (
               <>
                 <BasicInfoSection
                   data={form}
                   errors={errors}
                   onChange={handleChange}
+                  onPatch={handlePatch}
                   sectionRef={(el) => { sectionRefs.current['basic-info'] = el; }}
                 />
                 <DetailInfoSection
                   data={form}
                   onChange={(f, v) => handleChange(f, v)}
                   sectionRef={(el) => { sectionRefs.current['detail-info'] = el; }}
+                />
+                <AuxFacilitySection
+                  data={form}
+                  onChange={(f, v) => handleChange(f, v)}
+                  sectionRef={(el) => { sectionRefs.current['aux-facility'] = el; }}
+                />
+                <ProjectTargetSection
+                  data={form}
+                  onChange={(f, v) => handleChange(f, v)}
+                  sectionRef={(el) => { sectionRefs.current['project-target'] = el; }}
+                />
+                <ResearchPersonSection
+                  rows={form.researchPersons}
+                  onChange={(rows) => {
+                    setForm((prev) => ({ ...prev, researchPersons: rows }));
+                    setDirty(true);
+                  }}
+                  sectionRef={(el) => { sectionRefs.current['research-person'] = el; }}
                 />
               </>
             )}
@@ -440,6 +556,17 @@ export default function DeclarationFormPage() {
               }}
               sectionRef={(el) => { sectionRefs.current['payment-plan'] = el; }}
             />
+
+            {!overhaulMode && !minorMode && (
+              <RiskAssessSection
+                rows={form.riskAssessRows}
+                onChange={(rows) => {
+                  setForm((prev) => ({ ...prev, riskAssessRows: rows }));
+                  setDirty(true);
+                }}
+                sectionRef={(el) => { sectionRefs.current['risk-assess'] = el; }}
+              />
+            )}
 
             <AttachmentUploadSection
               majorType={majorType}

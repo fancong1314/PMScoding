@@ -1,4 +1,4 @@
-export interface ApprovalTemplate {
+﻿export interface ApprovalTemplate {
   id: string;
   name: string;
   businessType: string;
@@ -91,7 +91,9 @@ export const optionalFields: DisplayFieldGroup[] = [
     groupName: '项目基本信息',
     fields: [
       { fieldName: 'planName', fieldLabel: '年度计划名称', fieldType: '文本', readonly: true },
-      { fieldName: 'businessDivision', fieldLabel: '项目单位', fieldType: '文本', readonly: true },
+      { fieldName: 'businessDivision', fieldLabel: '项目提报单位', fieldType: '文本', readonly: true },
+      { fieldName: 'submitDept', fieldLabel: '提报部门', fieldType: '文本', readonly: true },
+      { fieldName: 'implementDept', fieldLabel: '实施主管部门', fieldType: '文本', readonly: true },
       { fieldName: 'projectCategory', fieldLabel: '项目类别', fieldType: '文本', readonly: true },
       { fieldName: 'projectManager', fieldLabel: '项目负责人', fieldType: '文本', readonly: false },
       { fieldName: 'applicant', fieldLabel: '申报人', fieldType: '文本', readonly: true },
@@ -143,7 +145,7 @@ export const initialApprovalTemplates: ApprovalTemplate[] = [
         groupName: '项目基本信息',
         fields: [
           { fieldName: 'planName', fieldLabel: '年度计划名称', fieldType: '文本', readonly: true },
-          { fieldName: 'businessDivision', fieldLabel: '项目单位', fieldType: '文本', readonly: true },
+          { fieldName: 'businessDivision', fieldLabel: '项目提报单位', fieldType: '文本', readonly: true },
           { fieldName: 'projectCategory', fieldLabel: '项目类别', fieldType: '文本', readonly: true },
         ],
       },
@@ -181,7 +183,7 @@ export const initialApprovalTemplates: ApprovalTemplate[] = [
         groupName: '项目基本信息',
         fields: [
           { fieldName: 'planName', fieldLabel: '年度计划名称', fieldType: '文本', readonly: true },
-          { fieldName: 'businessDivision', fieldLabel: '项目单位', fieldType: '文本', readonly: true },
+          { fieldName: 'businessDivision', fieldLabel: '项目提报单位', fieldType: '文本', readonly: true },
         ],
       },
       {
@@ -213,7 +215,7 @@ export const initialApprovalTemplates: ApprovalTemplate[] = [
         groupName: '项目基本信息',
         fields: [
           { fieldName: 'planName', fieldLabel: '年度计划名称', fieldType: '文本', readonly: true },
-          { fieldName: 'businessDivision', fieldLabel: '项目单位', fieldType: '文本', readonly: true },
+          { fieldName: 'businessDivision', fieldLabel: '项目提报单位', fieldType: '文本', readonly: true },
           { fieldName: 'projectCategory', fieldLabel: '项目类别', fieldType: '文本', readonly: true },
           { fieldName: 'projectManager', fieldLabel: '项目负责人', fieldType: '文本', readonly: true },
         ],
@@ -247,7 +249,7 @@ export const initialApprovalTemplates: ApprovalTemplate[] = [
         groupName: '项目基本信息',
         fields: [
           { fieldName: 'planName', fieldLabel: '年度计划名称', fieldType: '文本', readonly: true },
-          { fieldName: 'businessDivision', fieldLabel: '项目单位', fieldType: '文本', readonly: true },
+          { fieldName: 'businessDivision', fieldLabel: '项目提报单位', fieldType: '文本', readonly: true },
           { fieldName: 'projectCategory', fieldLabel: '项目类别', fieldType: '文本', readonly: true },
         ],
       },
@@ -565,6 +567,28 @@ export function setStoredApprovalRecords(records: ApprovalRecord[]) {
 
 export function getApprovalByPlanId(planId: string): ApprovalRecord | undefined {
   return getStoredApprovalRecords().find((r) => r.planId === planId);
+}
+
+/**
+ * 年度计划申报撤回条件：
+ * 已提交（部门内审/待会审/会审中），且尚未有任何审批节点完成。
+ * 一旦有节点 completed，不可撤回。
+ */
+export function canWithdrawDeclaration(
+  plan: { reviewStatus: string },
+  record?: ApprovalRecord | null
+): boolean {
+  const submitted =
+    plan.reviewStatus === 'dept_review' ||
+    plan.reviewStatus === 'pending_joint' ||
+    plan.reviewStatus === 'joint_reviewing';
+  if (!submitted) return false;
+  if (!record) {
+    // 已提交但未生成审批单：允许撤回（等同尚未审批）
+    return plan.reviewStatus === 'dept_review';
+  }
+  if (record.status !== 'approving') return false;
+  return !record.nodes.some((n) => n.status === 'completed');
 }
 
 export function addApprovalRecord(record: ApprovalRecord) {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import Layout from '@/components/feature/Layout';
 import {
   planPaymentSources,
@@ -161,7 +161,7 @@ export default function PlanPaymentReportPage() {
               </select>
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-xs text-steel-500 whitespace-nowrap w-16 text-right flex-shrink-0">项目单位</label>
+              <label className="text-xs text-steel-500 whitespace-nowrap w-16 text-right flex-shrink-0">项目提报单位</label>
               <select value={filterUnit} onChange={(e) => setFilterUnit(e.target.value)} className={inputCls + ' cursor-pointer'}>
                 <option value="">全部</option>
                 {paymentReportUnits.map((u) => <option key={u} value={u}>{u}</option>)}
@@ -196,7 +196,7 @@ export default function PlanPaymentReportPage() {
                 <tr className="bg-slate-50">
                   <th className="sticky left-0 z-20 bg-slate-50 px-2 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 w-10">序号</th>
                   <th className="sticky left-10 z-20 bg-slate-50 px-3 py-2 text-left text-xs font-medium text-steel-500 border-b border-r border-steel-200 min-w-[200px]">年度计划名称</th>
-                  <th className="px-2 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">项目单位</th>
+                  <th className="px-2 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">项目提报单位</th>
                   <th className="px-2 py-2 text-center text-xs font-medium text-steel-500 border-b border-steel-200 whitespace-nowrap">大类</th>
                   {MONTH_LABELS.map((m, i) => (
                     <th

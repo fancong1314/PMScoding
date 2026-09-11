@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import {
@@ -12,17 +12,26 @@ import {
 import type { LeaderReviewRecord, LeaderReviewStatus } from '@/mocks/planLeaderReviewMocks';
 import { projectMajorTypeFormPath } from '@/mocks/projectPlans';
 import type { ProjectMajorType } from '@/mocks/projectPlans';
+import type { PlanPriorityLevel } from '@/mocks/planLeaderReviewMocks';
 import LeaderReviewTable from './components/LeaderReviewTable';
 import type { RowAction, LeaderSortField } from './components/LeaderReviewTable';
 import LeaderActionModal from './components/LeaderActionModal';
 import PlanReviewDetailModal from '@/pages/project-plan/plan-review/components/PlanReviewDetailModal';
+import PriorityBatchModal from '@/pages/project-plan/plan-review/components/PriorityBatchModal';
 
-const STORAGE_KEY = 'ng_plan_leader_review_v4';
+const STORAGE_KEY = 'ng_plan_leader_review_v6';
 
 function getStored(): LeaderReviewRecord[] {
   try {
     const s = localStorage.getItem(STORAGE_KEY);
-    if (s) return JSON.parse(s) as LeaderReviewRecord[];
+    if (s) {
+      const list = JSON.parse(s) as Array<LeaderReviewRecord & { status: string }>;
+      return list.map((r) => {
+        // 旧「已修改」并入已通过
+        if (r.status === 'modified') return { ...r, status: 'leader_passed' as LeaderReviewStatus };
+        return r as LeaderReviewRecord;
+      });
+    }
   } catch { /* noop */ }
   return initial.map((r) => ({ ...r }));
 }
@@ -50,6 +59,7 @@ export default function LeaderReviewPage() {
 
   const [actionKind, setActionKind] = useState<ActionKind>(null);
   const [actionIds, setActionIds] = useState<string[]>([]);
+  const [priorityModalOpen, setPriorityModalOpen] = useState(false);
   const [detailTarget, setDetailTarget] = useState<LeaderReviewRecord | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
 
@@ -71,7 +81,8 @@ export default function LeaderReviewPage() {
     const st = location.state as { success?: boolean; message?: string; tab?: LeaderReviewStatus } | null;
     if (!st?.message) return;
     showToast(st.message, st.success === false ? 'error' : 'success');
-    if (st.tab) setActiveTab(st.tab);
+    const tabKeys = LEADER_REVIEW_TABS.map((t) => t.key);
+    if (st.tab && tabKeys.includes(st.tab)) setActiveTab(st.tab);
     navigate(location.pathname, { replace: true, state: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -97,6 +108,13 @@ export default function LeaderReviewPage() {
         const va = a[headerSortField];
         const vb = b[headerSortField];
         return headerSortDir === 'desc' ? vb - va : va - vb;
+      });
+    } else if (activeTab === 'pending_present') {
+      list = [...list].sort((a, b) => {
+        const pa = PRIORITY_SORT_ORDER[a.priorityLevel] ?? 99;
+        const pb = PRIORITY_SORT_ORDER[b.priorityLevel] ?? 99;
+        if (pa !== pb) return pa - pb;
+        return a.planName.localeCompare(b.planName, 'zh');
       });
     }
     return list;
@@ -183,11 +201,9 @@ export default function LeaderReviewPage() {
     } else if (actionKind === 'reject') {
       applyStatus(ids, 'rejected', reason);
       showToast(`已驳回 ${count} 条年度计划`, 'info');
-      setActiveTab('rejected');
     } else if (actionKind === 'pass') {
       applyStatus(ids, 'approved');
       showToast(`已通过 ${count} 条年度计划`);
-      setActiveTab('approved');
     } else if (actionKind === 'restore') {
       applyStatus(ids, 'pending_present');
       showToast(`已恢复 ${count} 条年度计划至待呈核`);
@@ -210,16 +226,37 @@ export default function LeaderReviewPage() {
     if (action === 'edit') {
       const major = record.projectMajorCategory as ProjectMajorType;
       const base = projectMajorTypeFormPath[major] || projectMajorTypeFormPath['技改'];
-      navigate(`${base}?id=${record.linkedPlanId}&from=leader-review&lrId=${record.id}`);
+      // 与年度计划申报编辑页一致；已通过场景保存后仍回到本菜单「已通过」
+      if (activeTab === 'leader_passed') {
+        navigate(`${base}?id=${record.linkedPlanId}&from=leader-review&lrId=${record.id}`);
+      } else {
+        navigate(`${base}?id=${record.linkedPlanId}`);
+      }
       return;
     }
     openSingleAction(action, record.id);
   };
 
+  const handleOpenPriority = () => {
+    if (selectedRows.length === 0) {
+      showToast('请先勾选需要设置优先级的年度计划', 'error');
+      return;
+    }
+    setPriorityModalOpen(true);
+  };
+
+  const handleConfirmPriority = (level: PlanPriorityLevel) => {
+    setRecords((prev) =>
+      prev.map((r) => (selectedRows.includes(r.id) ? { ...r, priorityLevel: level } : r))
+    );
+    showToast(`已将 ${selectedRows.length} 条年度计划设置为${level}类优先级`);
+    setPriorityModalOpen(false);
+    setSelectedRows([]);
+  };
+
   const showPresentBatch = activeTab === 'pending_present';
-  const showPassReturnBatch = activeTab === 'leader_passed' || activeTab === 'modified';
-  const showReturnRejectBatch = activeTab === 'leader_returned';
-  const showRestoreBatch = activeTab === 'rejected';
+  const showPendingActionBatch = activeTab === 'pending_present';
+  const showRestoreBatch = activeTab === 'leader_returned';
 
   const inputCls = 'w-full px-3 py-2 text-sm border border-steel-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 bg-slate-50';
 
@@ -260,7 +297,7 @@ export default function LeaderReviewPage() {
       case 'reject':
         return {
           title: '驳回确认',
-          hint: `确认驳回已选 ${n} 条年度计划？驳回后将进入已驳回。`,
+          hint: `确认驳回已选 ${n} 条年度计划？`,
           confirmText: '确认驳回',
           confirmCls: 'bg-red-500 hover:bg-red-600',
           requireReason: true,
@@ -291,7 +328,7 @@ export default function LeaderReviewPage() {
     <Layout>
       <div className="space-y-4">
         <div>
-          <h1 className="text-lg font-semibold text-steel-900">项目部审查</h1>
+          <h1 className="text-lg font-semibold text-steel-900">项目办呈送</h1>
           <p className="text-xs text-steel-400 mt-0.5">
             对会审后的年度计划进行呈核领导、审批处置与状态跟踪
           </p>
@@ -327,7 +364,7 @@ export default function LeaderReviewPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-xs text-steel-500 whitespace-nowrap w-24 text-right flex-shrink-0">项目单位</label>
+              <label className="text-xs text-steel-500 whitespace-nowrap w-24 text-right flex-shrink-0">项目提报单位</label>
               <select value={filterUnit} onChange={(e) => setFilterUnit(e.target.value)} className={inputCls + ' cursor-pointer'}>
                 <option value="">请选择部门</option>
                 {leaderReviewUnits.map((u) => <option key={u} value={u}>{u}</option>)}
@@ -392,11 +429,13 @@ export default function LeaderReviewPage() {
                 )}
               </button>
             )}
-            {showPassReturnBatch && (
+            {showPendingActionBatch && (
               <>
-                <button type="button" onClick={() => openBatchAction('return')}
-                  className="px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-orange-500 hover:bg-orange-600">
-                  退回
+                <button type="button" onClick={handleOpenPriority}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap"
+                  style={{ background: 'linear-gradient(135deg,#7c3aed,#8b5cf6)' }}>
+                  <i className="ri-sort-asc" />
+                  优先级排序
                   {selectedRows.length > 0 && (
                     <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-white/25 rounded-full">{selectedRows.length}</span>
                   )}
@@ -408,20 +447,16 @@ export default function LeaderReviewPage() {
                     <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-white/25 rounded-full">{selectedRows.length}</span>
                   )}
                 </button>
-              </>
-            )}
-            {showReturnRejectBatch && (
-              <>
-                <button type="button" onClick={() => openBatchAction('return')}
-                  className="px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-orange-500 hover:bg-orange-600">
-                  退回
+                <button type="button" onClick={() => openBatchAction('reject')}
+                  className="px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-red-500 hover:bg-red-600">
+                  驳回
                   {selectedRows.length > 0 && (
                     <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-white/25 rounded-full">{selectedRows.length}</span>
                   )}
                 </button>
-                <button type="button" onClick={() => openBatchAction('reject')}
-                  className="px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-red-500 hover:bg-red-600">
-                  驳回
+                <button type="button" onClick={() => openBatchAction('return')}
+                  className="px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-orange-500 hover:bg-orange-600">
+                  退回
                   {selectedRows.length > 0 && (
                     <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-white/25 rounded-full">{selectedRows.length}</span>
                   )}
@@ -532,6 +567,13 @@ export default function LeaderReviewPage() {
           onConfirm={handleActionConfirm}
         />
       )}
+
+      <PriorityBatchModal
+        open={priorityModalOpen}
+        selectedCount={selectedRows.length}
+        onClose={() => setPriorityModalOpen(false)}
+        onConfirm={handleConfirmPriority}
+      />
 
       <PlanReviewDetailModal
         open={!!detailTarget}

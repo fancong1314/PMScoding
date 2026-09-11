@@ -1,5 +1,5 @@
 import { useMemo, useRef } from 'react';
-import { getPlanDeclarationAttachmentConfigs, type AttachmentConfig } from '@/mocks/archiveConfigMocks';
+import { getInitiationDeclarationAttachmentConfigs, type AttachmentConfig } from '@/mocks/archiveConfigMocks';
 
 export interface UploadedFileItem {
   id: string;
@@ -151,7 +151,7 @@ export default function AttachmentUploadSection({
   errors = {},
   sectionRef,
 }: Props) {
-  const configs = useMemo(() => getPlanDeclarationAttachmentConfigs(majorType), [majorType]);
+  const configs = useMemo(() => getInitiationDeclarationAttachmentConfigs(majorType), [majorType]);
 
   const handleAdd = (config: AttachmentConfig, fileList: FileList | null) => {
     if (!fileList || fileList.length === 0) return;
@@ -223,7 +223,7 @@ export function validateRequiredAttachments(
   uploads: AttachmentUploadMap
 ): Record<string, string> {
   const errors: Record<string, string> = {};
-  getPlanDeclarationAttachmentConfigs(majorType).forEach((cfg) => {
+  getInitiationDeclarationAttachmentConfigs(majorType).forEach((cfg) => {
     if (cfg.required && (!(uploads[cfg.id] || []).length)) {
       errors[`attach_${cfg.id}`] = `请上传「${cfg.docName}」`;
     }
