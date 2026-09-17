@@ -1,4 +1,4 @@
-export interface EstimateItem {
+﻿export interface EstimateItem {
   id: string;
   name: string;
   spec: string;

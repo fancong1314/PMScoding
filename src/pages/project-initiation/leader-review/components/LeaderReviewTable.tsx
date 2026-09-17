@@ -1,4 +1,4 @@
-import type { LeaderReviewRecord, LeaderReviewStatus } from '@/mocks/planLeaderReviewMocks';
+﻿import type { LeaderReviewRecord, LeaderReviewStatus } from '@/mocks/planLeaderReviewMocks';
 
 export type RowAction = 'present' | 'return' | 'pass' | 'reject' | 'restore' | 'edit' | 'view';
 export type LeaderSortField = 'budget' | 'benefit';
@@ -25,8 +25,8 @@ const COLS: { id: string; label: string; width: number; sortable?: boolean }[] =
   { id: 'projectMajorCategory', label: '项目大类', width: 90 },
   { id: 'projectCategory', label: '项目类型', width: 120 },
   { id: 'applicant', label: '申报人', width: 90 },
-  { id: 'businessUnit', label: '项目单位', width: 120 },
-  { id: 'budget', label: '投资总估算（万元）', width: 140, sortable: true },
+  { id: 'businessUnit', label: '项目提报单位', width: 120 },
+  { id: 'budget', label: '立项总概算（万元）', width: 140, sortable: true },
   { id: 'benefit', label: '效益（万元）', width: 110, sortable: true },
   { id: 'startDate', label: '计划开工时间', width: 120 },
   { id: 'endDate', label: '计划完工时间', width: 120 },
@@ -34,12 +34,8 @@ const COLS: { id: string; label: string; width: number; sortable?: boolean }[] =
 
 function actionWidth(tab: LeaderReviewStatus) {
   switch (tab) {
+    case 'pending_present':
     case 'leader_passed':
-      return 200;
-    case 'leader_returned':
-    case 'modified':
-      return 168;
-    case 'rejected':
       return 120;
     default:
       return 88;
@@ -49,18 +45,8 @@ function actionWidth(tab: LeaderReviewStatus) {
 function rowActions(tab: LeaderReviewStatus): RowAction[] {
   switch (tab) {
     case 'pending_present':
-    case 'leader_reviewing':
-    case 'returned':
-    case 'approved':
-      return ['view'];
     case 'leader_passed':
-      return ['edit', 'return', 'pass', 'view'];
-    case 'modified':
-      return ['return', 'pass', 'view'];
-    case 'leader_returned':
-      return ['return', 'reject', 'view'];
-    case 'rejected':
-      return ['restore', 'view'];
+      return ['edit', 'view'];
     default:
       return ['view'];
   }
@@ -69,7 +55,7 @@ function rowActions(tab: LeaderReviewStatus): RowAction[] {
 const ACTION_LABEL: Record<RowAction, string> = {
   present: '呈核',
   return: '退回',
-  pass: '通过',
+  pass: '立项下达',
   reject: '驳回',
   restore: '恢复',
   edit: '修改',
@@ -199,7 +185,7 @@ export default function LeaderReviewTable({
             {records.length === 0 ? (
               <tr>
                 <td colSpan={COLS.length + 4} className="px-3 py-16 text-center text-sm text-steel-400">
-                  暂无符合条件的年度计划
+                  暂无符合条件的项目
                 </td>
               </tr>
             ) : (

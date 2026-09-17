@@ -66,14 +66,14 @@ export default function OverhaulFormSection({ data, errors, onChange, onPatch, s
       <div className="flex items-center gap-2.5 px-5 py-3.5" style={{ borderBottom: '1px solid #e8edf3', backgroundColor: '#fafbfd' }}>
         <i className="ri-file-info-line text-emerald-500" />
         <h3 className="text-sm font-semibold text-steel-800">基本信息</h3>
-        <span className="text-xs text-steel-400 ml-1">大修立项申报基础字段</span>
+        <span className="text-xs text-steel-400 ml-1">营缮立项申报基础字段</span>
       </div>
 
       <div className="p-5 space-y-4">
         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
           <div className={col}>
             <label className={labelCls}>项目类型{requiredStar}</label>
-            <input type="text" value="大修" readOnly className={inputCls() + ' bg-slate-50 text-steel-600'} />
+            <input type="text" value="营缮" readOnly className={inputCls() + ' bg-slate-50 text-steel-600'} />
           </div>
           <div className={col}>
             <label className={labelCls}>是否计划内{requiredStar}</label>
@@ -175,7 +175,7 @@ export default function OverhaulFormSection({ data, errors, onChange, onPatch, s
 
         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
           <div className={col}>
-            <label className={labelCls}>是否为资本性大修{requiredStar}</label>
+            <label className={labelCls}>是否为资本性营缮{requiredStar}</label>
             <select
               value={data.isCapitalOverhaul || '是'}
               onChange={(e) => onChange('isCapitalOverhaul', e.target.value)}
@@ -219,21 +219,15 @@ export default function OverhaulFormSection({ data, errors, onChange, onPatch, s
             </div>
           </div>
           <div className={col}>
-            <label className={labelCls}>项目计划金额(万元){requiredStar}</label>
-            <div>
-              <div className="relative">
-                <input
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={data.budgetAmount || ''}
-                  onChange={(e) => onChange('budgetAmount', Number(e.target.value))}
-                  placeholder="0.00"
-                  className={inputCls(errors.budgetAmount) + ' pr-10'}
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel-400">万元</span>
-              </div>
-              {errors.budgetAmount && <p className="mt-1 text-xs text-red-500">{errors.budgetAmount}</p>}
+            <label className={labelCls}>项目计划金额(万元)</label>
+            <div className="relative">
+              <input
+                type="number"
+                readOnly
+                value={data.budgetAmount ? Number(data.budgetAmount).toFixed(2) : '0.00'}
+                className={inputCls() + ' pr-24 bg-slate-50 text-steel-500 cursor-not-allowed'}
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel-400">由费用概算合计</span>
             </div>
           </div>
         </div>

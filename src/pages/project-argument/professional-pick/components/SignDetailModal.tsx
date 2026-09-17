@@ -1,4 +1,4 @@
-import type { ProfessionalPickRecord } from '@/mocks/professionalPickMocks';
+﻿import type { ProfessionalPickRecord } from '@/mocks/professionalPickMocks';
 
 interface SignDetailModalProps {
   open: boolean;

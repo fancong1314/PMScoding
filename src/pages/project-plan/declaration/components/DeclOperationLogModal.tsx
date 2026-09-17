@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { getDeclOperationLogs, declApprovalFlows, type DeclApprovalFlowNode } from '@/mocks/declarationOperationLogs';
 
 interface Props {

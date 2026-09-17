@@ -1,4 +1,4 @@
-import { projectPlans, withPaymentPlans, withAnnualPlanOrgFields, projectMajorTypeFormPath } from '@/mocks/projectPlans';
+﻿import { projectPlans, withPaymentPlans, withAnnualPlanOrgFields, projectMajorTypeFormPath } from '@/mocks/projectPlans';
 import type { ProjectPlan } from '@/mocks/projectPlans';
 import { getPlanDeclarationAttachmentConfigs } from '@/mocks/archiveConfigMocks';
 import { FormViewBlock, FormViewItem } from '@/components/feature/FormLayout';
@@ -14,7 +14,7 @@ interface Props {
 
 function getPlan(linkedPlanId: string): ProjectPlan | null {
   try {
-    const keys = ['ng_decl_plans_v12', 'ng_decl_plans_v11', 'ng_decl_plans_v10', 'ng_decl_plans_v9', 'ng_decl_plans_v8', 'ng_decl_plans_v7'];
+    const keys = ['ng_decl_plans_v13', 'ng_decl_plans_v12', 'ng_decl_plans_v11', 'ng_decl_plans_v10', 'ng_decl_plans_v9', 'ng_decl_plans_v8', 'ng_decl_plans_v7'];
     for (const key of keys) {
       const s = localStorage.getItem(key);
       if (s) {
@@ -97,11 +97,11 @@ export default function PlanReviewDetailModal({ open, linkedPlanId, fallbackName
                 <FormViewItem label="负责人电话" value={plan.projectManagerPhone} />
                 <FormViewItem label="计划开工时间" value={plan.startDate} />
                 <FormViewItem label="计划完工时间" value={plan.endDate} />
-                {plan.projectMajorType === '大修' && (
+                {plan.projectMajorType === '营缮' && (
                   <>
-                    <FormViewItem label="是否资本性大修" value={plan.isCapitalOverhaul} />
+                    <FormViewItem label="是否资本性营缮" value={plan.isCapitalOverhaul} />
                     <FormViewItem label="设备名称" value={plan.equipmentName} />
-                    <FormViewItem label="设备大修理由" value={plan.overhaulReason} multiline fullWidth />
+                    <FormViewItem label="设备营缮理由" value={plan.overhaulReason} multiline fullWidth />
                   </>
                 )}
                 {plan.projectMajorType === '零固' && (

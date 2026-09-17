@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { allPayContracts, contractStatusOptions, contractTypeOptions, formatCurrency } from '@/mocks/paymentDeclarationMocks';

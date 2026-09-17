@@ -1,4 +1,4 @@
-import { mockKpiCards } from '@/mocks/panoramaDashboardMocks';
+﻿import { mockKpiCards } from '@/mocks/panoramaDashboardMocks';
 
 function SparkLine({ data, color }: { data: number[]; color: string }) {
   const w = 120;

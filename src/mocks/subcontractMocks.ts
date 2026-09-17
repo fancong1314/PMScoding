@@ -1,4 +1,4 @@
-export interface SubcontractApplication {
+﻿export interface SubcontractApplication {
   id: string;
   approvalNo: string;
   contractNo: string;

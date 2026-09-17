@@ -1,4 +1,4 @@
-export type PlanApplicationType = 'delay' | 'suspend' | 'terminate' | 'execute';
+﻿export type PlanApplicationType = 'delay' | 'suspend' | 'terminate' | 'execute';
 export type PlanStatus = '正常' | '暂缓' | '延期' | '终止';
 export type PlanApprovalStatus = '无申请' | '审批中' | '已通过' | '已驳回';
 
@@ -16,7 +16,7 @@ export interface PlanDeferralRecord {
   planStatus: PlanStatus;
   approvalStatus: PlanApprovalStatus;
   projectType: string;
-  /** 项目大类：新建/技改/零固/大修 */
+  /** 项目大类：新建/技改/零固/营缮 */
   projectMajorCategory: string;
   division: string;
   planStartDate: string;
@@ -55,7 +55,7 @@ export const planActionConfig: Record<PlanApplicationType, { label: string; colo
 
 export const divisions = ['公司办', '物流中心', '科技部', '炼铁部', '炼钢部', '薄板部', '中厚板部', '棒线材部', '能源环保部', '设备部'];
 export const projectCategories = ['信息化', '人工智能', '自动化', '基础设施', '安全环保', '节能降耗', '技术改造'];
-export const projectMajorCategories = ['新建', '技改', '零固', '大修'];
+export const projectMajorCategories = ['新建', '技改', '零固', '营缮'];
 export const reportYears = ['2026', '2025', '2024', '2023'];
 
 export const planDeferralRecords: PlanDeferralRecord[] = [
@@ -92,7 +92,7 @@ export const planDeferralRecords: PlanDeferralRecord[] = [
     planStatus: '暂缓',
     approvalStatus: '无申请',
     projectType: '基础设施',
-    projectMajorCategory: '大修',
+    projectMajorCategory: '营缮',
     division: '公司办',
     planStartDate: '2026-05-01',
     planEndDate: '2026-08-30',
@@ -152,11 +152,11 @@ export const planDeferralRecords: PlanDeferralRecord[] = [
     planStatus: '延期',
     approvalStatus: '审批中',
     projectType: '基础设施',
-    projectMajorCategory: '大修',
+    projectMajorCategory: '营缮',
     division: '公司办',
     planStartDate: '2026-07-01',
     planEndDate: '2026-12-31',
-    projectSummary: '对奥花大楼多个会议室进行整体大修改造',
+    projectSummary: '对奥花大楼多个会议室进行整体营缮改造',
     allowedActions: ['delay', 'suspend', 'terminate'],
   },
   {
@@ -196,7 +196,7 @@ export const planDeferralRecords: PlanDeferralRecord[] = [
     division: '物流中心',
     planStartDate: '2026-05-01',
     planEndDate: '2026-10-31',
-    projectSummary: '对港北4号行车进行全面大修',
+    projectSummary: '对港北4号行车进行全面营缮',
     allowedActions: ['delay', 'execute', 'terminate'],
   },
   {
@@ -205,18 +205,18 @@ export const planDeferralRecords: PlanDeferralRecord[] = [
     planName: '港北3号行车大修',
     unit: '物流中心',
     investAmount: 45,
-    projectDesc: '港北3号行车使用年限较长，起重设备老化严重，严重影响生产。目前库有设备老化严重，经常出断，距续维修不适合，再维修成本，全面大修',
+    projectDesc: '港北3号行车使用年限较长，起重设备老化严重，严重影响生产。目前库有设备老化严重，经常出断，距续维修不适合，再维修成本，全面营缮',
     planYear: 2026,
     archiveDate: '20260304',
     updateDate: '20260318',
     planStatus: '正常',
     approvalStatus: '无申请',
     projectType: '技术改造',
-    projectMajorCategory: '大修',
+    projectMajorCategory: '营缮',
     division: '物流中心',
     planStartDate: '2026-06-01',
     planEndDate: '2026-11-30',
-    projectSummary: '对港北3号行车进行全面大修',
+    projectSummary: '对港北3号行车进行全面营缮',
     allowedActions: ['delay', 'suspend', 'terminate'],
   },
   {
@@ -252,11 +252,11 @@ export const planDeferralRecords: PlanDeferralRecord[] = [
     planStatus: '正常',
     approvalStatus: '无申请',
     projectType: '技术改造',
-    projectMajorCategory: '大修',
+    projectMajorCategory: '营缮',
     division: '物流中心',
     planStartDate: '2026-07-01',
     planEndDate: '2026-12-31',
-    projectSummary: '对港业库库进行全面大修改造',
+    projectSummary: '对港业库库进行全面营缮改造',
     allowedActions: ['delay', 'suspend', 'terminate'],
   },
   {

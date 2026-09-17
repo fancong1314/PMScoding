@@ -1,4 +1,4 @@
-export interface PaymentPlanRow {
+﻿export interface PaymentPlanRow {
   id: string;
   paymentType: string;
   paymentMonth: string; // YYYY-MM
@@ -64,7 +64,7 @@ export const defaultRiskAssessRows: RiskAssessRow[] = [
   },
 ];
 
-/** 大修内容明细行 */
+/** 营缮内容明细行 */
 export interface OverhaulContentRow {
   id: string;
   seq: number;
@@ -109,7 +109,7 @@ export const defaultMinorContentRows: MinorContentRow[] = [
   },
 ];
 
-/** 大修表单 · 事业部→单位级联选项 */
+/** 营缮表单 · 事业部→单位级联选项 */
 export const overhaulDivisionUnitMap: Record<string, string[]> = {
   '炼铁厂': ['高炉分厂', '烧结厂', '球团分厂'],
   '炼钢厂': ['第一炼钢厂', '第二炼钢厂', '连铸分厂'],
@@ -149,19 +149,19 @@ export interface ProjectPlan {
   submitDept?: string;
   /** 实施主管部门（手动选择组织） */
   implementDept?: string;
-  /** 业主单位（大修等表单可选） */
+  /** 业主单位（营缮等表单可选） */
   ownerUnit?: string;
-  /** 申报费用（万元）·大修/零固立项 */
+  /** 申报费用（万元）·营缮/零固立项 */
   declareFee?: number;
   /** 论证申请单号 · 零固立项 */
   argumentApplyNo?: string;
   /** 是否报废更新 · 零固立项 */
   isScrapRenew?: string;
-  /** 大修内容明细 */
+  /** 营缮内容明细 */
   overhaulContentRows?: OverhaulContentRow[];
   /** 零固内容明细 */
   minorContentRows?: MinorContentRow[];
-  /** 项目大类：新建 / 技改 / 大修 / 零固 */
+  /** 项目大类：新建 / 技改 / 营缮 / 零固 */
   projectMajorType: ProjectMajorType;
   projectCategory: string;
   planName: string;
@@ -248,7 +248,7 @@ export interface ProjectPlan {
   annualPlanNo?: string;
   /** 关联年度计划 ID */
   annualPlanId?: string;
-  // 大修专属字段
+  // 营缮专属字段
   isCapitalOverhaul?: string;
   fixedAssetCode?: string;
   equipmentCode?: string;
@@ -281,7 +281,7 @@ export interface ProjectPlan {
   updatedAt: string;
 }
 
-export type ProjectMajorType = '新建' | '技改' | '大修' | '零固';
+export type ProjectMajorType = '新建' | '技改' | '营缮' | '零固';
 
 /** 由历史三年付款字段生成付款计划演示行（无 paymentPlans 时使用） */
 export function derivePaymentPlans(plan: Pick<ProjectPlan, 'id' | 'year1Payment' | 'year2Payment' | 'year3Payment' | 'budgetAmount' | 'planYear'>): PaymentPlanRow[] {
@@ -333,7 +333,7 @@ export function withPaymentPlans(plan: ProjectPlan): ProjectPlan {
 /** 立项申请·新建/技改：补齐详细信息与研究报告人员演示字段 */
 export function withInitiationDetailFields(plan: ProjectPlan): ProjectPlan {
   const major = plan.projectMajorType || '技改';
-  if (major === '大修') {
+  if (major === '营缮') {
     const seed = Number(plan.id) || 0;
     const jobChangeRaw = plan.hasJobChange || '无';
     const hasJobChange =
@@ -444,7 +444,7 @@ export function withInitiationDetailFields(plan: ProjectPlan): ProjectPlan {
     ),
     costAnalysis: filled(
       plan.costAnalysis,
-      `投资总估算约 ${plan.budgetAmount || 0} 万元，含建安、设备及其他费用。`
+      `立项总概算约 ${plan.budgetAmount || 0} 万元，含建安、设备及其他费用。`
     ),
     researchPersons:
       plan.researchPersons && plan.researchPersons.length > 0
@@ -457,12 +457,12 @@ export function withInitiationDetailFields(plan: ProjectPlan): ProjectPlan {
   };
 }
 
-export const projectMajorTypes: ProjectMajorType[] = ['新建', '技改', '大修', '零固'];
+export const projectMajorTypes: ProjectMajorType[] = ['新建', '技改', '营缮', '零固'];
 
 export const projectMajorTypeFormPath: Record<ProjectMajorType, string> = {
   新建: '/project-plan/declaration/form/new',
   技改: '/project-plan/declaration/form/tech',
-  大修: '/project-plan/declaration/form/overhaul',
+  营缮: '/project-plan/declaration/form/overhaul',
   零固: '/project-plan/declaration/form/minor',
 };
 
@@ -470,7 +470,7 @@ export const projectMajorTypeFormPath: Record<ProjectMajorType, string> = {
 export const initiationMajorTypeFormPath: Record<ProjectMajorType, string> = {
   新建: '/project-initiation/declaration/form/new',
   技改: '/project-initiation/declaration/form/tech',
-  大修: '/project-initiation/declaration/form/overhaul',
+  营缮: '/project-initiation/declaration/form/overhaul',
   零固: '/project-initiation/declaration/form/minor',
 };
 
@@ -732,7 +732,7 @@ export function withAnnualPlanOrgFields(plan: ProjectPlan): ProjectPlan {
 }
 
 export const projectCategories = [
-  '设备大修',
+  '设备营缮',
   '环保改造',
   '节能改造',
   '智能化改造',
@@ -754,16 +754,16 @@ export const reviewStatusMap: Record<string, { label: string; dotColor: string; 
   transferred:     { label: '已转计划', dotColor: '#22c55e', bgColor: '#f0fdf4', textColor: '#16a34a' },
 };
 
-export const ANNUAL_DECL_STORAGE_KEY = 'ng_decl_plans_v12';
+export const ANNUAL_DECL_STORAGE_KEY = 'ng_decl_plans_v13';
 
 /** 立项申请可选：已申请通过（已转计划）的年度计划 */
 export function getApprovedAnnualPlans(): ProjectPlan[] {
   let list: ProjectPlan[] = projectPlans;
   try {
     const s = localStorage.getItem(ANNUAL_DECL_STORAGE_KEY)
+      || localStorage.getItem('ng_decl_plans_v12')
       || localStorage.getItem('ng_decl_plans_v11')
-      || localStorage.getItem('ng_decl_plans_v10')
-      || localStorage.getItem('ng_decl_plans_v9');
+      || localStorage.getItem('ng_decl_plans_v10');
     if (s) list = JSON.parse(s) as ProjectPlan[];
   } catch { /* use seed */ }
   return list
@@ -782,8 +782,8 @@ export const projectPlans: ProjectPlan[] = [
     id: '1',
     planYear: '2026',
     businessDivision: '炼铁事业部',
-    projectMajorType: '大修',
-    projectCategory: '设备大修',
+    projectMajorType: '营缮',
+    projectCategory: '设备营缮',
     planName: '3号高炉炉体大修及配套设备更新改造工程',
     budgetAmount: 850.00,
     benefit: 120.50,
@@ -798,12 +798,12 @@ export const projectPlans: ProjectPlan[] = [
     applicant: '张伟',
     startDate: '2026-03',
     endDate: '2026-08',
-    supplementNote: '高炉炉龄已达设计使用年限，大修势在必行',
+    supplementNote: '高炉炉龄已达设计使用年限，营缮势在必行',
     currentSituation: '3号高炉于2016年建成投产，目前炉龄已达10年，炉体设备老化严重，热风炉阀门漏风率高达15%，影响生产效率。',
-    necessity: '高炉大修是保障持续稳定生产的必要措施，可有效提升铁水质量，降低燃料比，实现年节省成本约2000万元。',
+    necessity: '高炉营缮是保障持续稳定生产的必要措施，可有效提升铁水质量，降低燃料比，实现年节省成本约2000万元。',
     innovation: '采用新型耐材技术和智能监测系统，引进国内先进的无料钟炉顶设备，实现高炉操作智能化。',
     processDesc: '拆除旧炉体，更换炉缸、炉腹、炉腰耐火砖，安装新型冷却壁，完善煤气系统及喷吹系统改造。',
-    overallIdea: '分步实施，先完成主体改造，再进行配套系统升级，确保大修期间不影响其他工序生产。',
+    overallIdea: '分步实施，先完成主体改造，再进行配套系统升级，确保营缮期间不影响其他工序生产。',
     jianAnFee: 350.00,
     equipmentFee: 380.00,
     otherFee: 120.00,
@@ -1156,8 +1156,8 @@ export const projectPlans: ProjectPlan[] = [
     id: '11',
     planYear: '2026',
     businessDivision: '炼钢事业部',
-    projectMajorType: '大修',
-    projectCategory: '设备大修',
+    projectMajorType: '营缮',
+    projectCategory: '设备营缮',
     planName: '2号转炉炉壳及托圈大修工程',
     budgetAmount: 460.00,
     benefit: 78.00,
@@ -1174,7 +1174,7 @@ export const projectPlans: ProjectPlan[] = [
     endDate: '2026-12',
     supplementNote: '',
     currentSituation: '2号转炉炉壳局部变形，托圈轴承磨损超标，影响冶炼节奏与安全运行。',
-    necessity: '按期大修可恢复炉役，避免非计划停炉造成的产能损失。',
+    necessity: '按期营缮可恢复炉役，避免非计划停炉造成的产能损失。',
     innovation: '采用整体吊装更换托圈，缩短工期约15天。',
     processDesc: '停炉冷却、拆除炉壳与托圈、安装新组件、烘炉试运行。',
     overallIdea: '结合定修窗口一次性完成，确保钢水供应衔接。',
@@ -1202,8 +1202,8 @@ export const projectPlans: ProjectPlan[] = [
     id: 'oh3',
     planYear: '2027',
     businessDivision: '热轧事业部',
-    projectMajorType: '大修',
-    projectCategory: '设备大修',
+    projectMajorType: '营缮',
+    projectCategory: '设备营缮',
     planName: '2250热轧精轧主传动系统大修工程',
     budgetAmount: 920.00,
     benefit: 210.00,
@@ -1249,8 +1249,8 @@ export const projectPlans: ProjectPlan[] = [
     id: 'oh4',
     planYear: '2027',
     businessDivision: '冷轧事业部',
-    projectMajorType: '大修',
-    projectCategory: '设备大修',
+    projectMajorType: '营缮',
+    projectCategory: '设备营缮',
     planName: '酸轧机组张力辊及换辊小车大修',
     budgetAmount: 186.00,
     benefit: 45.00,
@@ -1295,7 +1295,7 @@ export const projectPlans: ProjectPlan[] = [
     id: 'oh5',
     planYear: '2027',
     businessDivision: '动力事业部',
-    projectMajorType: '大修',
+    projectMajorType: '营缮',
     projectCategory: '电力工程',
     planName: '35kV主变压器及附属系统大修',
     budgetAmount: 680.00,
@@ -1341,8 +1341,8 @@ export const projectPlans: ProjectPlan[] = [
     id: 'oh6',
     planYear: '2026',
     businessDivision: '原料事业部',
-    projectMajorType: '大修',
-    projectCategory: '设备大修',
+    projectMajorType: '营缮',
+    projectCategory: '设备营缮',
     planName: '烧结机台车及密封系统大修工程',
     budgetAmount: 540.00,
     benefit: 160.00,
@@ -1387,8 +1387,8 @@ export const projectPlans: ProjectPlan[] = [
     id: 'oh7',
     planYear: '2026',
     businessDivision: '物流事业部',
-    projectMajorType: '大修',
-    projectCategory: '设备大修',
+    projectMajorType: '营缮',
+    projectCategory: '设备营缮',
     planName: '原料输送皮带机结构大修',
     budgetAmount: 98.00,
     benefit: 12.00,

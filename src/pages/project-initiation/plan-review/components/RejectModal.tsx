@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 
 interface Props {
   open: boolean;
@@ -19,7 +19,7 @@ export default function RejectModal({ open, mode, planName, onClose, onConfirm }
   if (!open) return null;
 
   const isReject = mode === 'reject';
-  const title = isReject ? '驳回年度计划' : '补充资料';
+  const title = isReject ? '驳回项目' : '补充资料';
   const label = isReject ? '作废理由' : '补充理由';
   const placeholder = isReject ? '请输入驳回作废理由，必填...' : '请说明需要补充的资料内容，必填...';
   const confirmText = isReject ? '确认驳回' : '确认退回';

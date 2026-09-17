@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { ProjectPlan } from '@/mocks/projectPlans';
 import { projectCategories, projectManagers } from '@/mocks/projectPlans';
 import EquipmentSelectModal from './EquipmentSelectModal';
@@ -37,8 +37,8 @@ export default function OverhaulFormSection({ data, errors, onChange, onPatch, s
     <FormSection
       id="overhaul-info"
       sectionRef={sectionRef}
-      title="大修项目信息"
-      subtitle="大修专项申报字段"
+      title="营缮项目信息"
+      subtitle="营缮专项申报字段"
       icon="ri-tools-line"
     >
       <SubmitOrgFields data={data} errors={errors} onChange={onChange} onPatch={onPatch} />
@@ -66,7 +66,7 @@ export default function OverhaulFormSection({ data, errors, onChange, onPatch, s
       </div>
 
       <div className={formRow2Cls}>
-        <FormField label="是否资本性大修" required>
+        <FormField label="是否资本性营缮" required>
           <select
             value={data.isCapitalOverhaul || '是'}
             onChange={(e) => {
@@ -175,7 +175,7 @@ export default function OverhaulFormSection({ data, errors, onChange, onPatch, s
       </div>
 
       <div className={formRow2Cls}>
-        <FormField label="规定大修周期(年)">
+        <FormField label="规定营缮周期(年)">
           <input
             type="number"
             min={0}
@@ -186,7 +186,7 @@ export default function OverhaulFormSection({ data, errors, onChange, onPatch, s
             className={formInputCls()}
           />
         </FormField>
-        <FormField label="上次大修竣工日期" required error={errors.lastOverhaulDate}>
+        <FormField label="上次营缮竣工日期" required error={errors.lastOverhaulDate}>
           <input
             type="date"
             value={data.lastOverhaulDate || ''}
@@ -231,9 +231,9 @@ export default function OverhaulFormSection({ data, errors, onChange, onPatch, s
       </div>
 
       {([
-        ['lastOverhaulContent', '上次大修主要内容', true],
-        ['overhaulReason', '设备大修理由', true],
-        ['overhaulPlanEffect', '大修方案及效果', true],
+        ['lastOverhaulContent', '上次营缮主要内容', true],
+        ['overhaulReason', '设备营缮理由', true],
+        ['overhaulPlanEffect', '营缮方案及效果', true],
       ] as const).map(([field, label, required]) => (
         <FormField key={field} label={label} required={required} error={errors[field]} topAlign>
           <textarea

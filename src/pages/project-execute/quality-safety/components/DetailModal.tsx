@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { type Issue } from '@/mocks/qualitySafetyMocks';
 
 interface DetailModalProps {

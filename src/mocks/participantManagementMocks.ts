@@ -1,4 +1,4 @@
-export interface Participant {
+﻿export interface Participant {
   id: string;
   name: string;
   type: '监理' | '施工方' | '设计' | '其他';
@@ -290,7 +290,7 @@ export const dangerousWorks: DangerousWork[] = Array.from({ length: 30 }, (_, i)
   const seq = String(i + 1).padStart(5, '0');
   const category = (['施工', '检修'] as const)[i % 2];
   const projectNames = [
-    '1号高炉大修工程', '2号转炉改造工程', '中厚板轧线智能升级',
+    '1号高炉营缮工程', '2号转炉改造工程', '中厚板轧线智能升级',
     '烟气脱硫脱硝改造项目', '原料场封闭改造项目', '焦化厂煤气脱硫脱氰装置改造',
     '第三炼钢厂连铸机结晶器振动系统升级', '科技质量基础新型高效净化水系统建设',
     '轧钢产线自动化控制系统改造', '特殊钢智能运矿人员管理系统升级',
@@ -367,11 +367,11 @@ export interface AttendanceRecord {
 }
 
 export const mockAttendanceRecords: AttendanceRecord[] = [
-  { id: 1, department: '炼铁事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-001', contractName: '1号高炉大修工程', date: '2026-06-22', personName: '张建国', checkInTime: '07:32:15' },
-  { id: 2, department: '炼铁事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-001', contractName: '1号高炉大修工程', date: '2026-06-22', personName: '李志强', checkInTime: '07:28:40' },
-  { id: 3, department: '炼铁事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-001', contractName: '1号高炉大修工程', date: '2026-06-22', personName: '王明辉', checkInTime: '07:45:03' },
-  { id: 4, department: '炼铁事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-001', contractName: '1号高炉大修工程', date: '2026-06-22', personName: '赵永刚', checkInTime: '08:01:22' },
-  { id: 5, department: '炼铁事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-001', contractName: '1号高炉大修工程', date: '2026-06-22', personName: '陈建华', checkInTime: '07:55:18' },
+  { id: 1, department: '炼铁事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-001', contractName: '1号高炉营缮工程', date: '2026-06-22', personName: '张建国', checkInTime: '07:32:15' },
+  { id: 2, department: '炼铁事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-001', contractName: '1号高炉营缮工程', date: '2026-06-22', personName: '李志强', checkInTime: '07:28:40' },
+  { id: 3, department: '炼铁事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-001', contractName: '1号高炉营缮工程', date: '2026-06-22', personName: '王明辉', checkInTime: '07:45:03' },
+  { id: 4, department: '炼铁事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-001', contractName: '1号高炉营缮工程', date: '2026-06-22', personName: '赵永刚', checkInTime: '08:01:22' },
+  { id: 5, department: '炼铁事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-001', contractName: '1号高炉营缮工程', date: '2026-06-22', personName: '陈建华', checkInTime: '07:55:18' },
   { id: 6, department: '炼钢事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-008', contractName: '2号转炉改造工程', date: '2026-06-22', personName: '刘伟', checkInTime: '07:30:45' },
   { id: 7, department: '炼钢事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-008', contractName: '2号转炉改造工程', date: '2026-06-22', personName: '孙志明', checkInTime: '07:35:12' },
   { id: 8, department: '炼钢事业部', ownerUnit: '南京钢铁股份有限公司', contractNo: 'NG-JS-2024-008', contractName: '2号转炉改造工程', date: '2026-06-22', personName: '周文博', checkInTime: '08:10:30' },
@@ -409,7 +409,7 @@ export const mockMonitorContracts: MonitorContract[] = [
   {
     id: 1,
     contractNo: 'NG-JS-2024-001',
-    contractName: '1号高炉大修工程',
+    contractName: '1号高炉营缮工程',
     totalCameras: 8,
     onlineCount: 7,
     offlineCount: 1,

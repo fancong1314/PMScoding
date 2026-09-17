@@ -1,4 +1,4 @@
-export interface EpcContract {
+﻿export interface EpcContract {
   id: string;
   contractNo: string;
   contractName: string;

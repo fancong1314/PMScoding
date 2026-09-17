@@ -1,4 +1,4 @@
-export interface EarlyEvaluationProject {
+﻿export interface EarlyEvaluationProject {
   id: string;
   approvalNo: string;
   planNo: string;

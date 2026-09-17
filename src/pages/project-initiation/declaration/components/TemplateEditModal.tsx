@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { ApprovalTemplate, ApprovalNodeConfig } from '@/mocks/approvalMocks';
 import { availableApprovers, saveApprovalTemplates, approvalTemplates } from '@/mocks/approvalMocks';
 

@@ -1,4 +1,4 @@
-/** 年度计划会审 · 会审意见签署演示数据 */
+﻿/** 年度计划会审 · 会审意见签署演示数据 */
 
 export type JointOpinionSignTab = 'pending' | 'signed';
 export type JointOpinionPassResult = '通过' | '不通过' | '';
@@ -13,7 +13,7 @@ export interface JointOpinionSignRecord {
   id: string;
   planName: string;
   planYear: string;
-  projectMajorType: '新建' | '技改' | '大修' | '零固';
+  projectMajorType: '新建' | '技改' | '营缮' | '零固';
   projectCategory: string;
   budgetAmount: number;
   benefit: number;
@@ -32,7 +32,7 @@ export interface JointOpinionSignRecord {
   attachments: JointOpinionAttachmentFile[];
 }
 
-export const JOINT_OPINION_SIGN_STORAGE_KEY = 'ng_plan_joint_opinion_sign_v1';
+export const JOINT_OPINION_SIGN_STORAGE_KEY = 'ng_plan_joint_opinion_sign_v2';
 
 /** 是否已超过会审意见截至时间 */
 export function isOpinionDeadlineExpired(deadline: string, now = new Date()): boolean {
@@ -89,8 +89,8 @@ export const jointOpinionSignRecords: JointOpinionSignRecord[] = [
     id: 'jos-p3',
     planName: '炼钢连铸机扇形段大修计划',
     planYear: '2026',
-    projectMajorType: '大修',
-    projectCategory: '设备大修',
+    projectMajorType: '营缮',
+    projectCategory: '设备营缮',
     budgetAmount: 860.0,
     benefit: 95.0,
     applicant: '陈刚',
@@ -212,8 +212,8 @@ export const jointOpinionSignRecords: JointOpinionSignRecord[] = [
     id: 'jos-s2',
     planName: '码头卸船机大修专项计划',
     planYear: '2026',
-    projectMajorType: '大修',
-    projectCategory: '设备大修',
+    projectMajorType: '营缮',
+    projectCategory: '设备营缮',
     budgetAmount: 430.0,
     benefit: 60.0,
     applicant: '周涛',
@@ -225,9 +225,9 @@ export const jointOpinionSignRecords: JointOpinionSignRecord[] = [
     signer: '超级管理员',
     reviewTime: '2026-05-16 15:30',
     reviewers: '刘工、陈工',
-    opinion: '大修范围清晰，建议纳入年度优先实施清单。',
+    opinion: '营缮范围清晰，建议纳入年度优先实施清单。',
     attachments: [
-      { id: 'af2', name: '大修会审纪要.docx', size: 1024 * 256 },
+      { id: 'af2', name: '营缮会审纪要.docx', size: 1024 * 256 },
     ],
   },
   {

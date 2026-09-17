@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+﻿import { useState, useRef } from 'react';
 import type { ColumnDef } from '@/hooks/useColumnConfig';
 
 interface Props {

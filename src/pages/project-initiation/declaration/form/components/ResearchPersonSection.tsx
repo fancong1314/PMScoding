@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { ResearchPersonRow } from '@/mocks/projectPlans';
 import { defaultResearchPersons } from '@/mocks/projectPlans';
 
@@ -67,7 +67,7 @@ export default function ResearchPersonSection({ rows: controlledRows, onChange, 
           <i className="ri-team-line text-emerald-500" />
         </div>
         <h3 className="text-sm font-semibold text-steel-800">项目研究报告人员</h3>
-        <span className="text-xs text-steel-400 ml-1">可研/研究报告编制人员</span>
+        <span className="text-xs text-steel-400 ml-1">提报单位内部评审人员/报告编制人员</span>
       </div>
 
       <div className="p-5">

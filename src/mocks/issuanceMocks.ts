@@ -1,4 +1,4 @@
-export interface IssuanceRecord {
+﻿export interface IssuanceRecord {
   id: string;
   applyNo: string;
   applyName: string;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { ReportRecord } from '@/mocks/contractProgressMocks';
 
 interface ReportRecordModalProps {

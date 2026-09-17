@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { getContractById, getStopResumeById } from '@/mocks/contractExecutionMocks';
@@ -66,7 +66,7 @@ export default function StopResumeFormPage() {
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
           <p className="text-xs text-red-600 leading-relaxed">
             <div className="w-3 h-3 flex items-center justify-center inline-flex mr-1"><i className="ri-error-warning-line" /></div>
-            制造部要求:合同开工必须走呈核流程, 大修类及零固类最后核准人是【009014】张涛科长, 自动化类为制造部【009585】宋宁岐科长, 其余为【009299】施海峰科长
+            制造部要求:合同开工必须走呈核流程, 营缮类及零固类最后核准人是【009014】张涛科长, 自动化类为制造部【009585】宋宁岐科长, 其余为【009299】施海峰科长
           </p>
         </div>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { EstimateItem } from '@/mocks/estimateManagementMocks';
 import { formatCurrency } from '@/mocks/estimateManagementMocks';
 

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { RETURN_RESTART_NODE_OPTIONS, type ReturnRestartNode } from '@/mocks/planReviewMocks';
+﻿import { useEffect, useState } from 'react';
+import { INIT_RETURN_RESTART_NODE_OPTIONS, type ReturnRestartNode } from '@/mocks/planReviewMocks';
 
 interface Props {
   open: boolean;
@@ -40,7 +40,7 @@ export default function ReturnReviewModal({ open, planName, onClose, onConfirm }
             <i className="ri-arrow-go-back-line text-orange-500 text-lg" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-steel-800">退回年度计划</h3>
+            <h3 className="text-sm font-semibold text-steel-800">退回项目</h3>
             <p className="text-xs text-steel-400 mt-0.5 line-clamp-1" title={planName}>{planName}</p>
           </div>
           <button
@@ -88,7 +88,7 @@ export default function ReturnReviewModal({ open, planName, onClose, onConfirm }
               重新提交后起始审批节点 <span className="text-red-500">*</span>
             </label>
             <div className="space-y-2">
-              {RETURN_RESTART_NODE_OPTIONS.map((opt) => (
+              {INIT_RETURN_RESTART_NODE_OPTIONS.map((opt) => (
                 <label
                   key={opt.value}
                   className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg border cursor-pointer transition-colors ${

@@ -1,4 +1,4 @@
-import type { ReactNode, Ref } from 'react';
+﻿import type { ReactNode, Ref } from 'react';
 
 /**
  * 贵港 PMS 表单布局标准（与 .cursor/skills/frontend-pms-standards/SKILL.md 同步）

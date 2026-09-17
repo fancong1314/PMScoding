@@ -1,11 +1,20 @@
-import { useState, useEffect } from 'react';
-import { getDeclOperationLogs, declApprovalFlows, type DeclApprovalFlowNode } from '@/mocks/declarationOperationLogs';
+﻿import { useState, useEffect } from 'react';
+import {
+  getDeclOperationLogs,
+  getOverviewOperationLogs,
+  declApprovalFlows,
+  type DeclApprovalFlowNode,
+} from '@/mocks/declarationOperationLogs';
 
 interface Props {
   open: boolean;
   planId: string;
   planName: string;
   onClose: () => void;
+  /** 总览场景：同时合并关联立项申请的操作记录 */
+  linkedPlanId?: string;
+  /** 使用总览合并查询 */
+  mode?: 'declaration' | 'overview';
 }
 
 type NodeStatus = DeclApprovalFlowNode['status'];
@@ -18,7 +27,9 @@ const nodeStatusStyle: Record<NodeStatus, { bg: string; border: string; icon: st
   returned: { bg: 'bg-orange-50',  border: 'border-orange-400',  icon: 'ri-arrow-go-back-line text-orange-500',     text: 'text-orange-700',  badge: '已退回' },
 };
 
-export default function DeclOperationLogModal({ open, planId, planName, onClose }: Props) {
+export default function DeclOperationLogModal({
+  open, planId, planName, onClose, linkedPlanId, mode = 'declaration',
+}: Props) {
   const [flowNo, setFlowNo] = useState<string | null>(null);
 
   useEffect(() => {
@@ -27,7 +38,9 @@ export default function DeclOperationLogModal({ open, planId, planName, onClose 
 
   if (!open) return null;
 
-  const logs = getDeclOperationLogs(planId);
+  const logs = mode === 'overview'
+    ? getOverviewOperationLogs(planId, linkedPlanId)
+    : getDeclOperationLogs(planId);
   const flow = flowNo ? declApprovalFlows[flowNo] : null;
   const nodes = flow?.nodes || [];
   const doneCount = nodes.filter((n) => n.status === 'passed').length;

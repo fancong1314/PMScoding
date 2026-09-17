@@ -1,4 +1,4 @@
-import type { Ref } from 'react';
+﻿import type { Ref } from 'react';
 import type { ProjectPlan } from '@/mocks/projectPlans';
 import { calcInvestmentEstimateTotal } from '@/mocks/projectPlans';
 

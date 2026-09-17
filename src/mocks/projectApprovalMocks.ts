@@ -1,4 +1,4 @@
-import { projects } from './projectPrepareMocks';
+﻿import { projects } from './projectPrepareMocks';
 
 export interface ApprovalStage {
   id: string;

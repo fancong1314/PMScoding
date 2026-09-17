@@ -1,4 +1,4 @@
-interface ConfirmModalProps {
+﻿interface ConfirmModalProps {
   open: boolean;
   title: string;
   content: string;

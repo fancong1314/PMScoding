@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+﻿import { useState, useRef, useCallback } from 'react';
 import { availableApprovers, type ApprovalNodeConfig } from '@/mocks/approvalMocks';
 
 interface BatchPresentModalProps {

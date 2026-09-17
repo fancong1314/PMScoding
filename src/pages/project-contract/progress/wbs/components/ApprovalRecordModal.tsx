@@ -1,4 +1,4 @@
-import type { WBSApprovalRecord } from '@/mocks/contractProgressMocks';
+﻿import type { WBSApprovalRecord } from '@/mocks/contractProgressMocks';
 
 interface ApprovalRecordModalProps {
   records: WBSApprovalRecord[];

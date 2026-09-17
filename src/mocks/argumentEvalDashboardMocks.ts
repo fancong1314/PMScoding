@@ -1,4 +1,4 @@
-/* ========== 论证后评价看板 Mock 数据 ========== */
+﻿/* ========== 论证后评价看板 Mock 数据 ========== */
 export interface KpiStats {
   argumentCompletionRate: number;
   argumentCompleted: number;

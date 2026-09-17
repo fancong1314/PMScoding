@@ -1,4 +1,4 @@
-import type { RouteObject } from "react-router-dom";
+﻿import type { RouteObject } from "react-router-dom";
 import NotFound from "../pages/NotFound";
 import InvestmentReportPage from "../pages/project-dashboard/investment-report/page";
 import ArgumentEvalDashboardPage from "../pages/project-dashboard/argument-evaluation/page";
@@ -7,25 +7,14 @@ import ProjectDetailPage from "../pages/project-dashboard/project-detail/page";
 import ApprovalProcessPage from "../pages/project-plan/approval-process/page";
 import ZhongteStageReviewPage from "../pages/project-plan/plan-review/zhongte-stage/page";
 import JointOpinionSignPage from "../pages/project-plan/joint-opinion-sign/page";
+import InitJointOpinionSignPage from "../pages/project-initiation/joint-opinion-sign/page";
 import LeaderReviewPage from "../pages/project-plan/leader-review/page";
 import PlanArchivePage from "../pages/project-plan/plan-archive/page";
 import PlanPaymentReportPage from "../pages/project-plan/payment-report/page";
 import ProjectPlanDeclaration from "../pages/project-plan/declaration/page";
 import PlanFormPage from "../pages/project-plan/declaration/form/page";
-import ProjectApplyPage from "../pages/project-plan/apply/page";
-import ApplyFormPage from "../pages/project-plan/apply/form/page";
-import ApplyPresentFormPage from "../pages/project-plan/apply/present-form/page";
-import ProjectReviewPage from "../pages/project-plan/review/page";
-import ReviewFormPage from "../pages/project-plan/review/form/page";
-import ProjectIssuancePage from "../pages/project-plan/issuance/page";
-import IssuanceFormPage from "../pages/project-plan/issuance/form/page";
-import ProjectDeferralPage from "../pages/project-plan/deferral/page";
-import DeferralFormPage from "../pages/project-plan/deferral/form/page";
 import PlanDeferralPage from "../pages/project-plan/plan-deferral/page";
 import PlanDeferralFormPage from "../pages/project-plan/plan-deferral/form/page";
-import ProjectNumberPage from "../pages/project-plan/project-number/page";
-import ProjectNumberFormPage from "../pages/project-plan/project-number/form/page";
-import ProjectNumberChangeFormPage from "../pages/project-plan/project-number/change-form/page";
 import ArgumentApplyPage from "../pages/project-argument/apply/page";
 import ArgumentApplyFormPage from "../pages/project-argument/apply/form/page";
 import OpinionSignPage from "../pages/project-argument/opinion-sign/page";
@@ -34,6 +23,9 @@ import InitDeclarationPage from "../pages/project-initiation/declaration/page";
 import InitDeclarationFormPage from "../pages/project-initiation/declaration/form/page";
 import InitZhongteStageReviewPage from "../pages/project-initiation/plan-review/zhongte-stage/page";
 import InitLeaderReviewPage from "../pages/project-initiation/leader-review/page";
+import InitOfficePrelimReviewPage from "../pages/project-initiation/office-prelim-review/page";
+import InitOverviewPage from "../pages/project-initiation/overview/page";
+import InitOverviewDetailPage from "../pages/project-initiation/overview/detail/page";
 import InitPlanDeferralPage from "../pages/project-initiation/plan-deferral/page";
 import InitPlanDeferralFormPage from "../pages/project-initiation/plan-deferral/form/page";
 import ContractListPage from "../pages/project-execute/quality-safety/contract-list/page";
@@ -45,10 +37,6 @@ import VideoSurveillancePage from "../pages/participant/video-surveillance/page"
 import DangerousWorkListPage from "../pages/project-execute/dangerous-work/list/page";
 import ProjectPrepareListPage from "../pages/project-prepare/project-management/list/page";
 import MemberListPage from "../pages/project-prepare/project-management/members/page";
-import PreliminaryProjectListPage from "../pages/project-prepare/preliminary-material/list/page";
-import MaterialListPage from "../pages/project-prepare/preliminary-material/materials/page";
-import PreliminaryDesignListPage from "../pages/project-prepare/preliminary-design/list/page";
-import EstimateReviewPage from "../pages/project-prepare/preliminary-design/estimate-review/page";
 import EstimateListPage from "../pages/project-prepare/estimate-management/list/page";
 import EstimateDetailPage from "../pages/project-prepare/estimate-management/detail/page";
 import EstimateApplyPage from "../pages/project-prepare/estimate-management/apply/page";
@@ -82,6 +70,14 @@ import CompletionManufacturingReviewPage from "../pages/project-contract/executi
 import CompletionDetailPage from "../pages/project-contract/execution/completion-detail/page";
 import ProjectApprovalListPage from "../pages/project-prepare/approval/list/page";
 import ProjectApprovalStagePage from "../pages/project-prepare/approval/stage/page";
+import FrameworkContractPage from "../pages/project-sporadic/framework-contract/page";
+import AgreementDeclarePage from "../pages/project-sporadic/agreement-declare/page";
+import AgreementFormPage from "../pages/project-sporadic/agreement-declare/form/page";
+import AgreementReviewPage from "../pages/project-sporadic/agreement-review/page";
+import AgreementIssuePage from "../pages/project-sporadic/agreement-issue/page";
+import AgreementIssueFormPage from "../pages/project-sporadic/agreement-issue/form/page";
+import SporadicPaymentPage from "../pages/project-sporadic/payment/page";
+import SporadicExecutionPage from "../pages/project-sporadic/execution/page";
 import ContractDocumentListPage from "../pages/project-contract/document/list/page";
 import ContractDocumentFormPage from "../pages/project-contract/document/form/page";
 import ContractDocumentAmountChangePage from "../pages/project-contract/document/amount-change/page";
@@ -136,8 +132,6 @@ import ArchiveConfigPage from "../pages/project-archive/config/page";
 import ArchiveConfigPreviewPage from "../pages/project-archive/config/preview/page";
 import ArchiveManagementListPage from "../pages/project-archive/management/list/page";
 import ArchiveManagementDetailPage from "../pages/project-archive/management/detail/page";
-import WBSDecompositionPage from "../pages/project-prepare/preliminary-design/wbs-decomposition/page";
-import WBSEditPage from "../pages/project-prepare/preliminary-design/wbs-edit/page";
 import ProjectProgressListPage from "../pages/project-execute/progress/list/page";
 import WeeklyMonthlyPage from "../pages/project-execute/progress/weekly-monthly/page";
 import ReportDetailPage2 from "../pages/project-execute/progress/weekly-monthly/detail/page";
@@ -156,13 +150,12 @@ import ItAcceptanceListPage from "../pages/project-execute/it-acceptance/list/pa
 import ItAcceptanceFormPage from "../pages/project-execute/it-acceptance/form/page";
 import ResearchConfirmListPage from "../pages/project-execute/it-acceptance/research-confirm/page";
 import ItAcceptanceConfirmPage from "../pages/project-execute/it-acceptance/confirm-form/page";
-import ChangeDetailPage from "../pages/project-prepare/preliminary-design/estimate-review/change-detail/page";
 import ConstructionMemberListPage from "../pages/participant/construction-member/list/page";
 import ConstructionMemberDetailPage from "../pages/participant/construction-member/detail/page";
 const routes: RouteObject[] = [
   {
     path: "/",
-    element: <ProjectApplyPage />,
+    element: <ProjectPlanDeclaration />,
   },
   {
     path: "/project-plan/approval-process",
@@ -191,42 +184,6 @@ const routes: RouteObject[] = [
   {
     path: "/project-plan/declaration/form/minor",
     element: <PlanFormPage />,
-  },
-  {
-    path: "/project-plan/apply",
-    element: <ProjectApplyPage />,
-  },
-  {
-    path: "/project-plan/apply/form",
-    element: <ApplyFormPage />,
-  },
-  {
-    path: "/project-plan/apply/present-form",
-    element: <ApplyPresentFormPage />,
-  },
-  {
-    path: "/project-plan/review",
-    element: <ProjectReviewPage />,
-  },
-  {
-    path: "/project-plan/review/form",
-    element: <ReviewFormPage />,
-  },
-  {
-    path: "/project-plan/issuance",
-    element: <ProjectIssuancePage />,
-  },
-  {
-    path: "/project-plan/issuance/form",
-    element: <IssuanceFormPage />,
-  },
-  {
-    path: "/project-plan/deferral",
-    element: <ProjectDeferralPage />,
-  },
-  {
-    path: "/project-plan/deferral/form",
-    element: <DeferralFormPage />,
   },
   {
     path: "/project-plan/plan-deferral",
@@ -273,18 +230,6 @@ const routes: RouteObject[] = [
     element: <ProjectDetailPage />,
   },
   {
-    path: "/project-plan/project-number",
-    element: <ProjectNumberPage />,
-  },
-  {
-    path: "/project-plan/project-number/form",
-    element: <ProjectNumberFormPage />,
-  },
-  {
-    path: "/project-plan/project-number/change-form",
-    element: <ProjectNumberChangeFormPage />,
-  },
-  {
     path: "/project-argument/apply",
     element: <ArgumentApplyPage />,
   },
@@ -299,6 +244,14 @@ const routes: RouteObject[] = [
   {
     path: "/project-argument/opinion-sign/form",
     element: <OpinionSignFormPage />,
+  },
+  {
+    path: "/project-initiation/overview",
+    element: <InitOverviewPage />,
+  },
+  {
+    path: "/project-initiation/overview/detail",
+    element: <InitOverviewDetailPage />,
   },
   {
     path: "/project-initiation/declaration",
@@ -325,8 +278,16 @@ const routes: RouteObject[] = [
     element: <InitDeclarationFormPage />,
   },
   {
+    path: "/project-initiation/office-prelim-review",
+    element: <InitOfficePrelimReviewPage />,
+  },
+  {
     path: "/project-initiation/plan-review/zhongte-stage",
     element: <InitZhongteStageReviewPage />,
+  },
+  {
+    path: "/project-initiation/joint-opinion-sign",
+    element: <InitJointOpinionSignPage />,
   },
   {
     path: "/project-initiation/leader-review",
@@ -375,22 +336,6 @@ const routes: RouteObject[] = [
   {
     path: "/project-prepare/project-management/members",
     element: <MemberListPage />,
-  },
-  {
-    path: "/project-prepare/preliminary-material",
-    element: <PreliminaryProjectListPage />,
-  },
-  {
-    path: "/project-prepare/preliminary-material/materials",
-    element: <MaterialListPage />,
-  },
-  {
-    path: "/project-prepare/preliminary-design",
-    element: <PreliminaryDesignListPage />,
-  },
-  {
-    path: "/project-prepare/preliminary-design/estimate-review",
-    element: <EstimateReviewPage />,
   },
   {
     path: "/project-prepare/estimate-management",
@@ -523,6 +468,38 @@ const routes: RouteObject[] = [
   {
     path: "/project-prepare/approval/stage",
     element: <ProjectApprovalStagePage />,
+  },
+  {
+    path: "/project-sporadic/framework-contract",
+    element: <FrameworkContractPage />,
+  },
+  {
+    path: "/project-sporadic/agreement-declare",
+    element: <AgreementDeclarePage />,
+  },
+  {
+    path: "/project-sporadic/agreement-declare/form",
+    element: <AgreementFormPage />,
+  },
+  {
+    path: "/project-sporadic/agreement-review",
+    element: <AgreementReviewPage />,
+  },
+  {
+    path: "/project-sporadic/agreement-issue",
+    element: <AgreementIssuePage />,
+  },
+  {
+    path: "/project-sporadic/agreement-issue/form",
+    element: <AgreementIssueFormPage />,
+  },
+  {
+    path: "/project-sporadic/payment",
+    element: <SporadicPaymentPage />,
+  },
+  {
+    path: "/project-sporadic/execution",
+    element: <SporadicExecutionPage />,
   },
   {
     path: "/project-contract/document",
@@ -743,18 +720,6 @@ const routes: RouteObject[] = [
   {
     path: "/project-archive/management/preview",
     element: <ArchiveManagementPreviewPage />,
-  },
-  {
-    path: "/project-prepare/preliminary-design/estimate-review/change-detail",
-    element: <ChangeDetailPage />,
-  },
-  {
-    path: "/project-prepare/preliminary-design/wbs-decomposition",
-    element: <WBSDecompositionPage />,
-  },
-  {
-    path: "/project-prepare/preliminary-design/wbs-edit",
-    element: <WBSEditPage />,
   },
   {
     path: "/project-execute/progress",

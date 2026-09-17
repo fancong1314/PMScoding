@@ -1,4 +1,4 @@
-export type ProjectStatus = 'active' | 'suspended' | 'delayed' | 'cancelled' | 'terminated' | 'changing';
+﻿export type ProjectStatus = 'active' | 'suspended' | 'delayed' | 'cancelled' | 'terminated' | 'changing';
 export type ApprovalStatus = 'none' | 'pending' | 'approving' | 'approved' | 'rejected';
 export type ApplicationType = 'delay' | 'suspend' | 'cancel' | 'terminate' | 'change';
 

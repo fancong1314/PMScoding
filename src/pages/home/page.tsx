@@ -1,4 +1,4 @@
-export default function Home() {
+﻿export default function Home() {
   return (
     // This is the template home page, please edit from this page
     <div className="relative flex flex-col items-center justify-center h-screen text-center px-4">

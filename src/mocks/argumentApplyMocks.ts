@@ -1,4 +1,4 @@
-export interface ArgumentApplyRecord {
+﻿export interface ArgumentApplyRecord {
   id: string;
   applyNo: string;
   applyName: string;
@@ -150,5 +150,5 @@ export const projectPlans: ProjectPlan[] = [
   { id: 'pp-007', planNo: '26J60200', planName: '焦化厂煤气脱硫脱氰装置改造工程', projectType: '环保改造', division: '焦化事业部', estimateTotal: 2897500, status: '已审批' },
   { id: 'pp-008', planNo: '26J40800', planName: '原料场封闭改造项目', projectType: '环保改造', division: '炼铁事业部', estimateTotal: 56200000, status: '已审批' },
   { id: 'pp-009', planNo: '26J20700', planName: '特殊钢智能运矿人员管理系统升级', projectType: '安全改造', division: '炼铁事业部', estimateTotal: 752000, status: '已审批' },
-  { id: 'pp-010', planNo: '26J31500', planName: '1号高炉大修工程', projectType: '大修', division: '炼铁事业部', estimateTotal: 48500000, status: '已审批' },
+  { id: 'pp-010', planNo: '26J31500', planName: '1号高炉营缮工程', projectType: '营缮', division: '炼铁事业部', estimateTotal: 48500000, status: '已审批' },
 ];

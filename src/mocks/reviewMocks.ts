@@ -1,4 +1,4 @@
-export interface ReviewRecord {
+﻿export interface ReviewRecord {
   id: string;
   applyNo: string;
   applyName: string;

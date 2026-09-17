@@ -1,4 +1,4 @@
-export type PlanPriorityLevel = 'A' | 'B' | 'C' | 'D';
+﻿export type PlanPriorityLevel = 'A' | 'B' | 'C' | 'D';
 
 export const PRIORITY_LEVEL_TIPS: Record<PlanPriorityLevel, string> = {
   A: '法规及公司战略需求，层峰交办，内部收益率（FIRR）达到10%以上的，静态投资回收期2年以内项目；',
@@ -12,12 +12,27 @@ export const PRIORITY_SORT_ORDER: Record<PlanPriorityLevel, number> = { A: 1, B:
 /** 会审模块状态：待会审 / 会审中 / 已通过 / 已驳回 / 已退回 */
 export type PlanReviewStatus = 'pending_joint' | 'reviewing' | 'approved' | 'rejected' | 'returned';
 
-export type ReturnRestartNode = 'dept_review' | 're_joint' | 'project_office';
+/** 退回后重新提交的起始审批节点（年度计划 / 立项共用值域） */
+export type ReturnRestartNode =
+  | 'dept_review'
+  | 're_joint'
+  | 'project_office'
+  | 'prelim_review'
+  | 'joint_approve';
 
+/** 年度计划会审 · 退回起始节点 */
 export const RETURN_RESTART_NODE_OPTIONS: { value: ReturnRestartNode; label: string }[] = [
   { value: 'dept_review', label: '部门内审' },
   { value: 're_joint', label: '重新会审' },
   { value: 'project_office', label: '项目办审批' },
+];
+
+/** 项目立项会审 · 退回起始节点 */
+export const INIT_RETURN_RESTART_NODE_OPTIONS: { value: ReturnRestartNode; label: string }[] = [
+  { value: 'dept_review', label: '部门内审' },
+  { value: 'prelim_review', label: '立项初审' },
+  { value: 're_joint', label: '重新组织会审' },
+  { value: 'joint_approve', label: '会审审批' },
 ];
 
 export type JointSignPassResult = '通过' | '不通过' | '';
@@ -152,8 +167,8 @@ export function normalizePlanReviewStatus(status: string): PlanReviewStatus {
 }
 
 export const planReviewBusinessUnits = ['炼铁事业部', '炼钢事业部', '热轧事业部', '冷轧事业部', '特钢事业部', '工程技术部', '科技质量部', '公辅能源部', '动力事业部', '原料事业部', '物流事业部'];
-export const planReviewCategories = ['设备升级', '智能制造/信息化', '安全环保', '品种质量', '基础设施', '节能减排', '公辅配套', '产能扩张', '设备大修', '设备更新', '电力工程', '信息化建设', '土建工程', '环保改造', '智能化改造', '工艺改造'];
-export const planReviewMajorCategories = ['新建', '技改', '零固', '大修'];
+export const planReviewCategories = ['设备升级', '智能制造/信息化', '安全环保', '品种质量', '基础设施', '节能减排', '公辅配套', '产能扩张', '设备营缮', '设备更新', '电力工程', '信息化建设', '土建工程', '环保改造', '智能化改造', '工艺改造'];
+export const planReviewMajorCategories = ['新建', '技改', '零固', '营缮'];
 export const planReviewYears = ['2024', '2025', '2026', '2027'];
 
 export const jointReviewPersonnel = [
@@ -230,7 +245,7 @@ export const planReviewRecords: PlanReviewRecord[] = [
   {
     id: 'pr-pj-2', linkedPlanId: 'oh5', buSortNo: 2, pdSortNo: 2, ceSortNo: 2, odSortNo: 2, bcSortNo: 2, zsSortNo: 2,
     priorityLevel: 'B',
-    applyYear: '2027', projectMajorCategory: '大修', businessUnit: '动力事业部', projectCategory: '电力工程',
+    applyYear: '2027', projectMajorCategory: '营缮', businessUnit: '动力事业部', projectCategory: '电力工程',
     planName: '35kV主变压器及附属系统大修',
     budget: 680.00, benefit: 95.00, payment1: 400.00, payment2: 280.00, payment3: 0,
     projectManager: '孙丽', latestStage: '待会审', projectStatus: 'pending_joint',
@@ -294,7 +309,7 @@ export const planReviewRecords: PlanReviewRecord[] = [
   {
     id: 'pr-rv-2', linkedPlanId: 'oh6', buSortNo: 2, pdSortNo: 2, ceSortNo: 2, odSortNo: 2, bcSortNo: 2, zsSortNo: 2,
     priorityLevel: 'B',
-    applyYear: '2026', projectMajorCategory: '大修', businessUnit: '原料事业部', projectCategory: '设备大修',
+    applyYear: '2026', projectMajorCategory: '营缮', businessUnit: '原料事业部', projectCategory: '设备营缮',
     planName: '烧结机台车及密封系统大修工程',
     budget: 540.00, benefit: 160.00, payment1: 300.00, payment2: 240.00, payment3: 0,
     projectManager: '李明', latestStage: '会审中', projectStatus: 'reviewing',
@@ -324,7 +339,7 @@ export const planReviewRecords: PlanReviewRecord[] = [
   {
     id: 'pr-rv-5', linkedPlanId: '1', buSortNo: 5, pdSortNo: 5, ceSortNo: 5, odSortNo: 5, bcSortNo: 5, zsSortNo: 5,
     priorityLevel: 'B',
-    applyYear: '2026', projectMajorCategory: '大修', businessUnit: '炼铁事业部', projectCategory: '设备大修',
+    applyYear: '2026', projectMajorCategory: '营缮', businessUnit: '炼铁事业部', projectCategory: '设备营缮',
     planName: '3号高炉炉体大修及配套设备更新改造工程',
     budget: 850.00, benefit: 120.50, payment1: 300.00, payment2: 400.00, payment3: 150.00,
     projectManager: '张伟', latestStage: '会审中', projectStatus: 'reviewing',

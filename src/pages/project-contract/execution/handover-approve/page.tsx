@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { getHandoverById, getContractById, HandoverApply } from '@/mocks/contractExecutionMocks';

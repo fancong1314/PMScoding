@@ -1,4 +1,4 @@
-export interface ApprovalRecord {
+﻿export interface ApprovalRecord {
   id: string;
   applyNo: string;
   applyName: string;

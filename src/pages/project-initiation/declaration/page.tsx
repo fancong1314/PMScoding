@@ -1,6 +1,6 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+﻿import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { projectPlans, reviewStatusMap, businessDivisions, projectCategories, projectMajorTypes, initiationMajorTypeFormPath, withPaymentPlans, withInitiationDetailFields, normalizeReviewStatus } from '@/mocks/projectPlans';
+import { projectPlans, reviewStatusMap, businessDivisions, projectCategories, projectMajorTypes, initiationMajorTypeFormPath, withPaymentPlans, withInitiationDetailFields, withInvestmentEstimateFields, normalizeReviewStatus } from '@/mocks/projectPlans';
 import type { ProjectPlan, ProjectMajorType } from '@/mocks/projectPlans';
 import { useColumnConfig } from '@/hooks/useColumnConfig';
 import type { ColumnDef } from '@/hooks/useColumnConfig';
@@ -8,51 +8,57 @@ import DeclarationTable from './components/DeclarationTable';
 import ConfirmModal from './components/ConfirmModal';
 import ApprovalResultModal from './components/ApprovalResultModal';
 import DeclOperationLogModal from './components/DeclOperationLogModal';
-import { getApprovalRecords, setStoredApprovalRecords, getApprovalByPlanId } from '@/mocks/approvalMocks';
+import { getApprovalRecords, setStoredApprovalRecords, getApprovalByPlanId, canWithdrawDeclaration } from '@/mocks/approvalMocks';
 import type { ApprovalRecord } from '@/mocks/approvalMocks';
+import { appendDeclOperationLog } from '@/mocks/declarationOperationLogs';
 import Layout from '@/components/feature/Layout';
 
 const DEFAULT_COLUMNS: ColumnDef[] = [
   { id: 'isInPlanProject',  label: '是否计划内项目',      visible: true,  width: 120 },
-  { id: 'annualPlanNo',     label: '年度计划号/项目计划号', visible: true,  width: 140 },
+  { id: 'annualPlanNo',     label: '年度计划号',          visible: true,  width: 140 },
   { id: 'planYear',         label: '计划年度',            visible: true,  width: 90  },
   { id: 'projectMajorType', label: '项目大类',            visible: true,  width: 90  },
-  { id: 'businessDivision', label: '项目单位/事业部',      visible: true,  width: 120 },
+  { id: 'businessDivision', label: '项目提报单位',        visible: true,  width: 120 },
+  { id: 'submitDept',       label: '提报部门',            visible: false, width: 120 },
+  { id: 'implementDept',    label: '实施主管部门',        visible: true,  width: 120 },
   { id: 'ownerUnit',        label: '单位',                visible: false, width: 120 },
-  { id: 'implementUnit',    label: '实施主管单位',        visible: true,  width: 120 },
+  { id: 'implementUnit',    label: '实施主管单位',        visible: false, width: 120 },
   { id: 'professionalUnit', label: '专业主管单位',        visible: false, width: 120 },
   { id: 'projectCategory',  label: '项目类别',            visible: true,  width: 100 },
-  { id: 'budgetAmount',     label: '概算/计划金额(万元)',  visible: true,  width: 140 },
+  { id: 'budgetAmount',     label: '立项总概算(万元)',    visible: true,  width: 140 },
   { id: 'declareFee',       label: '申报费用(万元)',      visible: false, width: 120 },
-  { id: 'isCapitalOverhaul', label: '是否资本性大修',     visible: false, width: 120 },
+  { id: 'isCapitalOverhaul', label: '是否资本性营缮',     visible: false, width: 120 },
   { id: 'argumentApplyNo',  label: '论证申请单号',        visible: false, width: 130 },
   { id: 'isScrapRenew',     label: '是否报废更新',        visible: false, width: 110 },
   { id: 'benefit',          label: '效益(万元)',          visible: true,  width: 110 },
-  { id: 'projectManager',   label: '项目经理/负责人',    visible: true,  width: 120 },
-  { id: 'projectManagerPhone', label: '联系电话',         visible: false, width: 120 },
-  { id: 'startDate',        label: '计划开工日期',        visible: true,  width: 120 },
-  { id: 'endDate',          label: '计划完工日期',        visible: true,  width: 120 },
-  { id: 'projectDuration',  label: '项目工期(月)',        visible: true,  width: 110 },
-  { id: 'hasJobChange',     label: '岗位增减',            visible: false, width: 90  },
+  { id: 'projectManager',   label: '项目负责人',          visible: true,  width: 120 },
+  { id: 'projectManagerPhone', label: '负责人电话',       visible: false, width: 120 },
+  { id: 'startDate',        label: '计划开工时间',        visible: true,  width: 120 },
+  { id: 'endDate',          label: '计划完工时间',        visible: true,  width: 120 },
+  { id: 'projectDuration',  label: '绝对工期',            visible: false, width: 110 },
+  { id: 'hasJobChange',     label: '涉及岗位增减',        visible: false, width: 110 },
   { id: 'currentReviewer',  label: '当前审核人',          visible: true,  width: 110 },
   { id: 'reviewStatus',     label: '审核状态',            visible: true,  width: 100 },
   { id: 'applicant',        label: '申报人',              visible: true,  width: 90  },
 ];
 
-const STORAGE_KEY = 'ng_init_decl_plans_v6';
+const STORAGE_KEY = 'ng_init_decl_plans_v9';
 
 function normalizePlans(list: ProjectPlan[]): ProjectPlan[] {
-  return list.map((p) => withPaymentPlans(withInitiationDetailFields({
+  return list.map((p) => withInvestmentEstimateFields(withPaymentPlans(withInitiationDetailFields({
     ...p,
     projectMajorType: p.projectMajorType || '技改',
     reviewStatus: normalizeReviewStatus(p.reviewStatus as string),
-  })));
+  }))));
 }
 
 function getStoredPlans(): ProjectPlan[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return normalizePlans(JSON.parse(stored));
+    localStorage.removeItem('ng_init_decl_plans_v8');
+    localStorage.removeItem('ng_init_decl_plans_v7');
+    localStorage.removeItem('ng_init_decl_plans_v6');
     localStorage.removeItem('ng_init_decl_plans_v5');
     localStorage.removeItem('ng_init_decl_plans_v4');
     localStorage.removeItem('ng_init_decl_plans_v3');
@@ -100,11 +106,11 @@ export default function ProjectPlanDeclaration() {
   const [approvalResultPlan, setApprovalResultPlan] = useState<ProjectPlan | null>(null);
   const [approvalResultRecord, setApprovalResultRecord] = useState<ApprovalRecord | null>(null);
   const [withdrawModalOpen, setWithdrawModalOpen] = useState(false);
-  const [withdrawTarget, setWithdrawTarget] = useState<ApprovalRecord | null>(null);
+  const [withdrawTarget, setWithdrawTarget] = useState<ProjectPlan | null>(null);
   const [approvalRecords, setApprovalRecords] = useState<ApprovalRecord[]>(getApprovalRecords());
 
   const { columns, resetColumns, toggleVisible, reorderColumns, updateWidth } =
-    useColumnConfig('init-decl-plans-v6', DEFAULT_COLUMNS);
+    useColumnConfig('init-decl-plans-v8', DEFAULT_COLUMNS);
 
   useEffect(() => {
     if (location.state?.success) {
@@ -227,27 +233,57 @@ export default function ProjectPlanDeclaration() {
   };
 
   const handleWithdrawApproval = (record: ApprovalRecord) => {
-    setWithdrawTarget(record);
+    const plan = plans.find((p) => p.id === record.planId) || approvalResultPlan;
+    if (!plan) return;
+    if (!canWithdrawDeclaration(plan, record)) {
+      showToast('该申请已有审批记录，无法撤回', 'error');
+      return;
+    }
+    setWithdrawTarget(plan);
     setApprovalResultOpen(false);
+    setWithdrawModalOpen(true);
+  };
+
+  const handleWithdrawPlan = (plan: ProjectPlan) => {
+    const record = getApprovalByPlanId(plan.id);
+    if (!canWithdrawDeclaration(plan, record)) {
+      showToast('仅提交后且尚未有任何审批时允许撤回', 'error');
+      return;
+    }
+    setWithdrawTarget(plan);
     setWithdrawModalOpen(true);
   };
 
   const confirmWithdraw = () => {
     if (!withdrawTarget) return;
-    const updated = { ...withdrawTarget, status: 'withdrawn' as const, currentNode: '' };
-    const records = getApprovalRecords().map((r) => (r.id === updated.id ? updated : r));
-    setStoredApprovalRecords(records);
-    setApprovalRecords(records);
+    const record = getApprovalByPlanId(withdrawTarget.id);
+    if (record && record.status === 'approving') {
+      const updated = { ...record, status: 'withdrawn' as const, currentNode: '' };
+      const records = getApprovalRecords().map((r) => (r.id === updated.id ? updated : r));
+      setStoredApprovalRecords(records);
+      setApprovalRecords(records);
+    }
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const timeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     setPlans((prev) =>
       prev.map((p) =>
-        p.id === withdrawTarget.planId
-          ? { ...p, reviewStatus: 'draft' as const, latestStage: '申报阶段', currentReviewer: '' }
+        p.id === withdrawTarget.id
+          ? { ...p, reviewStatus: 'draft' as const, latestStage: '草稿', currentReviewer: '', updatedAt: timeStr.slice(0, 10) }
           : p
       )
     );
+    appendDeclOperationLog({
+      planId: withdrawTarget.id,
+      operateTime: timeStr,
+      operator: withdrawTarget.applicant || '当前用户',
+      operation: '撤回',
+      remark: '提交后尚未审批，自行撤回至草稿，可修改后重新发起',
+      approvalNo: record?.appNo,
+    });
     setWithdrawModalOpen(false);
     setWithdrawTarget(null);
-    showToast('审批已撤回');
+    showToast('已撤回，状态恢复为草稿，可修改后重新提交');
   };
 
   const renderPagination = () => {
@@ -326,7 +362,7 @@ export default function ProjectPlanDeclaration() {
               onChange={(e) => setFilterDivision(e.target.value)}
               className="px-3 py-2 text-sm border border-steel-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 bg-slate-50 cursor-pointer"
             >
-              <option value="">全部项目单位</option>
+              <option value="">全部项目提报单位</option>
               {businessDivisions.map((d) => (
                 <option key={d} value={d}>{d}</option>
               ))}
@@ -431,6 +467,7 @@ export default function ProjectPlanDeclaration() {
           onViewLog={handleViewLog}
           onViewApproval={handleViewApproval}
           onProcessApproval={handleProcessApproval}
+          onWithdraw={handleWithdrawPlan}
           getApprovalRecord={getApprovalByPlanId}
           pageOffset={pageOffset}
           budgetSort={budgetSort}
@@ -543,12 +580,17 @@ export default function ProjectPlanDeclaration() {
       {/* Withdraw Confirmation */}
       {withdrawModalOpen && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setWithdrawModalOpen(false)} />
+          <div className="absolute inset-0 bg-black/40" onClick={() => { setWithdrawModalOpen(false); setWithdrawTarget(null); }} />
           <div className="relative bg-white rounded-xl shadow-xl w-[400px] p-5 z-10">
-            <h3 className="text-base font-semibold text-slate-800 mb-3">撤回审批</h3>
-            <p className="text-sm text-slate-500 mb-4">确认撤回该审批申请？撤回后业务数据状态将恢复为可编辑。</p>
+            <h3 className="text-base font-semibold text-slate-800 mb-3">撤回申请</h3>
+            <p className="text-sm text-slate-700 mb-2">
+              确认撤回「{withdrawTarget?.planName}」？
+            </p>
+            <p className="text-sm text-slate-500 mb-4">
+              撤回后状态恢复为草稿，可修改后重新发起。仅在尚未有任何审批时允许撤回。
+            </p>
             <div className="flex items-center justify-end gap-2">
-              <button onClick={() => setWithdrawModalOpen(false)} className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer whitespace-nowrap">取消</button>
+              <button onClick={() => { setWithdrawModalOpen(false); setWithdrawTarget(null); }} className="px-4 py-2 text-sm text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer whitespace-nowrap">取消</button>
               <button onClick={confirmWithdraw} className="px-4 py-2 text-sm text-white rounded-lg hover:opacity-90 cursor-pointer whitespace-nowrap" style={{ background: '#ef4444' }}>确认撤回</button>
             </div>
           </div>

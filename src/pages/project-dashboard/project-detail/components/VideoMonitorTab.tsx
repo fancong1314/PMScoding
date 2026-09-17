@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { projectCameras } from '@/mocks/projectDetailMocks';
 import type { CameraInfo } from '@/mocks/projectDetailMocks';
 

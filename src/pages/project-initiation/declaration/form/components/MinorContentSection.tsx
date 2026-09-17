@@ -1,4 +1,4 @@
-import type { MinorContentRow } from '@/mocks/projectPlans';
+﻿import type { MinorContentRow } from '@/mocks/projectPlans';
 import {
   calcMinorContentSubtotal,
   calcMinorContentTotal,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { jointReviewPersonnel } from '@/mocks/planReviewMocks';
 
 export interface JointReviewParticipant {
@@ -11,10 +11,12 @@ export interface JointReviewParticipant {
 interface Props {
   open: boolean;
   planNames: string[];
+  businessUnits: string[];
   onClose: () => void;
   onSubmit: (payload: {
     reviewTime: string;
     location: string;
+    opinionDeadline: string;
     participants: JointReviewParticipant[];
     sendNotice: boolean;
   }) => void;
@@ -29,9 +31,16 @@ function newRow(): JointReviewParticipant {
   };
 }
 
-export default function JointReviewNoticeModal({ open, planNames, onClose, onSubmit }: Props) {
+export default function JointReviewNoticeModal({
+  open,
+  planNames,
+  businessUnits,
+  onClose,
+  onSubmit,
+}: Props) {
   const [reviewTime, setReviewTime] = useState('');
   const [location, setLocation] = useState('');
+  const [opinionDeadline, setOpinionDeadline] = useState('');
   const [rows, setRows] = useState<JointReviewParticipant[]>([newRow()]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [personSearch, setPersonSearch] = useState<Record<string, string>>({});
@@ -41,12 +50,22 @@ export default function JointReviewNoticeModal({ open, planNames, onClose, onSub
     if (open) {
       setReviewTime('');
       setLocation('');
+      setOpinionDeadline('');
       setRows([newRow()]);
       setErrors({});
       setPersonSearch({});
       setOpenDropdown(null);
     }
   }, [open]);
+
+  const uniqueUnits = useMemo(() => {
+    const seen = new Set<string>();
+    return businessUnits.filter((u) => {
+      if (!u || seen.has(u)) return false;
+      seen.add(u);
+      return true;
+    });
+  }, [businessUnits]);
 
   const filteredPeople = useMemo(() => {
     return (keyword: string) => {
@@ -64,6 +83,7 @@ export default function JointReviewNoticeModal({ open, planNames, onClose, onSub
     const e: Record<string, string> = {};
     if (!reviewTime) e.reviewTime = '请选择会审时间';
     if (!location.trim()) e.location = '请输入会审地点';
+    if (!opinionDeadline) e.opinionDeadline = '请选择会审意见截至时间';
     if (rows.length === 0) e.participants = '请至少添加一名会审人员';
     rows.forEach((r, i) => {
       if (!r.personId) e[`row_${r.id}`] = `第 ${i + 1} 行请选择参与人员`;
@@ -74,7 +94,13 @@ export default function JointReviewNoticeModal({ open, planNames, onClose, onSub
 
   const doSubmit = (sendNotice: boolean) => {
     if (!validate()) return;
-    onSubmit({ reviewTime, location: location.trim(), participants: rows, sendNotice });
+    onSubmit({
+      reviewTime,
+      location: location.trim(),
+      opinionDeadline,
+      participants: rows,
+      sendNotice,
+    });
   };
 
   const selectPerson = (rowId: string, personId: string) => {
@@ -118,18 +144,34 @@ export default function JointReviewNoticeModal({ open, planNames, onClose, onSub
             <p className="text-xs text-emerald-700 leading-relaxed">选择会审人员后，会发送短信通知审人员</p>
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-steel-600 mb-1.5">项目名称</label>
-            <div className="rounded-lg border border-steel-200 bg-slate-50 px-3 py-2.5 max-h-28 overflow-y-auto space-y-1">
-              {planNames.length === 0 ? (
-                <p className="text-sm text-steel-400">未选择年度计划</p>
-              ) : (
-                planNames.map((name, i) => (
-                  <p key={`${name}-${i}`} className="text-sm text-steel-800 leading-relaxed">
-                    {planNames.length > 1 ? `${i + 1}. ` : ''}{name}
-                  </p>
-                ))
-              )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-steel-600 mb-1.5">项目名称</label>
+              <div className="rounded-lg border border-steel-200 bg-slate-50 px-3 py-2.5 max-h-28 overflow-y-auto space-y-1">
+                {planNames.length === 0 ? (
+                  <p className="text-sm text-steel-400">未选择项目</p>
+                ) : (
+                  planNames.map((name, i) => (
+                    <p key={`${name}-${i}`} className="text-sm text-steel-800 leading-relaxed">
+                      {planNames.length > 1 ? `${i + 1}. ` : ''}{name}
+                    </p>
+                  ))
+                )}
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-steel-600 mb-1.5">项目提报单位</label>
+              <div className="rounded-lg border border-steel-200 bg-slate-50 px-3 py-2.5 max-h-28 overflow-y-auto space-y-1">
+                {uniqueUnits.length === 0 ? (
+                  <p className="text-sm text-steel-400">—</p>
+                ) : (
+                  uniqueUnits.map((u, i) => (
+                    <p key={`${u}-${i}`} className="text-sm text-steel-800 leading-relaxed">
+                      {uniqueUnits.length > 1 ? `${i + 1}. ` : ''}{u}
+                    </p>
+                  ))
+                )}
+              </div>
             </div>
           </div>
 
@@ -150,6 +192,21 @@ export default function JointReviewNoticeModal({ open, planNames, onClose, onSub
               {errors.reviewTime && <p className="mt-1 text-xs text-red-500">{errors.reviewTime}</p>}
             </div>
             <div>
+              <label className="block text-xs font-medium text-steel-600 mb-1.5">
+                会审意见截至时间 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="datetime-local"
+                value={opinionDeadline}
+                onChange={(e) => {
+                  setOpinionDeadline(e.target.value);
+                  if (errors.opinionDeadline) setErrors((p) => { const n = { ...p }; delete n.opinionDeadline; return n; });
+                }}
+                className={inputCls(errors.opinionDeadline) + ' cursor-pointer'}
+              />
+              {errors.opinionDeadline && <p className="mt-1 text-xs text-red-500">{errors.opinionDeadline}</p>}
+            </div>
+            <div className="col-span-2">
               <label className="block text-xs font-medium text-steel-600 mb-1.5">
                 会审地点 <span className="text-red-500">*</span>
               </label>

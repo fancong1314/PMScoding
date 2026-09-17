@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { OverhaulContentRow } from '@/mocks/projectPlans';
 import { defaultOverhaulContentRows, overhaulContentCategories } from '@/mocks/projectPlans';
 import EquipmentSelectModal from './EquipmentSelectModal';
@@ -51,8 +51,8 @@ export default function OverhaulContentSection({ rows: controlledRows, onChange,
         <div className="w-5 h-5 flex items-center justify-center">
           <i className="ri-list-check-2 text-emerald-500" />
         </div>
-        <h3 className="text-sm font-semibold text-steel-800">大修内容明细</h3>
-        <span className="text-xs text-steel-400 ml-1">维护大修设备部件与大修内容明细</span>
+        <h3 className="text-sm font-semibold text-steel-800">营缮内容明细</h3>
+        <span className="text-xs text-steel-400 ml-1">维护营缮设备部件与营缮内容明细</span>
       </div>
 
       <div className="p-5">
@@ -77,7 +77,7 @@ export default function OverhaulContentSection({ rows: controlledRows, onChange,
                 <th className="px-3 py-2.5 text-xs font-semibold text-steel-500 w-36 whitespace-nowrap">类别</th>
                 <th className="px-3 py-2.5 text-xs font-semibold text-steel-500 whitespace-nowrap" style={{ minWidth: 200 }}>设备部件/零件编码</th>
                 <th className="px-3 py-2.5 text-xs font-semibold text-steel-500 whitespace-nowrap" style={{ minWidth: 160 }}>设备部件/零件名称</th>
-                <th className="px-3 py-2.5 text-xs font-semibold text-steel-500 whitespace-nowrap" style={{ minWidth: 180 }}>大修内容</th>
+                <th className="px-3 py-2.5 text-xs font-semibold text-steel-500 whitespace-nowrap" style={{ minWidth: 180 }}>营缮内容</th>
                 {!readonly && <th className="px-3 py-2.5 text-xs font-semibold text-steel-500 w-20 text-center">操作</th>}
               </tr>
             </thead>

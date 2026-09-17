@@ -1,4 +1,4 @@
-import type { PlanArchiveRecord, PlanOccupyDetailItem } from '@/mocks/planArchiveMocks';
+﻿import type { PlanArchiveRecord, PlanOccupyDetailItem } from '@/mocks/planArchiveMocks';
 import { getPlanOccupyDetails } from '@/mocks/planArchiveMocks';
 
 interface Props {

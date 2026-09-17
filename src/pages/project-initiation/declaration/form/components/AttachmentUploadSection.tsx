@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+﻿import { useMemo, useRef } from 'react';
 import { getInitiationDeclarationAttachmentConfigs, type AttachmentConfig } from '@/mocks/archiveConfigMocks';
 
 export interface UploadedFileItem {
@@ -15,6 +15,7 @@ interface Props {
   onChange: (next: AttachmentUploadMap) => void;
   errors?: Record<string, string>;
   sectionRef: (el: HTMLDivElement | null) => void;
+  readonly?: boolean;
 }
 
 function formatSize(bytes: number) {
@@ -42,12 +43,14 @@ function ConfigCard({
   error,
   onAdd,
   onRemove,
+  readonly,
 }: {
   config: AttachmentConfig;
   files: UploadedFileItem[];
   error?: string;
   onAdd: (files: FileList | null) => void;
   onRemove: (fileId: string) => void;
+  readonly?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const remain = Math.max(0, config.fileCount - files.length);
@@ -105,19 +108,27 @@ function ConfigCard({
         {files.map((f) => (
           <div key={f.id} className="flex items-center gap-2 px-3 py-2 rounded-md bg-slate-50 border border-steel-100">
             <i className="ri-attachment-2 text-steel-400" />
-            <span className="text-sm text-steel-700 flex-1 truncate">{f.name}</span>
-            <span className="text-xs text-steel-400">{formatSize(f.size)}</span>
             <button
               type="button"
-              onClick={() => onRemove(f.id)}
-              className="w-6 h-6 flex items-center justify-center text-steel-400 hover:text-red-500 cursor-pointer"
+              className="text-sm text-sky-600 hover:underline flex-1 truncate text-left cursor-pointer"
+              onClick={() => alert(`预览/下载：${f.name}`)}
             >
-              <i className="ri-close-line" />
+              {f.name}
             </button>
+            <span className="text-xs text-steel-400">{formatSize(f.size)}</span>
+            {!readonly && (
+              <button
+                type="button"
+                onClick={() => onRemove(f.id)}
+                className="w-6 h-6 flex items-center justify-center text-steel-400 hover:text-red-500 cursor-pointer"
+              >
+                <i className="ri-close-line" />
+              </button>
+            )}
           </div>
         ))}
 
-        {remain > 0 && (
+        {!readonly && remain > 0 && (
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
@@ -127,17 +138,24 @@ function ConfigCard({
             上传文件（还可上传 {remain} 个）
           </button>
         )}
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          accept={acceptFromFormats(config.fileFormats)}
-          className="hidden"
-          onChange={(e) => {
-            onAdd(e.target.files);
-            e.target.value = '';
-          }}
-        />
+        {readonly && files.length === 0 && (
+          <p className="text-sm text-steel-400 py-3 text-center border border-dashed border-steel-200 rounded-md">
+            暂无已上传附件
+          </p>
+        )}
+        {!readonly && (
+          <input
+            ref={inputRef}
+            type="file"
+            multiple
+            accept={acceptFromFormats(config.fileFormats)}
+            className="hidden"
+            onChange={(e) => {
+              onAdd(e.target.files);
+              e.target.value = '';
+            }}
+          />
+        )}
       </div>
       {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
     </div>
@@ -150,11 +168,12 @@ export default function AttachmentUploadSection({
   onChange,
   errors = {},
   sectionRef,
+  readonly = false,
 }: Props) {
   const configs = useMemo(() => getInitiationDeclarationAttachmentConfigs(majorType), [majorType]);
 
   const handleAdd = (config: AttachmentConfig, fileList: FileList | null) => {
-    if (!fileList || fileList.length === 0) return;
+    if (readonly || !fileList || fileList.length === 0) return;
     const current = uploads[config.id] || [];
     const remain = Math.max(0, config.fileCount - current.length);
     const maxBytes = config.fileSize * (config.fileSizeUnit === 'GB' ? 1024 * 1024 * 1024 : 1024 * 1024);
@@ -176,6 +195,7 @@ export default function AttachmentUploadSection({
   };
 
   const handleRemove = (configId: string, fileId: string) => {
+    if (readonly) return;
     const list = (uploads[configId] || []).filter((f) => f.id !== fileId);
     onChange({ ...uploads, [configId]: list });
   };
@@ -209,6 +229,7 @@ export default function AttachmentUploadSection({
               error={errors[`attach_${cfg.id}`]}
               onAdd={(fl) => handleAdd(cfg, fl)}
               onRemove={(fid) => handleRemove(cfg.id, fid)}
+              readonly={readonly}
             />
           ))
         )}

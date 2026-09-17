@@ -1,4 +1,4 @@
-interface Props {
+﻿interface Props {
   open: boolean;
   planName: string;
   mode: 'pass' | 'submit' | 'present';
@@ -11,7 +11,7 @@ const CONFIG = {
     icon: 'ri-checkbox-circle-line',
     iconColor: 'text-emerald-500',
     title: '确认会审通过',
-    desc: '确认通过该年度计划会审？通过后将更新项目状态。',
+    desc: '确认通过该项目立项会审？通过后将更新项目状态。',
     confirmText: '确认通过',
     confirmCls: 'bg-emerald-500 hover:bg-emerald-600',
   },
@@ -19,7 +19,7 @@ const CONFIG = {
     icon: 'ri-send-plane-line',
     iconColor: 'text-sky-500',
     title: '提交至下一级',
-    desc: '确认将该年度计划提交至下一级审查部门？',
+    desc: '确认将该项目提交至下一级审查部门？',
     confirmText: '确认提交',
     confirmCls: 'bg-sky-500 hover:bg-sky-600',
   },
@@ -27,7 +27,7 @@ const CONFIG = {
     icon: 'ri-user-received-2-line',
     iconColor: 'text-sky-500',
     title: '呈核确认',
-    desc: '确认将该年度计划呈核至部门领导审核？审核通过后将进入下一审查流程。',
+    desc: '确认将该项目呈核至部门领导审核？审核通过后将进入下一审查流程。',
     confirmText: '确认呈核',
     confirmCls: 'bg-sky-500 hover:bg-sky-600',
   },

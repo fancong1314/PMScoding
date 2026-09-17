@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+﻿import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { projectPlans, reviewStatusMap, reportUnits, projectCategories, projectMajorTypes, projectMajorTypeFormPath, withPaymentPlans, normalizeReviewStatus, withAnnualPlanOrgFields, ANNUAL_DECL_STORAGE_KEY } from '@/mocks/projectPlans';
 import type { ProjectPlan, ProjectMajorType } from '@/mocks/projectPlans';
@@ -46,6 +46,7 @@ function getStoredPlans(): ProjectPlan[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return normalizePlans(JSON.parse(stored));
+    localStorage.removeItem('ng_decl_plans_v12');
     localStorage.removeItem('ng_decl_plans_v11');
     localStorage.removeItem('ng_decl_plans_v10');
     localStorage.removeItem('ng_decl_plans_v9');

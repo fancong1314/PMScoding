@@ -155,7 +155,7 @@ export default function PlanArchivePage() {
       <div className="space-y-3">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="text-lg font-semibold text-steel-900">计划资料管理</h1>
+            <h1 className="text-lg font-semibold text-steel-900">年度计划总览</h1>
             <p className="text-xs text-steel-400 mt-0.5">
               汇集项目部审查通过的年度计划档案，支持汇总分析与多维检索（当前统计口径：{PLAN_ARCHIVE_CURRENT_YEAR}年）
             </p>

@@ -1,4 +1,4 @@
-interface Props {
+﻿interface Props {
   open: boolean;
   planName: string;
   mode: 'pass' | 'submit' | 'present';

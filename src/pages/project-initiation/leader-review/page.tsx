@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import {
@@ -14,14 +14,31 @@ import type { ProjectMajorType } from '@/mocks/projectPlans';
 import LeaderReviewTable from './components/LeaderReviewTable';
 import type { RowAction, LeaderSortField } from './components/LeaderReviewTable';
 import LeaderActionModal from './components/LeaderActionModal';
-import PlanReviewDetailModal from '@/pages/project-initiation/plan-review/components/PlanReviewDetailModal';
 
-const STORAGE_KEY = 'ng_init_leader_review_v2';
+const STORAGE_KEY = 'ng_init_leader_review_v5';
+
+/** 立项签发 TAB：已通过 → 已立项（不影响年度计划签发） */
+const INIT_LEADER_REVIEW_TABS = LEADER_REVIEW_TABS.map((t) =>
+  t.key === 'leader_passed' ? { ...t, label: '已立项' } : t
+);
 
 function getStored(): LeaderReviewRecord[] {
   try {
     const s = localStorage.getItem(STORAGE_KEY);
-    if (s) return JSON.parse(s) as LeaderReviewRecord[];
+    if (s) {
+      const list = JSON.parse(s) as Array<LeaderReviewRecord & { status: string }>;
+      return list.map((r) => {
+        // 旧「已修改 / 已通过(approved)」并入已立项
+        if (r.status === 'modified' || r.status === 'approved') {
+          return { ...r, status: 'leader_passed' as LeaderReviewStatus };
+        }
+        return r as LeaderReviewRecord;
+      });
+    }
+    localStorage.removeItem('ng_init_leader_review_v4');
+    localStorage.removeItem('ng_init_leader_review_v3');
+    localStorage.removeItem('ng_init_leader_review_v2');
+    localStorage.removeItem('ng_init_leader_review_v1');
   } catch { /* noop */ }
   return initial.map((r) => ({ ...r }));
 }
@@ -49,7 +66,6 @@ export default function LeaderReviewPage() {
 
   const [actionKind, setActionKind] = useState<ActionKind>(null);
   const [actionIds, setActionIds] = useState<string[]>([]);
-  const [detailTarget, setDetailTarget] = useState<LeaderReviewRecord | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   useEffect(() => {
@@ -70,7 +86,8 @@ export default function LeaderReviewPage() {
     const st = location.state as { success?: boolean; message?: string; tab?: LeaderReviewStatus } | null;
     if (!st?.message) return;
     showToast(st.message, st.success === false ? 'error' : 'success');
-    if (st.tab) setActiveTab(st.tab);
+    const tabKeys = INIT_LEADER_REVIEW_TABS.map((t) => t.key);
+    if (st.tab && tabKeys.includes(st.tab)) setActiveTab(st.tab);
     navigate(location.pathname, { replace: true, state: null });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -132,7 +149,7 @@ export default function LeaderReviewPage() {
 
   const openBatchAction = (kind: ActionKind) => {
     if (selectedRows.length === 0) {
-      showToast('请先勾选需要操作的年度计划', 'error');
+      showToast('请先勾选需要操作的项目', 'error');
       return;
     }
     setActionIds([...selectedRows]);
@@ -168,19 +185,18 @@ export default function LeaderReviewPage() {
       setActiveTab('leader_reviewing');
     } else if (actionKind === 'return') {
       applyStatus(ids, 'returned', reason);
-      showToast(`已退回 ${count} 条年度计划`, 'info');
+      showToast(`已退回 ${count} 条项目`, 'info');
       setActiveTab('returned');
     } else if (actionKind === 'reject') {
       applyStatus(ids, 'rejected', reason);
-      showToast(`已驳回 ${count} 条年度计划`, 'info');
-      setActiveTab('rejected');
+      showToast(`已驳回 ${count} 条项目`, 'info');
     } else if (actionKind === 'pass') {
-      applyStatus(ids, 'approved');
-      showToast(`已通过 ${count} 条年度计划`);
-      setActiveTab('approved');
+      applyStatus(ids, 'leader_passed');
+      showToast(`已立项下达 ${count} 条项目`);
+      setActiveTab('leader_passed');
     } else if (actionKind === 'restore') {
       applyStatus(ids, 'pending_present');
-      showToast(`已恢复 ${count} 条年度计划至待呈核`);
+      showToast(`已恢复 ${count} 条项目至待呈核`);
       setActiveTab('pending_present');
     }
     setActionKind(null);
@@ -193,23 +209,26 @@ export default function LeaderReviewPage() {
   };
 
   const handleRowAction = (action: RowAction, record: LeaderReviewRecord) => {
+    const major = record.projectMajorCategory as ProjectMajorType;
+    const base = initiationMajorTypeFormPath[major] || initiationMajorTypeFormPath['技改'];
     if (action === 'view') {
-      setDetailTarget(record);
+      navigate(`${base}?id=${record.linkedPlanId}&mode=review`);
       return;
     }
     if (action === 'edit') {
-      const major = record.projectMajorCategory as ProjectMajorType;
-      const base = initiationMajorTypeFormPath[major] || initiationMajorTypeFormPath['技改'];
-      navigate(`${base}?id=${record.linkedPlanId}&from=leader-review&lrId=${record.id}`);
+      if (activeTab === 'leader_passed') {
+        navigate(`${base}?id=${record.linkedPlanId}&from=leader-review&lrId=${record.id}`);
+      } else {
+        navigate(`${base}?id=${record.linkedPlanId}`);
+      }
       return;
     }
     openSingleAction(action, record.id);
   };
 
   const showPresentBatch = activeTab === 'pending_present';
-  const showPassReturnBatch = activeTab === 'leader_passed' || activeTab === 'modified';
-  const showReturnRejectBatch = activeTab === 'leader_returned';
-  const showRestoreBatch = activeTab === 'rejected';
+  const showPendingActionBatch = activeTab === 'pending_present';
+  const showRestoreBatch = activeTab === 'leader_returned';
 
   const inputCls = 'w-full px-3 py-2 text-sm border border-steel-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 bg-slate-50';
 
@@ -233,7 +252,7 @@ export default function LeaderReviewPage() {
       case 'present':
         return {
           title: '呈核至领导',
-          hint: `确认将已选 ${n} 条年度计划呈核至领导并发起审批？`,
+          hint: `确认将已选 ${n} 条项目呈核至领导并发起审批？`,
           confirmText: '确认呈核',
           confirmCls: 'bg-cyan-500 hover:bg-cyan-600',
           requireReason: false,
@@ -241,7 +260,7 @@ export default function LeaderReviewPage() {
       case 'return':
         return {
           title: '退回确认',
-          hint: `确认退回已选 ${n} 条年度计划？`,
+          hint: `确认退回已选 ${n} 条项目？`,
           confirmText: '确认退回',
           confirmCls: 'bg-orange-500 hover:bg-orange-600',
           requireReason: true,
@@ -250,7 +269,7 @@ export default function LeaderReviewPage() {
       case 'reject':
         return {
           title: '驳回确认',
-          hint: `确认驳回已选 ${n} 条年度计划？驳回后将进入已驳回。`,
+          hint: `确认驳回已选 ${n} 条项目？`,
           confirmText: '确认驳回',
           confirmCls: 'bg-red-500 hover:bg-red-600',
           requireReason: true,
@@ -258,16 +277,16 @@ export default function LeaderReviewPage() {
         };
       case 'pass':
         return {
-          title: '通过确认',
-          hint: `确认通过已选 ${n} 条年度计划？`,
-          confirmText: '确认通过',
+          title: '立项下达确认',
+          hint: `确认对已选 ${n} 条项目执行立项下达？下达后将进入「已立项」。`,
+          confirmText: '确认立项下达',
           confirmCls: 'bg-emerald-500 hover:bg-emerald-600',
           requireReason: false,
         };
       case 'restore':
         return {
           title: '恢复确认',
-          hint: `确认将已选 ${n} 条年度计划恢复至待呈核？`,
+          hint: `确认将已选 ${n} 条项目恢复至待呈核？`,
           confirmText: '确认恢复',
           confirmCls: 'bg-violet-500 hover:bg-violet-600',
           requireReason: false,
@@ -299,7 +318,7 @@ export default function LeaderReviewPage() {
             </div>
             <div className="flex items-center gap-2">
               <label className="text-xs text-steel-500 whitespace-nowrap w-24 text-right flex-shrink-0">项目名称</label>
-              <input value={filterName} onChange={(e) => setFilterName(e.target.value)} placeholder="根据计划名称模糊搜索" className={inputCls} />
+              <input value={filterName} onChange={(e) => setFilterName(e.target.value)} placeholder="根据项目名称模糊搜索" className={inputCls} />
             </div>
             <div className="flex items-center gap-2">
               <label className="text-xs text-steel-500 whitespace-nowrap w-24 text-right flex-shrink-0">项目大类</label>
@@ -317,7 +336,7 @@ export default function LeaderReviewPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-xs text-steel-500 whitespace-nowrap w-24 text-right flex-shrink-0">项目单位</label>
+              <label className="text-xs text-steel-500 whitespace-nowrap w-24 text-right flex-shrink-0">项目提报单位</label>
               <select value={filterUnit} onChange={(e) => setFilterUnit(e.target.value)} className={inputCls + ' cursor-pointer'}>
                 <option value="">请选择部门</option>
                 {leaderReviewUnits.map((u) => <option key={u} value={u}>{u}</option>)}
@@ -340,7 +359,7 @@ export default function LeaderReviewPage() {
         {/* TAB */}
         <div className="bg-white rounded-lg border border-steel-200 overflow-x-auto">
           <div className="inline-flex min-w-full divide-x divide-steel-200">
-            {LEADER_REVIEW_TABS.map((tab) => {
+            {INIT_LEADER_REVIEW_TABS.map((tab) => {
               const active = activeTab === tab.key;
               return (
                 <button
@@ -382,29 +401,11 @@ export default function LeaderReviewPage() {
                 )}
               </button>
             )}
-            {showPassReturnBatch && (
+            {showPendingActionBatch && (
               <>
-                <button type="button" onClick={() => openBatchAction('return')}
-                  className="px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-orange-500 hover:bg-orange-600">
-                  退回
-                  {selectedRows.length > 0 && (
-                    <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-white/25 rounded-full">{selectedRows.length}</span>
-                  )}
-                </button>
                 <button type="button" onClick={() => openBatchAction('pass')}
                   className="px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-emerald-500 hover:bg-emerald-600">
-                  通过
-                  {selectedRows.length > 0 && (
-                    <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-white/25 rounded-full">{selectedRows.length}</span>
-                  )}
-                </button>
-              </>
-            )}
-            {showReturnRejectBatch && (
-              <>
-                <button type="button" onClick={() => openBatchAction('return')}
-                  className="px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-orange-500 hover:bg-orange-600">
-                  退回
+                  立项下达
                   {selectedRows.length > 0 && (
                     <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-white/25 rounded-full">{selectedRows.length}</span>
                   )}
@@ -412,6 +413,13 @@ export default function LeaderReviewPage() {
                 <button type="button" onClick={() => openBatchAction('reject')}
                   className="px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-red-500 hover:bg-red-600">
                   驳回
+                  {selectedRows.length > 0 && (
+                    <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-white/25 rounded-full">{selectedRows.length}</span>
+                  )}
+                </button>
+                <button type="button" onClick={() => openBatchAction('return')}
+                  className="px-4 py-2 text-sm text-white rounded-md cursor-pointer whitespace-nowrap bg-orange-500 hover:bg-orange-600">
+                  退回
                   {selectedRows.length > 0 && (
                     <span className="ml-1.5 px-1.5 py-0.5 text-[10px] bg-white/25 rounded-full">{selectedRows.length}</span>
                   )}
@@ -522,13 +530,6 @@ export default function LeaderReviewPage() {
           onConfirm={handleActionConfirm}
         />
       )}
-
-      <PlanReviewDetailModal
-        open={!!detailTarget}
-        linkedPlanId={detailTarget?.linkedPlanId || ''}
-        fallbackName={detailTarget?.planName}
-        onClose={() => setDetailTarget(null)}
-      />
 
       {toast && (
         <div className="fixed top-16 right-4 z-[9999]">

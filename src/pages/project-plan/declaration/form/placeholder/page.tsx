@@ -1,13 +1,13 @@
-import Layout from '@/components/feature/Layout';
+﻿import Layout from '@/components/feature/Layout';
 import { useNavigate, useLocation } from 'react-router-dom';
 import type { ProjectMajorType } from '@/mocks/projectPlans';
 
 const PATH_LABEL: Record<string, ProjectMajorType> = {
-  '/project-plan/declaration/form/overhaul': '大修',
+  '/project-plan/declaration/form/overhaul': '营缮',
   '/project-plan/declaration/form/minor': '零固',
 };
 
-/** 大修 / 零固表单占位页（字段后续补充） */
+/** 营缮 / 零固表单占位页（字段后续补充） */
 export default function DeclarationFormPlaceholderPage() {
   const navigate = useNavigate();
   const location = useLocation();

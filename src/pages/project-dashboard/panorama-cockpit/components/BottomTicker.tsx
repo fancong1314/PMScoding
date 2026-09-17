@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+﻿import { useEffect, useRef } from 'react';
 import { mockTickerEvents } from '@/mocks/panoramaDashboardMocks';
 
 const typeTagStyle: Record<string, { bg: string; color: string }> = {

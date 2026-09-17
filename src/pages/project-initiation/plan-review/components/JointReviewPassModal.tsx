@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   defaultJointMeeting,
   jointReviewPassAttachmentConfigs,
@@ -55,13 +55,32 @@ function cloneMeeting(src: JointReviewMeetingInfo): JointReviewMeetingInfo {
     location: src.location,
     opinionDeadline: src.opinionDeadline || '',
     opinionSummary: src.opinionSummary || '',
-    participants: src.participants.map((p) => ({ ...p, opinion: p.opinion || '' })),
+    participants: src.participants.map((p) => ({
+      ...p,
+      // 专业意见自动带入参与人员已填写的签署意见
+      opinion: (p.opinion || '').trim(),
+      attachments: p.attachments ? [...p.attachments] : [],
+    })),
   };
+}
+
+function formatDateTime(value?: string) {
+  if (!value) return '—';
+  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
+  const d = new Date(normalized);
+  if (Number.isNaN(d.getTime())) return value.replace('T', ' ');
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const h = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${y}-${mo}-${day} ${h}:${mi}`;
 }
 
 export default function JointReviewPassModal({ open, record, onClose, onConfirm }: Props) {
   const [reviewTime, setReviewTime] = useState('');
   const [location, setLocation] = useState('');
+  const [opinionDeadline, setOpinionDeadline] = useState('');
   const [rows, setRows] = useState<JointReviewParticipantInfo[]>([newParticipant()]);
   const [opinionSummary, setOpinionSummary] = useState('');
   const [uploads, setUploads] = useState<UploadMap>({});
@@ -76,6 +95,7 @@ export default function JointReviewPassModal({ open, record, onClose, onConfirm 
       : cloneMeeting(defaultJointMeeting(Number(record.zsSortNo) || 0));
     setReviewTime(base.reviewTime);
     setLocation(base.location);
+    setOpinionDeadline(base.opinionDeadline || '');
     setRows(base.participants.length > 0 ? base.participants : [newParticipant()]);
     setOpinionSummary(base.opinionSummary || '');
     setUploads({});
@@ -182,7 +202,7 @@ export default function JointReviewPassModal({ open, record, onClose, onConfirm 
       meeting: {
         reviewTime,
         location: location.trim(),
-        opinionDeadline: record.jointMeeting?.opinionDeadline || '',
+        opinionDeadline,
         participants: rows.map((r) => ({ ...r, opinion: (r.opinion || '').trim() })),
         opinionSummary: opinionSummary.trim(),
       },
@@ -195,16 +215,28 @@ export default function JointReviewPassModal({ open, record, onClose, onConfirm 
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative bg-white rounded-xl shadow-xl w-full max-w-3xl max-h-[92vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-steel-100">
-          <div>
-            <h3 className="text-base font-semibold text-steel-800">会审通过确认</h3>
-            <p className="text-xs text-steel-400 mt-0.5 line-clamp-1">{record.planName}</p>
-          </div>
+          <h3 className="text-base font-semibold text-steel-800">会审通过确认</h3>
           <button type="button" onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-steel-400 cursor-pointer">
             <i className="ri-close-line text-lg" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-steel-600 mb-1.5">项目名称</label>
+              <div className="rounded-lg border border-steel-200 bg-slate-50 px-3 py-2.5 text-sm text-steel-800">
+                {record.planName}
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-steel-600 mb-1.5">项目提报单位</label>
+              <div className="rounded-lg border border-steel-200 bg-slate-50 px-3 py-2.5 text-sm text-steel-800">
+                {record.businessUnit}
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-steel-600 mb-1.5">
@@ -222,6 +254,12 @@ export default function JointReviewPassModal({ open, record, onClose, onConfirm 
               {errors.reviewTime && <p className="mt-1 text-xs text-red-500">{errors.reviewTime}</p>}
             </div>
             <div>
+              <label className="block text-xs font-medium text-steel-600 mb-1.5">会审意见截至时间</label>
+              <div className="w-full px-3 py-2 text-sm border border-steel-200 rounded-md bg-slate-50 text-steel-700">
+                {formatDateTime(opinionDeadline)}
+              </div>
+            </div>
+            <div className="col-span-2">
               <label className="block text-xs font-medium text-steel-600 mb-1.5">
                 会审地点 <span className="text-red-500">*</span>
               </label>
@@ -258,7 +296,7 @@ export default function JointReviewPassModal({ open, record, onClose, onConfirm 
                   <tr className="bg-slate-50 border-b border-steel-200">
                     <th className="px-3 py-2 text-xs font-medium text-steel-500 text-left w-[28%]">参与人员 <span className="text-red-500">*</span></th>
                     <th className="px-3 py-2 text-xs font-medium text-steel-500 text-left w-[18%]">专业单位</th>
-                    <th className="px-3 py-2 text-xs font-medium text-steel-500 text-left">专业意见</th>
+                    <th className="px-3 py-2 text-xs font-medium text-steel-500 text-left">专业意见（自动带入）</th>
                     <th className="px-3 py-2 text-xs font-medium text-steel-500 text-center w-16">操作</th>
                   </tr>
                 </thead>
@@ -323,14 +361,11 @@ export default function JointReviewPassModal({ open, record, onClose, onConfirm 
                         <td className="px-3 py-2">
                           <textarea
                             value={row.opinion || ''}
-                            onChange={(e) =>
-                              setRows((prev) =>
-                                prev.map((r) => (r.id === row.id ? { ...r, opinion: e.target.value } : r))
-                              )
-                            }
+                            readOnly
                             rows={2}
-                            placeholder="选填，填写该人员专业意见"
-                            className="w-full px-3 py-2 text-sm border border-steel-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 resize-none"
+                            placeholder={row.signed ? '暂无签署意见' : '尚未签署，无意见可带入'}
+                            className="w-full px-3 py-2 text-sm border border-steel-200 rounded-md bg-slate-50 text-steel-600 resize-none cursor-default"
+                            title="专业意见自动带入参与人员签署意见，无需手工输入"
                           />
                         </td>
                         <td className="px-3 py-2 text-center">

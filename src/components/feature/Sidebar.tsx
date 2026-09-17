@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSidebarCollapsed } from '@/hooks/useSidebarCollapsed';
 
@@ -29,7 +29,7 @@ const menuItems: MenuItem[] = [
         ],
       },
       { key: 'plan-deferral', label: '年度计划暂缓', icon: 'ri-time-line', path: '/project-plan/plan-deferral' },
-      { key: 'plan-archive', label: '计划资料管理', icon: 'ri-folder-chart-line', path: '/project-plan/plan-archive' },
+      { key: 'plan-archive', label: '年度计划总览', icon: 'ri-folder-chart-line', path: '/project-plan/plan-archive' },
       { key: 'payment-report', label: '年度付款计划报表', icon: 'ri-money-cny-box-line', path: '/project-plan/payment-report' },
     ],
   },
@@ -38,24 +38,20 @@ const menuItems: MenuItem[] = [
     label: '项目立项管理',
     icon: 'ri-survey-line',
     children: [
-      { key: 'argument-apply', label: '项目论证申请', icon: 'ri-file-edit-line', path: '/project-argument/apply' },
-      { key: 'opinion-sign', label: '论证意见签署', icon: 'ri-draft-line', path: '/project-argument/opinion-sign' },
+      { key: 'init-overview', label: '项目总览', icon: 'ri-dashboard-3-line', path: '/project-initiation/overview' },
       { key: 'init-declaration', label: '项目立项申请', icon: 'ri-file-list-3-line', path: '/project-initiation/declaration' },
-      { key: 'init-plan-review', label: '项目立项会审', icon: 'ri-search-2-line', path: '/project-initiation/plan-review/zhongte-stage' },
-      { key: 'init-leader-review', label: '项目立项签发', icon: 'ri-user-star-line', path: '/project-initiation/leader-review' },
+      {
+        key: 'init-examine',
+        label: '项目立项审查',
+        icon: 'ri-file-search-line',
+        grandchildren: [
+          { key: 'init-office-prelim', label: '项目立项初审', icon: 'ri-file-search-line', path: '/project-initiation/office-prelim-review' },
+          { key: 'init-plan-review', label: '项目立项会审', icon: 'ri-search-2-line', path: '/project-initiation/plan-review/zhongte-stage' },
+          { key: 'init-joint-opinion-sign', label: '会审意见签署', icon: 'ri-draft-line', path: '/project-initiation/joint-opinion-sign' },
+          { key: 'init-leader-review', label: '项目立项签发', icon: 'ri-send-plane-line', path: '/project-initiation/leader-review' },
+        ],
+      },
       { key: 'init-plan-deferral', label: '项目延期暂缓', icon: 'ri-time-line', path: '/project-initiation/plan-deferral' },
-    ],
-  },
-  {
-    key: 'project-approval',
-    label: '项目立项管理留存',
-    icon: 'ri-folder-add-line',
-    children: [
-      { key: 'approval-number', label: '立项号管理', icon: 'ri-barcode-line', path: '/project-plan/project-number' },
-      { key: 'approval-apply', label: '项目立项申请', icon: 'ri-file-edit-line', path: '/project-plan/apply' },
-      { key: 'approval-review', label: '项目立项审核', icon: 'ri-check-double-line', path: '/project-plan/review' },
-      { key: 'approval-issuance', label: '项目立项签发', icon: 'ri-send-plane-line', path: '/project-plan/issuance' },
-      { key: 'approval-deferral', label: '项目立项变更', icon: 'ri-time-line', path: '/project-plan/deferral' },
     ],
   },
   {
@@ -65,9 +61,20 @@ const menuItems: MenuItem[] = [
     children: [
       { key: 'project-management', label: '项目成员管理', icon: 'ri-team-line', path: '/project-prepare/project-management' },
       { key: 'approval-management', label: '项目报批报建管理', icon: 'ri-building-2-line', path: '/project-prepare/approval' },
-      { key: 'preliminary-material', label: '前期资料管理', icon: 'ri-folder-chart-line', path: '/project-prepare/preliminary-material' },
-      { key: 'preliminary-design', label: '初步设计审查', icon: 'ri-draft-line', path: '/project-prepare/preliminary-design' },
       { key: 'estimate-management', label: '概算管理', icon: 'ri-calculator-line', path: '/project-prepare/estimate-management' },
+    ],
+  },
+  {
+    key: 'project-sporadic',
+    label: '零星工程项目管理',
+    icon: 'ri-flashlight-line',
+    children: [
+      { key: 'sporadic-framework', label: '框架合同管理', icon: 'ri-file-paper-2-line', path: '/project-sporadic/framework-contract' },
+      { key: 'sporadic-agreement-declare', label: '零星协议单申报', icon: 'ri-file-list-3-line', path: '/project-sporadic/agreement-declare' },
+      { key: 'sporadic-agreement-review', label: '零星协议单审查', icon: 'ri-file-search-line', path: '/project-sporadic/agreement-review' },
+      { key: 'sporadic-agreement-issue', label: '零星协议单签发', icon: 'ri-file-check-line', path: '/project-sporadic/agreement-issue' },
+      { key: 'sporadic-payment', label: '零星工程付款管理', icon: 'ri-money-cny-circle-line', path: '/project-sporadic/payment' },
+      { key: 'sporadic-execution', label: '零星工程执行管理', icon: 'ri-hammer-line', path: '/project-sporadic/execution' },
     ],
   },
   {
@@ -174,9 +181,9 @@ const EXPANDED_KEY = 'ng_sidebar_expanded';
 function getInitialExpanded(): string[] {
   try {
     const stored = localStorage.getItem(EXPANDED_KEY);
-    return stored ? JSON.parse(stored) : ['project-plan', 'project-approval'];
+    return stored ? JSON.parse(stored) : ['project-plan'];
   } catch {
-    return ['project-plan', 'project-approval'];
+    return ['project-plan'];
   }
 }
 

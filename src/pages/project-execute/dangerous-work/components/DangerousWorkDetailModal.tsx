@@ -1,4 +1,4 @@
-import { type DangerousWork } from '@/mocks/participantManagementMocks';
+﻿import { type DangerousWork } from '@/mocks/participantManagementMocks';
 
 interface DangerousWorkDetailModalProps {
   open: boolean;

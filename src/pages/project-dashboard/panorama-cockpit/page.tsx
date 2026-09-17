@@ -1,4 +1,4 @@
-import TopBar from './components/TopBar';
+﻿import TopBar from './components/TopBar';
 import LeftPanel from './components/LeftPanel';
 import KpiCards from './components/KpiCards';
 import MapSection from './components/MapSection';

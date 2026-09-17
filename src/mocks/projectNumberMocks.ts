@@ -1,4 +1,4 @@
-export interface ProjectNumberRecord {
+﻿export interface ProjectNumberRecord {
   id: string;
   projectNo: string;
   isPreProject: boolean;
@@ -94,7 +94,7 @@ export const projectNumberEngineeringTypes = [
   '改建工程',
   '扩建工程',
   '技术改造',
-  '设备大修',
+  '设备营缮',
   '安全整改',
   '环保治理',
 ];

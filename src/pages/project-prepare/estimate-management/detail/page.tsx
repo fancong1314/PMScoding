@@ -1,4 +1,4 @@
-import Layout from '@/components/feature/Layout';
+﻿import Layout from '@/components/feature/Layout';
 import { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getProjectById, getProjectEstimates, formatCurrency } from '@/mocks/estimateManagementMocks';

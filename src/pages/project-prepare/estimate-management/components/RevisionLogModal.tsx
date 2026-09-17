@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { getProjectRevisionLogs, formatCurrency } from '@/mocks/estimateManagementMocks';
 import type { EstimateRevisionLog } from '@/mocks/estimateManagementMocks';
 

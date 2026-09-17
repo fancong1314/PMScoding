@@ -1,4 +1,4 @@
-import type { ProjectPlan } from '@/mocks/projectPlans';
+﻿import type { ProjectPlan } from '@/mocks/projectPlans';
 import { withPaymentPlans, withAnnualPlanOrgFields } from '@/mocks/projectPlans';
 import type { ApprovalRecord } from '@/mocks/approvalMocks';
 import { getPlanDeclarationAttachmentConfigs } from '@/mocks/archiveConfigMocks';
@@ -131,20 +131,20 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
             <FormViewItem label="投资总估算" value={`${plan.budgetAmount.toFixed(2)} 万元`} />
             <FormViewItem label="项目负责人" value={plan.projectManager} />
             <FormViewItem label="负责人电话" value={plan.projectManagerPhone} />
-            {plan.projectMajorType !== '大修' && plan.projectMajorType !== '零固' && (
+            {plan.projectMajorType !== '营缮' && plan.projectMajorType !== '零固' && (
               <FormViewItem label="效益" value={`${plan.benefit.toFixed(2)} 万元`} />
             )}
             <FormViewItem label="计划开工时间" value={plan.startDate} />
             <FormViewItem label="计划完工时间" value={plan.endDate} />
-            {plan.projectMajorType === '大修' && (
+            {plan.projectMajorType === '营缮' && (
               <>
-                <FormViewItem label="是否资本性大修" value={plan.isCapitalOverhaul} />
+                <FormViewItem label="是否资本性营缮" value={plan.isCapitalOverhaul} />
                 {plan.isCapitalOverhaul === '是' && (
                   <FormViewItem label="固定资产编码" value={plan.fixedAssetCode} />
                 )}
                 <FormViewItem label="设备编码" value={plan.equipmentCode} />
                 <FormViewItem label="设备名称" value={plan.equipmentName} />
-                <FormViewItem label="设备大修理由" value={plan.overhaulReason} multiline fullWidth />
+                <FormViewItem label="设备营缮理由" value={plan.overhaulReason} multiline fullWidth />
               </>
             )}
             {plan.projectMajorType === '零固' && (
@@ -167,7 +167,7 @@ export default function ApprovalResultModal({ open, plan, approvalRecord, onClos
                 <FormViewItem label="更新理由" value={plan.updateReason} multiline fullWidth />
               </>
             )}
-            {plan.projectMajorType !== '大修' && plan.projectMajorType !== '零固' && (
+            {plan.projectMajorType !== '营缮' && plan.projectMajorType !== '零固' && (
               <FormViewItem label="补充实施理由" value={plan.supplementNote} multiline fullWidth />
             )}
           </FormViewBlock>

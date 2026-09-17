@@ -1,4 +1,4 @@
-const modules = import.meta.glob('./*/*.ts', { eager: true });
+﻿const modules = import.meta.glob('./*/*.ts', { eager: true });
 
 const messages: Record<string, { translation: Record<string, string> }> = {};
 

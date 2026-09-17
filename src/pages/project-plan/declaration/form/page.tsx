@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+﻿import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { projectPlans, withPaymentPlans, normalizeReviewStatus, withAnnualPlanOrgFields, ANNUAL_DECL_STORAGE_KEY } from '@/mocks/projectPlans';
@@ -23,7 +23,7 @@ const NEW_TECH_SECTIONS = [
 ];
 
 const OVERHAUL_SECTIONS = [
-  { id: 'overhaul-info', title: '大修项目信息', icon: 'ri-tools-line' },
+  { id: 'overhaul-info', title: '营缮项目信息', icon: 'ri-tools-line' },
   { id: 'investment-estimate', title: '年度计划投资估算', icon: 'ri-funds-line' },
   { id: 'payment-plan', title: '付款计划', icon: 'ri-calendar-schedule-line' },
   { id: 'attachment-upload', title: '附件上传', icon: 'ri-attachment-2' },
@@ -39,7 +39,7 @@ const MINOR_SECTIONS = [
 const PATH_TYPE_MAP: Record<string, ProjectMajorType> = {
   '/project-plan/declaration/form/new': '新建',
   '/project-plan/declaration/form/tech': '技改',
-  '/project-plan/declaration/form/overhaul': '大修',
+  '/project-plan/declaration/form/overhaul': '营缮',
   '/project-plan/declaration/form/minor': '零固',
 };
 
@@ -140,12 +140,12 @@ export default function DeclarationFormPage() {
   const lrId = searchParams.get('lrId');
   const isEdit = !!planId;
   const returnPath = fromLeaderReview ? '/project-plan/leader-review' : '/project-plan/declaration';
-  const LEADER_REVIEW_STORAGE = 'ng_plan_leader_review_v6';
+  const LEADER_REVIEW_STORAGE = 'ng_plan_leader_review_v7';
 
   const routeMajorType: ProjectMajorType = useMemo(() => {
     if (PATH_TYPE_MAP[location.pathname]) return PATH_TYPE_MAP[location.pathname];
     const q = searchParams.get('type') as ProjectMajorType | null;
-    if (q === '新建' || q === '技改' || q === '大修' || q === '零固') return q;
+    if (q === '新建' || q === '技改' || q === '营缮' || q === '零固') return q;
     return '新建';
   }, [location.pathname, searchParams]);
 
@@ -158,7 +158,7 @@ export default function DeclarationFormPage() {
   });
 
   const majorType = (form.projectMajorType || routeMajorType) as ProjectMajorType;
-  const overhaulMode = majorType === '大修';
+  const overhaulMode = majorType === '营缮';
   const minorMode = majorType === '零固';
   const SECTIONS = overhaulMode ? OVERHAUL_SECTIONS : minorMode ? MINOR_SECTIONS : NEW_TECH_SECTIONS;
 
@@ -245,10 +245,10 @@ export default function DeclarationFormPage() {
       if ((form.isCapitalOverhaul || '是') === '是' && !form.fixedAssetCode?.trim()) {
         e.fixedAssetCode = '请输入固定资产编码';
       }
-      if (!form.lastOverhaulDate) e.lastOverhaulDate = '请选择上次大修竣工日期';
-      if (!form.lastOverhaulContent?.trim()) e.lastOverhaulContent = '请填写上次大修主要内容';
-      if (!form.overhaulReason?.trim()) e.overhaulReason = '请填写设备大修理由';
-      if (!form.overhaulPlanEffect?.trim()) e.overhaulPlanEffect = '请填写大修方案及效果';
+      if (!form.lastOverhaulDate) e.lastOverhaulDate = '请选择上次营缮竣工日期';
+      if (!form.lastOverhaulContent?.trim()) e.lastOverhaulContent = '请填写上次营缮主要内容';
+      if (!form.overhaulReason?.trim()) e.overhaulReason = '请填写设备营缮理由';
+      if (!form.overhaulPlanEffect?.trim()) e.overhaulPlanEffect = '请填写营缮方案及效果';
     } else if (minorMode) {
       if (!form.startDate) e.startDate = '请选择计划开工时间';
       if (!form.endDate) e.endDate = '请选择计划完工时间';

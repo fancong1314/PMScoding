@@ -1,4 +1,4 @@
-export interface ContractDocument {
+﻿export interface ContractDocument {
   id: string;
   approvalNo: string;
   contractNo: string;

@@ -1,4 +1,4 @@
-export interface Contract {
+﻿export interface Contract {
   id: string;
   projectNo: string;
   projectName: string;
@@ -169,7 +169,7 @@ export const issueStatuses = [
 ];
 
 const projectNames = [
-  '炼铁厂1号高炉大修工程',
+  '炼铁厂1号高炉营缮工程',
   '炼钢厂转炉除尘系统改造',
   '轧钢事业部热轧产线升级',
   '能源事业部余热发电项目',

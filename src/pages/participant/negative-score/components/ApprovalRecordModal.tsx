@@ -1,4 +1,4 @@
-import { type DeductionRecord } from '@/mocks/participantManagementMocks';
+﻿import { type DeductionRecord } from '@/mocks/participantManagementMocks';
 
 interface ApprovalRecordModalProps {
   open: boolean;

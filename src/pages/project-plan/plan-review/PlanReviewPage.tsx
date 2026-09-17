@@ -124,7 +124,7 @@ export default function PlanReviewPage({ reviewDept }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
   const isJointReview = reviewDept === 'zhongte-stage';
-  const storageKey = `ng_plan_review_${reviewDept}_v6`;
+  const storageKey = `ng_plan_review_${reviewDept}_v7`;
   const colKey = `plan-review-cols-${reviewDept}-v11`;
 
   const [records, setRecords] = useState<PlanReviewRecord[]>(() => getStored(storageKey));

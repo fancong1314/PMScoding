@@ -1,4 +1,4 @@
-export interface SignboardContract {
+﻿export interface SignboardContract {
   id: string;
   approvalNo: string;
   projectName: string;
@@ -77,9 +77,9 @@ export const signboardContracts: SignboardContract[] = [
   {
     id: 'sc-001',
     approvalNo: 'LX-2024-001',
-    projectName: '炼铁厂1#高炉大修项目',
+    projectName: '炼铁厂1#高炉营缮项目',
     contractNo: 'NG-GC-2024-001',
-    contractName: '炼铁厂1#高炉大修土建施工合同',
+    contractName: '炼铁厂1#高炉营缮土建施工合同',
     contractType: '施工总承包',
     contractorNo: 'CBS-001',
     contractorName: '中冶建工集团有限公司',

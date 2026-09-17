@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { getProjectById, getDemandById, formatCurrency, demandTypes, secondCategories, procurementMethods, procurementCatalogs, demandDepts, contractMethods, userUnits, units } from '@/mocks/changePricingMocks';

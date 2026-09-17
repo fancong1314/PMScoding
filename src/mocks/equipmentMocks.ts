@@ -1,4 +1,4 @@
-/** 设备台账演示数据（年度计划申报-大修/零固设备选择） */
+﻿/** 设备台账演示数据（年度计划申报-营缮/零固设备选择） */
 export interface EquipmentItem {
   id: string;
   code: string;

@@ -1,4 +1,4 @@
-/** 年度计划申报操作日志演示数据 */
+﻿/** 年度计划申报操作日志演示数据 */
 export interface DeclOperationLog {
   id: string;
   planId: string;
@@ -73,9 +73,9 @@ export const declApprovalFlows: Record<string, { title: string; nodes: DeclAppro
       { name: '李副总', role: '分管领导', status: 'pending' },
     ],
   },
-  /* —— 大修前三 —— */
+  /* —— 营缮前三 —— */
   'SP-OH-2026-007': {
-    title: '原料输送皮带机结构大修 · 已驳回',
+    title: '原料输送皮带机结构营缮 · 已驳回',
     nodes: [
       { name: '周涛', role: '申报人', status: 'passed', time: '2026-02-14 10:00', opinion: '发起部门内审' },
       { name: '赵明辉', role: '物流事业部负责人', status: 'passed', time: '2026-02-15 09:30', opinion: '同意' },
@@ -83,7 +83,7 @@ export const declApprovalFlows: Record<string, { title: string; nodes: DeclAppro
     ],
   },
   'SP-OH-2026-006': {
-    title: '烧结机台车及密封系统大修 · 会审中',
+    title: '烧结机台车及密封系统营缮 · 会审中',
     nodes: [
       { name: '周涛', role: '申报人', status: 'passed', time: '2026-02-11 15:40', opinion: '提交部门内审' },
       { name: '赵明辉', role: '原料事业部负责人', status: 'passed', time: '2026-02-12 09:18', opinion: '同意呈核会审' },
@@ -93,7 +93,7 @@ export const declApprovalFlows: Record<string, { title: string; nodes: DeclAppro
     ],
   },
   'SP-OH-2026-005': {
-    title: '35kV主变压器及附属系统大修 · 待会审',
+    title: '35kV主变压器及附属系统营缮 · 待会审',
     nodes: [
       { name: '孙丽', role: '申报人', status: 'passed', time: '2026-02-08 13:20', opinion: '发起部门内审' },
       { name: '吴刚', role: '动力事业部负责人', status: 'passed', time: '2026-02-09 10:05', opinion: '部门内审通过，待会审排期' },
@@ -162,7 +162,7 @@ export const declApprovalFlows: Record<string, { title: string; nodes: DeclAppro
     ],
   },
   'SP-AR-2025-DX-008': {
-    title: '热轧加热炉蓄热式烧嘴大修 · 领导审批',
+    title: '热轧加热炉蓄热式烧嘴营缮 · 领导审批',
     nodes: [
       { name: '王强', role: '申报人', status: 'passed', time: '2025-03-28 11:00', opinion: '呈核' },
       { name: '张主任', role: '项目部', status: 'passed', time: '2025-04-01 09:40', opinion: '同意' },
@@ -209,11 +209,159 @@ export const declApprovalFlows: Record<string, { title: string; nodes: DeclAppro
     ],
   },
   'SP-AR-PASS-010': {
-    title: '3号高炉炉体大修 · 领导通过',
+    title: '3号高炉炉体营缮 · 领导通过',
     nodes: [
       { name: '张伟', role: '申报人', status: 'passed', time: '2026-04-15 09:00', opinion: '呈核领导审批' },
       { name: '张主任', role: '项目部', status: 'passed', time: '2026-04-18 10:30', opinion: '同意通过' },
       { name: '李副总', role: '公司领导', status: 'passed', time: '2026-04-20 14:00', opinion: '同意' },
+    ],
+  },
+  /* —— 项目总览操作审批流 —— */
+  'SP-OV-2021-001': {
+    title: '原料场封闭抑尘改造 · 立项审批',
+    nodes: [
+      { name: '小明', role: '申报人', status: 'passed', time: '2021-11-05 10:10', opinion: '呈核部门内审及会审' },
+      { name: '赵明辉', role: '事业部负责人', status: 'passed', time: '2021-11-12 09:40', opinion: '同意' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2021-11-22 16:00', opinion: '同意立项下达' },
+    ],
+  },
+  'SP-OV-FEE-001': {
+    title: '原料场封闭抑尘改造 · 费用增补',
+    nodes: [
+      { name: '小明', role: '项目负责人', status: 'passed', time: '2022-03-15 09:30', opinion: '申请封闭罩加长段增补' },
+      { name: '财务审核', role: '财务部', status: 'passed', time: '2022-03-18 11:00', opinion: '费用依据充分' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2022-03-20 14:20', opinion: '同意增补' },
+    ],
+  },
+  'SP-OV-FEE-002': {
+    title: '原料场封闭抑尘改造 · 费用调拨',
+    nodes: [
+      { name: '小明', role: '项目负责人', status: 'passed', time: '2022-06-20 11:00', opinion: '建安费调设备费' },
+      { name: '财务部', role: '费用管理员', status: 'passed', time: '2022-06-21 09:30', opinion: '科目内调拨通过' },
+    ],
+  },
+  'SP-OV-2022-002': {
+    title: '脱硫脱硝提标改造 · 立项审批',
+    nodes: [
+      { name: '李明', role: '申报人', status: 'passed', time: '2022-03-01 10:00', opinion: '呈核立项' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2022-03-15 15:00', opinion: '同意立项' },
+    ],
+  },
+  'SP-OV-PAUSE-002': {
+    title: '脱硫脱硝提标改造 · 暂停审批',
+    nodes: [
+      { name: '李明', role: '项目负责人', status: 'passed', time: '2022-08-12 09:20', opinion: '产线窗口冲突申请暂停' },
+      { name: '张主任', role: '项目部', status: 'passed', time: '2022-08-14 10:00', opinion: '同意暂停' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2022-08-15 16:00', opinion: '同意暂停待窗口' },
+    ],
+  },
+  'SP-OV-2023-003': {
+    title: '危废暂存库新建 · 立项审批',
+    nodes: [
+      { name: '孙丽', role: '申报人', status: 'passed', time: '2023-05-20 14:00', opinion: '呈核领导' },
+      { name: '孙总', role: '公司领导', status: 'passed', time: '2023-06-08 11:00', opinion: '同意立项' },
+    ],
+  },
+  'SP-OV-STOP-003': {
+    title: '危废暂存库新建 · 终止审批',
+    nodes: [
+      { name: '孙丽', role: '项目负责人', status: 'passed', time: '2024-01-10 10:00', opinion: '规划调整申请终止' },
+      { name: '张主任', role: '项目部', status: 'passed', time: '2024-01-12 09:40', opinion: '同意终止' },
+      { name: '孙总', role: '公司领导', status: 'passed', time: '2024-01-15 15:20', opinion: '同意终止归档' },
+    ],
+  },
+  'SP-OV-2024-004': {
+    title: '热风炉阀门组营缮 · 立项审批',
+    nodes: [
+      { name: '王强', role: '申报人', status: 'passed', time: '2024-01-08 10:30', opinion: '呈核会审及签发' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2024-01-20 16:00', opinion: '同意营缮立项' },
+    ],
+  },
+  'SP-OV-FEE-004': {
+    title: '热风炉阀门组营缮 · 费用增补',
+    nodes: [
+      { name: '王强', role: '项目负责人', status: 'passed', time: '2024-04-15 09:00', opinion: '阀门备件增补' },
+      { name: '财务部', role: '财务审核', status: 'passed', time: '2024-04-16 11:20', opinion: '同意' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2024-04-18 14:00', opinion: '同意增补' },
+    ],
+  },
+  'SP-OV-2024-005': {
+    title: '远程抄表终端购置 · 立项审批',
+    nodes: [
+      { name: '赵芳', role: '申报人', status: 'passed', time: '2024-05-05 11:00', opinion: '呈核立项' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2024-05-12 15:30', opinion: '同意立项' },
+    ],
+  },
+  'SP-OV-FEE-005': {
+    title: '远程抄表终端购置 · 费用调拨',
+    nodes: [
+      { name: '赵芳', role: '项目负责人', status: 'passed', time: '2024-07-08 10:00', opinion: '信息化科目内调拨' },
+      { name: '财务部', role: '费用管理员', status: 'passed', time: '2024-07-09 09:15', opinion: '调拨通过' },
+    ],
+  },
+  'SP-OV-2025-006': {
+    title: '加热炉节能烧嘴改造 · 立项审批',
+    nodes: [
+      { name: '周涛', role: '申报人', status: 'passed', time: '2025-02-10 14:00', opinion: '呈核立项' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2025-02-18 16:00', opinion: '同意立项' },
+    ],
+  },
+  'SP-OV-PAUSE-006': {
+    title: '加热炉节能烧嘴改造 · 暂停审批',
+    nodes: [
+      { name: '周涛', role: '项目负责人', status: 'passed', time: '2025-06-01 09:30', opinion: '进口设备延期申请暂停' },
+      { name: '张主任', role: '项目部', status: 'passed', time: '2025-06-03 10:00', opinion: '同意暂停' },
+      { name: '李副总', role: '分管领导', status: 'current', time: '' },
+    ],
+  },
+  'SP-OV-2025-007': {
+    title: '连铸二冷段封闭罩新建 · 立项审批',
+    nodes: [
+      { name: '张伟', role: '申报人', status: 'passed', time: '2025-08-01 11:00', opinion: '呈核立项' },
+      { name: '孙总', role: '公司领导', status: 'passed', time: '2025-08-05 15:00', opinion: '同意新建立项' },
+    ],
+  },
+  'SP-OV-2025-008': {
+    title: '轨道衡检定标准器更新 · 立项审批',
+    nodes: [
+      { name: '陈建华', role: '申报人', status: 'passed', time: '2025-11-01 10:00', opinion: '呈核立项' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2025-11-11 14:00', opinion: '同意零固立项' },
+    ],
+  },
+  'SP-OV-FEE-008': {
+    title: '轨道衡检定标准器更新 · 费用增补',
+    nodes: [
+      { name: '陈建华', role: '项目负责人', status: 'passed', time: '2026-02-20 09:00', opinion: '检定工装增补' },
+      { name: '财务部', role: '财务审核', status: 'passed', time: '2026-02-21 11:00', opinion: '同意' },
+    ],
+  },
+  'SP-OV-2026-009': {
+    title: '皮带通廊智能化改造 · 立项审批',
+    nodes: [
+      { name: '吴晓燕', role: '申报人', status: 'passed', time: '2025-12-20 14:00', opinion: '呈核立项' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2026-01-09 16:00', opinion: '同意立项' },
+    ],
+  },
+  'SP-OV-STOP-009': {
+    title: '皮带通廊智能化改造 · 终止审批',
+    nodes: [
+      { name: '吴晓燕', role: '项目负责人', status: 'passed', time: '2026-03-01 10:00', opinion: '码头改线冲突申请终止' },
+      { name: '张主任', role: '项目部', status: 'passed', time: '2026-03-03 09:40', opinion: '同意终止' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2026-03-05 15:00', opinion: '同意终止归档' },
+    ],
+  },
+  'SP-OV-2026-010': {
+    title: '冲渣水余热回收系统新建 · 立项审批',
+    nodes: [
+      { name: '小明', role: '申报人', status: 'passed', time: '2026-02-25 10:00', opinion: '呈核立项' },
+      { name: '孙总', role: '公司领导', status: 'passed', time: '2026-03-01 15:00', opinion: '同意新建立项' },
+    ],
+  },
+  'SP-OV-FEE-010': {
+    title: '冲渣水余热回收系统新建 · 费用调拨',
+    nodes: [
+      { name: '小明', role: '项目负责人', status: 'passed', time: '2026-04-12 09:30', opinion: '其他费调建安费' },
+      { name: '财务部', role: '费用管理员', status: 'passed', time: '2026-04-13 10:20', opinion: '调拨通过' },
     ],
   },
 };
@@ -227,6 +375,10 @@ export const declOperationLogs: DeclOperationLog[] = [
   { id: 'dl-xj2-1', planId: 'xj2', operateTime: '2026-02-26 08:50:00', operator: '周涛', operation: '新增', remark: '创建厂内物流调度平台新建草稿', approvalNo: '' },
   { id: 'dl-xj2-2', planId: 'xj2', operateTime: '2026-02-26 09:10:12', operator: '周涛', operation: '提交', remark: '发起部门内审', approvalNo: 'SP-XJ-2026-002' },
   { id: 'dl-xj2-3', planId: 'xj2', operateTime: '2026-02-27 10:08:33', operator: '王部长', operation: '退回修改', remark: '请补充与现有MES接口方案', approvalNo: 'SP-XJ-2026-002' },
+  { id: 'dl-xj2-4', planId: 'xj2', operateTime: '2026-03-05 09:20:00', operator: '周涛', operation: '修改', remark: '按退回意见补充MES接口方案', approvalNo: '' },
+  { id: 'dl-xj2-5', planId: 'xj2', operateTime: '2026-03-10 14:00:00', operator: '周涛', operation: '呈核', remark: '修订后再次呈核会审', approvalNo: 'SP-XJ-2026-002' },
+  { id: 'dl-xj2-6', planId: 'xj2', operateTime: '2026-03-18 11:00:00', operator: '财务部', operation: '费用增补', remark: '接口开发费用增补 12 万元', approvalNo: 'SP-OV-FEE-001' },
+  { id: 'dl-xj2-7', planId: 'xj2', operateTime: '2026-03-25 10:00:00', operator: '财务部', operation: '费用调拨', remark: '自建安费调拨至设备费 5 万元', approvalNo: 'SP-OV-FEE-002' },
 
   { id: 'dl-xj1-1', planId: 'xj1', operateTime: '2026-02-25 09:15:00', operator: '李明', operation: '新增', remark: '创建原料场智能堆取料系统新建', approvalNo: '' },
   { id: 'dl-xj1-2', planId: 'xj1', operateTime: '2026-02-25 10:05:22', operator: '李明', operation: '修改', remark: '调整投资总估算与工期', approvalNo: '' },
@@ -250,7 +402,7 @@ export const declOperationLogs: DeclOperationLog[] = [
   { id: 'dl-4-3', planId: '4', operateTime: '2026-01-10 11:20:00', operator: '赵明辉', operation: '部门内审通过', remark: '同意进入会审', approvalNo: 'SP-TG-2026-004' },
   { id: 'dl-4-4', planId: '4', operateTime: '2026-01-12 16:10:00', operator: '王部长', operation: '会签通过', remark: '技术方案可行，进入会审环节', approvalNo: 'SP-TG-2026-004' },
 
-  /* ========== 大修 · 前三：oh7 / oh6 / oh5 ========== */
+  /* ========== 营缮 · 前三：oh7 / oh6 / oh5 ========== */
   { id: 'dl-oh7-1', planId: 'oh7', operateTime: '2026-02-14 09:20:00', operator: '周涛', operation: '新增', remark: '创建原料输送皮带机结构大修', approvalNo: '' },
   { id: 'dl-oh7-2', planId: 'oh7', operateTime: '2026-02-14 10:00:00', operator: '周涛', operation: '提交', remark: '发起部门内审', approvalNo: 'SP-OH-2026-007' },
   { id: 'dl-oh7-3', planId: 'oh7', operateTime: '2026-02-16 14:22:00', operator: '郑浩', operation: '驳回（作废）', remark: '方案深度不足，请补充载荷核算', approvalNo: 'SP-OH-2026-007' },
@@ -279,7 +431,7 @@ export const declOperationLogs: DeclOperationLog[] = [
   { id: 'dl-mn2-4', planId: 'mn2', operateTime: '2026-02-16 14:30:00', operator: '孙丽', operation: '呈核会审', remark: '呈核公司会审组', approvalNo: 'SP-MN-2026-002' },
 
   /* ========== 其他历史演示（兼容原有数据） ========== */
-  { id: 'dl1', planId: '1', operateTime: '2025-12-15 10:22:11', operator: '张伟', operation: '新增', remark: '创建大修年度计划草稿', approvalNo: '' },
+  { id: 'dl1', planId: '1', operateTime: '2025-12-15 10:22:11', operator: '张伟', operation: '新增', remark: '创建营缮年度计划草稿', approvalNo: '' },
   { id: 'dl2', planId: '1', operateTime: '2026-01-08 11:05:33', operator: '张伟', operation: '修改', remark: '调整投资总估算及设备信息', approvalNo: '' },
   { id: 'dl3', planId: '1', operateTime: '2026-01-10 09:18:02', operator: '张伟', operation: '提交', remark: '发起部门审批', approvalNo: 'SP-2026-decl-001' },
   { id: 'dl4', planId: '2', operateTime: '2025-11-20 08:40:00', operator: '李明', operation: '新增', remark: '创建技改申报', approvalNo: '' },
@@ -300,7 +452,7 @@ export const declOperationLogs: DeclOperationLog[] = [
   { id: 'ar-oh3-1', planId: 'oh3', operateTime: '2025-03-10 08:40:00', operator: '王强', operation: '新增', remark: '创建热轧加热炉蓄热式烧嘴大修', approvalNo: '' },
   { id: 'ar-oh3-2', planId: 'oh3', operateTime: '2025-03-20 11:00:00', operator: '王强', operation: '呈核', remark: '呈核领导审批', approvalNo: 'SP-AR-2025-DX-008' },
   { id: 'ar-oh3-3', planId: 'oh3', operateTime: '2025-04-02 15:25:00', operator: '李副总', operation: '通过', remark: '同意立项归档', approvalNo: 'SP-AR-2025-DX-008' },
-  { id: 'ar-oh3-4', planId: 'oh3', operateTime: '2025-08-05 09:30:00', operator: '王强', operation: '启动', remark: '结合年修窗口启动大修', approvalNo: '' },
+  { id: 'ar-oh3-4', planId: 'oh3', operateTime: '2025-08-05 09:30:00', operator: '王强', operation: '启动', remark: '结合年修窗口启动营缮', approvalNo: '' },
 
   /* pa-03 → 5 已有部分，补通过/启动 */
   { id: 'ar-5-1', planId: '5', operateTime: '2025-02-15 10:00:00', operator: '刘洋', operation: '修改', remark: '调整管廊分段实施范围', approvalNo: '' },
@@ -332,7 +484,7 @@ export const declOperationLogs: DeclOperationLog[] = [
 
   /* pa-07 → oh4 */
   { id: 'ar-oh4-1', planId: 'oh4', operateTime: '2026-02-20 09:30:00', operator: '张伟', operation: '新增', remark: '创建高炉鼓风机本体及润滑系统大修', approvalNo: '' },
-  { id: 'ar-oh4-2', planId: 'oh4', operateTime: '2026-02-28 16:00:00', operator: '张伟', operation: '修改', remark: '调整大修工期与备件计划', approvalNo: '' },
+  { id: 'ar-oh4-2', planId: 'oh4', operateTime: '2026-02-28 16:00:00', operator: '张伟', operation: '修改', remark: '调整营缮工期与备件计划', approvalNo: '' },
   { id: 'ar-oh4-3', planId: 'oh4', operateTime: '2026-03-02 10:00:00', operator: '张伟', operation: '呈核', remark: '呈核项目部审查', approvalNo: 'SP-AR-PASS-010' },
   { id: 'ar-oh4-4', planId: 'oh4', operateTime: '2026-03-05 14:20:00', operator: '李副总', operation: '通过', remark: '领导通过，待年修窗口启动', approvalNo: 'SP-AR-PASS-010' },
 
@@ -351,8 +503,8 @@ export const declOperationLogs: DeclOperationLog[] = [
 
   /* pa-10 → 1 已有，补通过/启动 */
   { id: 'ar-1-1', planId: '1', operateTime: '2026-04-10 09:00:00', operator: '张伟', operation: '呈核', remark: '呈核领导审批', approvalNo: 'SP-AR-PASS-010' },
-  { id: 'ar-1-2', planId: '1', operateTime: '2026-04-20 14:05:00', operator: '李副总', operation: '通过', remark: '同意大修立项归档', approvalNo: 'SP-AR-PASS-010' },
-  { id: 'ar-1-3', planId: '1', operateTime: '2026-05-01 08:00:00', operator: '张伟', operation: '启动', remark: '高炉大修工程启动', approvalNo: '' },
+  { id: 'ar-1-2', planId: '1', operateTime: '2026-04-20 14:05:00', operator: '李副总', operation: '通过', remark: '同意营缮立项归档', approvalNo: 'SP-AR-PASS-010' },
+  { id: 'ar-1-3', planId: '1', operateTime: '2026-05-01 08:00:00', operator: '张伟', operation: '启动', remark: '高炉营缮工程启动', approvalNo: '' },
 
   /* pa-11 → 15 */
   { id: 'ar-15-1', planId: '15', operateTime: '2026-04-01 09:20:00', operator: '王强', operation: '新增', remark: '创建热轧厂区雨水收集与回用站新建', approvalNo: '' },
@@ -420,22 +572,93 @@ export const declOperationLogs: DeclOperationLog[] = [
   { id: 'ar-8-5', planId: '8', operateTime: '2024-11-20 09:10:00', operator: '周涛', operation: '终止', remark: '实物已完工并验收，申请终止流程并归档', approvalNo: 'SP-AR-STOP-022' },
 
   /* pa-23 → oh2 */
-  { id: 'ar-oh2-1', planId: 'oh2', operateTime: '2024-04-01 09:00:00', operator: '刘洋', operation: '新增', remark: '创建高线精轧机齿轮箱大修', approvalNo: '' },
+  { id: 'ar-oh2-1', planId: 'oh2', operateTime: '2024-04-01 09:00:00', operator: '刘洋', operation: '新增', remark: '创建高线精轧机齿轮箱营缮', approvalNo: '' },
   { id: 'ar-oh2-2', planId: 'oh2', operateTime: '2024-04-20 14:00:00', operator: '刘洋', operation: '呈核', remark: '呈核领导审批', approvalNo: 'SP-2026-decl-001' },
-  { id: 'ar-oh2-3', planId: 'oh2', operateTime: '2024-05-08 10:00:00', operator: '李副总', operation: '通过', remark: '同意大修立项', approvalNo: 'SP-2026-decl-001' },
-  { id: 'ar-oh2-4', planId: 'oh2', operateTime: '2024-08-05 08:00:00', operator: '刘洋', operation: '启动', remark: '齿轮箱大修开工', approvalNo: '' },
+  { id: 'ar-oh2-3', planId: 'oh2', operateTime: '2024-05-08 10:00:00', operator: '李副总', operation: '通过', remark: '同意营缮立项', approvalNo: 'SP-2026-decl-001' },
+  { id: 'ar-oh2-4', planId: 'oh2', operateTime: '2024-08-05 08:00:00', operator: '刘洋', operation: '启动', remark: '齿轮箱营缮开工', approvalNo: '' },
 
   /* pa-24 → tg3 已有预审，补通过归档 */
   { id: 'ar-tg3-4', planId: 'tg3', operateTime: '2024-03-20 09:00:00', operator: '陈刚', operation: '修改', remark: '完善工艺改造方案后正式推进', approvalNo: '' },
   { id: 'ar-tg3-5', planId: 'tg3', operateTime: '2024-04-01 10:00:00', operator: '陈刚', operation: '呈核', remark: '呈核领导审批', approvalNo: 'SP-TG-2026-003' },
   { id: 'ar-tg3-6', planId: 'tg3', operateTime: '2024-04-16 15:00:00', operator: '李副总', operation: '通过', remark: '同意归档（历史技改）', approvalNo: 'SP-TG-2026-003' },
   { id: 'ar-tg3-7', planId: 'tg3', operateTime: '2024-06-05 08:30:00', operator: '陈刚', operation: '启动', remark: '精炼炉电极升降技改实施', approvalNo: '' },
+
+  /* ========== 项目总览 · 按 overviewId 的全生命周期操作（含费用增补/调拨/暂停/终止） ========== */
+  { id: 'ov-01-a', planId: 'ov-01', operateTime: '2021-10-08 09:00:00', operator: '小明', operation: '新增', remark: '创建原料场封闭抑尘改造立项申请', approvalNo: '' },
+  { id: 'ov-01-b', planId: 'ov-01', operateTime: '2021-10-20 14:20:00', operator: '小明', operation: '修改', remark: '调整抑尘方案与概算分项', approvalNo: '' },
+  { id: 'ov-01-c', planId: 'ov-01', operateTime: '2021-11-05 10:10:00', operator: '小明', operation: '呈核', remark: '呈核部门内审及会审', approvalNo: 'SP-OV-2021-001' },
+  { id: 'ov-01-d', planId: 'ov-01', operateTime: '2021-11-22 16:00:00', operator: '李副总', operation: '立项下达', remark: '立项签发通过', approvalNo: 'SP-OV-2021-001' },
+  { id: 'ov-01-e', planId: 'ov-01', operateTime: '2022-03-15 09:30:00', operator: '小明', operation: '费用增补', remark: '封闭罩加长段费用增补 8.5 万元', approvalNo: 'SP-OV-FEE-001' },
+  { id: 'ov-01-f', planId: 'ov-01', operateTime: '2022-06-20 11:00:00', operator: '财务部', operation: '费用调拨', remark: '自建安费调拨至设备费 3.2 万元', approvalNo: 'SP-OV-FEE-002' },
+
+  { id: 'ov-02-a', planId: 'ov-02', operateTime: '2022-02-10 09:00:00', operator: '李明', operation: '新增', remark: '创建脱硫脱硝提标改造立项', approvalNo: '' },
+  { id: 'ov-02-b', planId: 'ov-02', operateTime: '2022-03-01 10:00:00', operator: '李明', operation: '呈核', remark: '呈核立项审批', approvalNo: 'SP-OV-2022-002' },
+  { id: 'ov-02-c', planId: 'ov-02', operateTime: '2022-03-15 15:00:00', operator: '李副总', operation: '立项下达', remark: '同意立项', approvalNo: 'SP-OV-2022-002' },
+  { id: 'ov-02-d', planId: 'ov-02', operateTime: '2022-08-12 09:20:00', operator: '李明', operation: '暂停', remark: '产线窗口冲突，申请暂停实施', approvalNo: 'SP-OV-PAUSE-002' },
+
+  { id: 'ov-03-a', planId: 'ov-03', operateTime: '2023-05-01 09:00:00', operator: '孙丽', operation: '新增', remark: '创建危废暂存库新建立项', approvalNo: '' },
+  { id: 'ov-03-b', planId: 'ov-03', operateTime: '2023-05-20 14:00:00', operator: '孙丽', operation: '呈核', remark: '呈核领导审批', approvalNo: 'SP-OV-2023-003' },
+  { id: 'ov-03-c', planId: 'ov-03', operateTime: '2023-06-08 11:00:00', operator: '孙总', operation: '立项下达', remark: '同意立项', approvalNo: 'SP-OV-2023-003' },
+  { id: 'ov-03-d', planId: 'ov-03', operateTime: '2024-01-10 10:00:00', operator: '孙丽', operation: '终止', remark: '规划调整，申请终止项目', approvalNo: 'SP-OV-STOP-003' },
+
+  { id: 'ov-04-a', planId: 'ov-04', operateTime: '2023-12-01 09:00:00', operator: '王强', operation: '新增', remark: '创建热风炉阀门组营缮立项', approvalNo: '' },
+  { id: 'ov-04-b', planId: 'ov-04', operateTime: '2024-01-08 10:30:00', operator: '王强', operation: '呈核', remark: '呈核会审及签发', approvalNo: 'SP-OV-2024-004' },
+  { id: 'ov-04-c', planId: 'ov-04', operateTime: '2024-01-20 16:00:00', operator: '李副总', operation: '立项下达', remark: '同意营缮立项', approvalNo: 'SP-OV-2024-004' },
+  { id: 'ov-04-d', planId: 'ov-04', operateTime: '2024-04-15 09:00:00', operator: '王强', operation: '费用增补', remark: '阀门备件增补 5.6 万元', approvalNo: 'SP-OV-FEE-004' },
+
+  { id: 'ov-05-a', planId: 'ov-05', operateTime: '2024-04-20 09:00:00', operator: '赵芳', operation: '新增', remark: '创建远程抄表终端零固立项', approvalNo: '' },
+  { id: 'ov-05-b', planId: 'ov-05', operateTime: '2024-05-05 11:00:00', operator: '赵芳', operation: '呈核', remark: '呈核立项审批', approvalNo: 'SP-OV-2024-005' },
+  { id: 'ov-05-c', planId: 'ov-05', operateTime: '2024-05-12 15:30:00', operator: '李副总', operation: '立项下达', remark: '同意立项', approvalNo: 'SP-OV-2024-005' },
+  { id: 'ov-05-d', planId: 'ov-05', operateTime: '2024-07-08 10:00:00', operator: '财务部', operation: '费用调拨', remark: '信息化费用科目内调拨 1.2 万元', approvalNo: 'SP-OV-FEE-005' },
+
+  { id: 'ov-06-a', planId: 'ov-06', operateTime: '2025-01-15 09:00:00', operator: '周涛', operation: '新增', remark: '创建加热炉节能烧嘴改造立项', approvalNo: '' },
+  { id: 'ov-06-b', planId: 'ov-06', operateTime: '2025-02-10 14:00:00', operator: '周涛', operation: '呈核', remark: '呈核立项审批', approvalNo: 'SP-OV-2025-006' },
+  { id: 'ov-06-c', planId: 'ov-06', operateTime: '2025-02-18 16:00:00', operator: '李副总', operation: '立项下达', remark: '同意立项', approvalNo: 'SP-OV-2025-006' },
+  { id: 'ov-06-d', planId: 'ov-06', operateTime: '2025-06-01 09:30:00', operator: '周涛', operation: '暂停', remark: '进口烧嘴交货延期，申请暂停', approvalNo: 'SP-OV-PAUSE-006' },
+
+  { id: 'ov-07-a', planId: 'ov-07', operateTime: '2025-07-01 09:00:00', operator: '张伟', operation: '新增', remark: '创建连铸二冷段封闭罩新建立项', approvalNo: '' },
+  { id: 'ov-07-b', planId: 'ov-07', operateTime: '2025-07-25 10:00:00', operator: '张伟', operation: '修改', remark: '补充消防疏散与检修通道说明', approvalNo: '' },
+  { id: 'ov-07-c', planId: 'ov-07', operateTime: '2025-08-01 11:00:00', operator: '张伟', operation: '呈核', remark: '呈核立项审批', approvalNo: 'SP-OV-2025-007' },
+  { id: 'ov-07-d', planId: 'ov-07', operateTime: '2025-08-05 15:00:00', operator: '孙总', operation: '立项下达', remark: '同意新建立项', approvalNo: 'SP-OV-2025-007' },
+
+  { id: 'ov-08-a', planId: 'ov-08', operateTime: '2025-10-10 09:00:00', operator: '陈建华', operation: '新增', remark: '创建轨道衡检定标准器更新立项', approvalNo: '' },
+  { id: 'ov-08-b', planId: 'ov-08', operateTime: '2025-11-01 10:00:00', operator: '陈建华', operation: '呈核', remark: '呈核立项审批', approvalNo: 'SP-OV-2025-008' },
+  { id: 'ov-08-c', planId: 'ov-08', operateTime: '2025-11-11 14:00:00', operator: '李副总', operation: '立项下达', remark: '同意零固立项', approvalNo: 'SP-OV-2025-008' },
+  { id: 'ov-08-d', planId: 'ov-08', operateTime: '2026-02-20 09:00:00', operator: '陈建华', operation: '费用增补', remark: '检定配套工装增补 0.8 万元', approvalNo: 'SP-OV-FEE-008' },
+
+  { id: 'ov-09-a', planId: 'ov-09', operateTime: '2025-12-01 09:00:00', operator: '吴晓燕', operation: '新增', remark: '创建皮带通廊智能化改造立项', approvalNo: '' },
+  { id: 'ov-09-b', planId: 'ov-09', operateTime: '2025-12-20 14:00:00', operator: '吴晓燕', operation: '呈核', remark: '呈核立项审批', approvalNo: 'SP-OV-2026-009' },
+  { id: 'ov-09-c', planId: 'ov-09', operateTime: '2026-01-09 16:00:00', operator: '李副总', operation: '立项下达', remark: '同意立项', approvalNo: 'SP-OV-2026-009' },
+  { id: 'ov-09-d', planId: 'ov-09', operateTime: '2026-03-01 10:00:00', operator: '吴晓燕', operation: '终止', remark: '码头改线规划冲突，申请终止', approvalNo: 'SP-OV-STOP-009' },
+
+  { id: 'ov-10-a', planId: 'ov-10', operateTime: '2026-02-01 09:00:00', operator: '小明', operation: '新增', remark: '创建冲渣水余热回收系统新建立项', approvalNo: '' },
+  { id: 'ov-10-b', planId: 'ov-10', operateTime: '2026-02-18 11:00:00', operator: '小明', operation: '修改', remark: '调整并网方案与效益测算', approvalNo: '' },
+  { id: 'ov-10-c', planId: 'ov-10', operateTime: '2026-02-25 10:00:00', operator: '小明', operation: '呈核', remark: '呈核立项审批', approvalNo: 'SP-OV-2026-010' },
+  { id: 'ov-10-d', planId: 'ov-10', operateTime: '2026-03-01 15:00:00', operator: '孙总', operation: '立项下达', remark: '同意新建立项', approvalNo: 'SP-OV-2026-010' },
+  { id: 'ov-10-e', planId: 'ov-10', operateTime: '2026-04-12 09:30:00', operator: '财务部', operation: '费用调拨', remark: '自其他费调拨至建安费 6.0 万元', approvalNo: 'SP-OV-FEE-010' },
 ];
 
 export function getDeclOperationLogs(planId: string): DeclOperationLog[] {
   const runtime = getRuntimeLogs().filter((l) => l.planId === planId);
   return [...runtime, ...declOperationLogs.filter((l) => l.planId === planId)]
     .sort((a, b) => (a.operateTime < b.operateTime ? 1 : -1));
+}
+
+/** 项目总览操作记录：总览自身记录 + 关联立项申请记录（去重） */
+export function getOverviewOperationLogs(overviewId: string, linkedPlanId?: string): DeclOperationLog[] {
+  const own = getDeclOperationLogs(overviewId);
+  if (!linkedPlanId || linkedPlanId === overviewId) return own;
+  const linked = getDeclOperationLogs(linkedPlanId);
+  const seen = new Set(own.map((l) => `${l.operateTime}|${l.operation}|${l.remark}`));
+  const merged = [...own];
+  linked.forEach((l) => {
+    const key = `${l.operateTime}|${l.operation}|${l.remark}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      merged.push(l);
+    }
+  });
+  return merged.sort((a, b) => (a.operateTime < b.operateTime ? 1 : -1));
 }
 
 const LOG_STORAGE_KEY = 'ng_decl_operation_logs_v1';

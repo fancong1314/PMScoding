@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import Layout from '@/components/feature/Layout';
 import { useNavigate } from 'react-router-dom';
 import { contracts, allIssues, issueStatuses, type Contract } from '@/mocks/qualitySafetyMocks';

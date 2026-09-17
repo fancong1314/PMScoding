@@ -1,4 +1,4 @@
-export interface ExamExemptionContract {
+﻿export interface ExamExemptionContract {
   id: string;
   approvalNo: string;
   contractNo: string;

@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+﻿import { useMemo, useRef } from 'react';
 import { getPlanDeclarationAttachmentConfigs, type AttachmentConfig } from '@/mocks/archiveConfigMocks';
 
 export interface UploadedFileItem {

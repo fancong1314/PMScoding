@@ -1,4 +1,4 @@
-const COLLAPSED_KEY = 'ng_sidebar_collapsed';
+﻿const COLLAPSED_KEY = 'ng_sidebar_collapsed';
 
 type Listener = () => void;
 const listeners = new Set<Listener>();

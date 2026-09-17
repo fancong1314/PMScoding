@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { planDeferralRecords, planAppTypeMap } from '@/mocks/planDeferralMocks';
@@ -222,7 +222,7 @@ export default function PlanDeferralFormPage() {
                     <span className="text-sm text-steel-800 font-medium leading-relaxed">{plan.planName}</span>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-steel-400">投资总估算（万元）</span>
+                    <span className="text-xs text-steel-400">立项总概算（万元）</span>
                     <span className="text-sm text-steel-800 font-medium">{plan.investAmount.toFixed(2)}</span>
                   </div>
                   <div className="flex flex-col gap-1">

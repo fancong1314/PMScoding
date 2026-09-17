@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { deductionCategories, availableContracts, availableHandlers } from '@/mocks/participantManagementMocks';
 
 interface DeductionModalProps {

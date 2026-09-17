@@ -1,4 +1,4 @@
-// 项目档案管理 - Mock数据
+﻿// 项目档案管理 - Mock数据
 
 export interface ArchiveProject {
   id: string;
@@ -49,7 +49,7 @@ export interface MissingDoc {
 
 // 档案项目列表
 export const archiveProjects: ArchiveProject[] = [
-  { id: 'ap-1', approvalNo: 'LX-2024-001', projectName: '炼铁厂高炉大修工程', projectType: '技改项目', contractCount: 8, attachmentTotal: 186, archivedCount: 152, pendingCount: 34, completeness: 81.7, lastUpdated: '2026-05-28' },
+  { id: 'ap-1', approvalNo: 'LX-2024-001', projectName: '炼铁厂高炉营缮工程', projectType: '技改项目', contractCount: 8, attachmentTotal: 186, archivedCount: 152, pendingCount: 34, completeness: 81.7, lastUpdated: '2026-05-28' },
   { id: 'ap-2', approvalNo: 'LX-2024-002', projectName: '转炉炼钢车间升级改造', projectType: '技改项目', contractCount: 12, attachmentTotal: 245, archivedCount: 198, pendingCount: 47, completeness: 80.8, lastUpdated: '2026-06-02' },
   { id: 'ap-3', approvalNo: 'LX-2025-001', projectName: '轧钢生产线智能化改造', projectType: '技改项目', contractCount: 6, attachmentTotal: 132, archivedCount: 110, pendingCount: 22, completeness: 83.3, lastUpdated: '2026-05-15' },
   { id: 'ap-4', approvalNo: 'LX-2025-002', projectName: '原料场环保封闭改造', projectType: '环保项目', contractCount: 5, attachmentTotal: 98, archivedCount: 76, pendingCount: 22, completeness: 77.6, lastUpdated: '2026-06-05' },
@@ -63,7 +63,7 @@ export const archiveProjects: ArchiveProject[] = [
   { id: 'ap-12', approvalNo: 'LX-2026-006', projectName: '炼铁除尘系统提标改造', projectType: '环保项目', contractCount: 5, attachmentTotal: 96, archivedCount: 74, pendingCount: 22, completeness: 77.1, lastUpdated: '2026-05-18' },
 ];
 
-// 项目档案详情-附件列表（以炼铁厂高炉大修工程为例）
+// 项目档案详情-附件列表（以炼铁厂高炉营缮工程为例）
 export const archiveAttachments: Record<string, ArchiveAttachment[]> = {
   'ap-1': [
     // 合同 HT-2024-001 - 高炉本体耐材砌筑
@@ -115,7 +115,7 @@ export const versionHistories: Record<string, VersionRecord[]> = {
   ],
 };
 
-// 档案缺失提醒（以ap-1炼铁厂高炉大修工程为例）
+// 档案缺失提醒（以ap-1炼铁厂高炉营缮工程为例）
 export const missingDocs: Record<string, MissingDoc[]> = {
   'ap-1': [
     { nodePath: '项目合同管理 > 合同业务执行管理 > 合同举牌验收 > 验收管理 > 新增验收记录', docName: '设备开箱检验记录' },

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { argumentRiskLevels, argumentRiskStatuses, argumentRiskCategories, argumentRiskStrategies } from '@/mocks/argumentApplyMocks';
 
 interface RiskRow {

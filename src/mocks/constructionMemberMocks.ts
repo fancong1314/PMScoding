@@ -1,4 +1,4 @@
-export interface ConstructionProject {
+﻿export interface ConstructionProject {
   id: number;
   projectName: string;
   projectNumber: string;
@@ -38,7 +38,7 @@ export interface ConstructionMember {
 }
 
 export const mockConstructionProjects: ConstructionProject[] = [
-  { id: 1, projectName: '高炉大修及环保升级改造项目', projectNumber: 'NG-GC-2025-001', projectType: '技改', ownerUnit: '炼铁事业部', contractCount: 8, memberCount: 156, pendingCount: 12, lastUpdated: '2026-06-30' },
+  { id: 1, projectName: '高炉营缮及环保升级改造项目', projectNumber: 'NG-GC-2025-001', projectType: '技改', ownerUnit: '炼铁事业部', contractCount: 8, memberCount: 156, pendingCount: 12, lastUpdated: '2026-06-30' },
   { id: 2, projectName: '热轧1580产线智能化升级', projectNumber: 'NG-GC-2025-002', projectType: '技改', ownerUnit: '板材事业部', contractCount: 5, memberCount: 89, pendingCount: 5, lastUpdated: '2026-06-29' },
   { id: 3, projectName: '炼钢连铸机大修工程', projectNumber: 'NG-GC-2025-003', projectType: '大中修', ownerUnit: '炼钢事业部', contractCount: 4, memberCount: 72, pendingCount: 0, lastUpdated: '2026-06-28' },
   { id: 4, projectName: '厂区道路及排水系统改造', projectNumber: 'NG-GC-2025-004', projectType: '零星施工', ownerUnit: '公辅事业部', contractCount: 3, memberCount: 45, pendingCount: 3, lastUpdated: '2026-06-27' },

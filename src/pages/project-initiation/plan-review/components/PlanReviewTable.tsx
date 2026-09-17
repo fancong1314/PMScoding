@@ -1,10 +1,11 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { PlanReviewRecord } from '@/mocks/planReviewMocks';
-import { planReviewStatusMap } from '@/mocks/planReviewMocks';
+import { getOpinionSignSummary, planReviewStatusMap } from '@/mocks/planReviewMocks';
 import type { ColumnDef } from '@/hooks/useColumnConfig';
-import ColumnSettingsPanel from '@/pages/project-initiation/declaration/components/ColumnSettingsPanel';
+import ColumnSettingsPanel from '@/pages/project-plan/declaration/components/ColumnSettingsPanel';
 import JointReviewPassModal, { type JointReviewPassPayload } from './JointReviewPassModal';
-import RejectModal from './RejectModal';
+import OpinionSignRecordsModal from './OpinionSignRecordsModal';
+import JointReviewSmsModal from './JointReviewSmsModal';
 
 type ReviewDept = 'business-unit' | 'professional-dept' | 'chief-engineer' | 'operations-dept' | 'budget-committee' | 'zhongte-stage';
 type ActionMode = 'pending_joint' | 'reviewing';
@@ -22,10 +23,10 @@ interface Props {
   onToggleSelectAll: () => void;
   onToggleSelectRow: (id: string) => void;
   onPass: (record: PlanReviewRecord, payload: JointReviewPassPayload) => void;
-  onReject: (id: string, reason: string) => void;
-  onReturn: (record: PlanReviewRecord) => void;
   onView: (record: PlanReviewRecord) => void;
   onModify: (record: PlanReviewRecord) => void;
+  onJointDetail?: (record: PlanReviewRecord) => void;
+  onSmsToast?: (msg: string) => void;
   onToggleVisible: (id: string) => void;
   onReorder: (from: number, to: number) => void;
   onResetColumns: () => void;
@@ -36,6 +37,21 @@ const SEQ_W = 60;
 const ACTION_W = 220;
 /** 会审列表左侧固定列（紧随勾选框、序号之后） */
 const LEFT_PIN_IDS = ['planName'] as const;
+/** 仅会审中 TAB 展示 */
+const REVIEWING_ONLY_COL_IDS = new Set(['jointDetail', 'opinionDeadline', 'opinionSign']);
+
+function formatDateTime(value?: string) {
+  if (!value) return '—';
+  const normalized = value.includes('T') ? value : value.replace(' ', 'T');
+  const d = new Date(normalized);
+  if (Number.isNaN(d.getTime())) return value.replace('T', ' ');
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const h = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${y}-${mo}-${day} ${h}:${mi}`;
+}
 
 export default function PlanReviewTable({
   records, selectedRows, columns,
@@ -43,15 +59,26 @@ export default function PlanReviewTable({
   pageOffset,
   sortField, sortDir, onHeaderSort,
   onToggleSelectAll, onToggleSelectRow,
-  onPass, onReject, onReturn, onView, onModify,
+  onPass, onView, onModify, onJointDetail, onSmsToast,
   onToggleVisible, onReorder, onResetColumns,
 }: Props) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [passTarget, setPassTarget] = useState<PlanReviewRecord | null>(null);
-  const [rejectTarget, setRejectTarget] = useState<PlanReviewRecord | null>(null);
+  const [signTarget, setSignTarget] = useState<PlanReviewRecord | null>(null);
+  const [smsTarget, setSmsTarget] = useState<PlanReviewRecord | null>(null);
 
-  const leftPinCols = LEFT_PIN_IDS.map((id) => columns.find((c) => c.id === id && c.visible)).filter((c): c is ColumnDef => !!c);
-  const scrollCols = columns.filter((c) => c.visible && !(LEFT_PIN_IDS as readonly string[]).includes(c.id));
+  const listColumns =
+    actionMode === 'pending_joint'
+      ? columns.filter((c) => !REVIEWING_ONLY_COL_IDS.has(c.id))
+      : columns;
+
+  const pinLeft = listColumns.some((c) => c.id === 'planName');
+  const leftPinCols = pinLeft
+    ? LEFT_PIN_IDS.map((id) => listColumns.find((c) => c.id === id && c.visible)).filter((c): c is ColumnDef => !!c)
+    : [];
+  const scrollCols = pinLeft
+    ? listColumns.filter((c) => c.visible && !(LEFT_PIN_IDS as readonly string[]).includes(c.id))
+    : listColumns.filter((c) => c.visible);
   const visibleCols = [...leftPinCols, ...scrollCols];
 
   const midWidth = visibleCols.reduce((sum, c) => sum + c.width, 0);
@@ -62,7 +89,7 @@ export default function PlanReviewTable({
   const isIndeterminate = selectedRows.length > 0 && selectedRows.length < records.length;
 
   const hBg = '#f5f7fa';
-  const pinCount = leftPinCols.length > 0 ? leftPinCols.length : Math.min(1, visibleCols.length);
+  const pinCount = pinLeft ? leftPinCols.length : Math.min(2, visibleCols.length);
   const lastPinIdx = pinCount - 1;
 
   const stickyLeftOf = (i: number) => {
@@ -119,6 +146,56 @@ export default function PlanReviewTable({
             {r.planName}
           </button>
         );
+      case 'jointDetail':
+        if (actionMode !== 'reviewing') {
+          return <span className="text-steel-300 text-xs">—</span>;
+        }
+        {
+          const names = (r.jointMeeting?.participants || [])
+            .map((p) => p.personName)
+            .filter(Boolean);
+          const full = names.length > 0 ? names.join('、') : '会审人员';
+          const display = full.length > 5 ? `${full.slice(0, 5)}…` : full;
+          return (
+            <button
+              type="button"
+              onClick={() => onJointDetail?.(r)}
+              className="text-xs font-medium hover:underline cursor-pointer whitespace-nowrap"
+              style={{ color: '#2563eb' }}
+              title={full}
+            >
+              {display}
+            </button>
+          );
+        }
+      case 'opinionDeadline':
+        if (actionMode !== 'reviewing') {
+          return <span className="text-steel-300 text-xs">—</span>;
+        }
+        return (
+          <span className="text-xs text-steel-600 whitespace-nowrap">
+            {formatDateTime(r.jointMeeting?.opinionDeadline)}
+          </span>
+        );
+      case 'opinionSign':
+        if (actionMode !== 'reviewing') {
+          return <span className="text-steel-300 text-xs">—</span>;
+        }
+        {
+          const s = getOpinionSignSummary(r.jointMeeting);
+          return (
+            <button
+              type="button"
+              onClick={() => setSignTarget(r)}
+              className="text-xs whitespace-nowrap cursor-pointer hover:opacity-80 text-left"
+              title="查看签署记录"
+            >
+              <span className="text-sky-500 font-medium">{s.signed}/{s.total}</span>
+              <span className="text-emerald-600 ml-1.5">通过:{s.passCount}人</span>
+              <span className="text-red-600 ml-1.5">不通过:{s.failCount}人</span>
+            </button>
+          );
+        }
       case 'budget':
         return <span className="text-right block font-medium text-steel-700 whitespace-nowrap">{r.budget.toFixed(2)}</span>;
       case 'benefit':
@@ -214,7 +291,7 @@ export default function PlanReviewTable({
               <tr>
                 <td colSpan={visibleCols.length + 3} className="px-3 py-16 text-center">
                   <p className="text-sm text-steel-400">
-                    {actionMode === 'pending_joint' ? '暂无待会审年度计划' : '暂无会审中年度计划'}
+                    {actionMode === 'pending_joint' ? '暂无待会审项目' : '暂无会审中项目'}
                   </p>
                 </td>
               </tr>
@@ -253,17 +330,13 @@ export default function PlanReviewTable({
                         </button>
                         {actionMode === 'reviewing' && (
                           <>
+                            <button type="button" title="短信通知" onClick={() => setSmsTarget(r)}
+                              className="px-2 py-1 text-xs rounded font-medium bg-violet-50 text-violet-600 hover:bg-violet-100 cursor-pointer whitespace-nowrap">
+                              短信通知
+                            </button>
                             <button type="button" title="会审通过" onClick={() => setPassTarget(r)}
                               className="px-2 py-1 text-xs rounded font-medium bg-emerald-50 text-emerald-600 hover:bg-emerald-100 cursor-pointer whitespace-nowrap">
                               通过
-                            </button>
-                            <button type="button" title="驳回" onClick={() => setRejectTarget(r)}
-                              className="px-2 py-1 text-xs rounded font-medium bg-red-50 text-red-500 hover:bg-red-100 cursor-pointer whitespace-nowrap">
-                              驳回
-                            </button>
-                            <button type="button" title="退回" onClick={() => onReturn(r)}
-                              className="px-2 py-1 text-xs rounded font-medium bg-orange-50 text-orange-500 hover:bg-orange-100 cursor-pointer whitespace-nowrap">
-                              退回
                             </button>
                           </>
                         )}
@@ -295,15 +368,20 @@ export default function PlanReviewTable({
         }}
       />
 
-      <RejectModal
-        open={!!rejectTarget}
-        mode="reject"
-        planName={rejectTarget?.planName ?? ''}
-        onClose={() => setRejectTarget(null)}
-        onConfirm={(reason) => {
-          if (!rejectTarget) return;
-          onReject(rejectTarget.id, reason);
-          setRejectTarget(null);
+      <OpinionSignRecordsModal
+        open={!!signTarget}
+        record={signTarget}
+        onClose={() => setSignTarget(null)}
+      />
+
+      <JointReviewSmsModal
+        open={!!smsTarget}
+        record={smsTarget}
+        onClose={() => setSmsTarget(null)}
+        onSend={({ type, personIds }) => {
+          const label = type === 'opinion' ? '会审意见填写通知' : '会审通知';
+          onSmsToast?.(`已向 ${personIds.length} 人发送${label}`);
+          setSmsTarget(null);
         }}
       />
     </div>

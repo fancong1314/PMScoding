@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { Contract } from '@/mocks/contractProgressMocks';
 
 interface ReviewModalProps {

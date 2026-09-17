@@ -1,4 +1,4 @@
-export interface ProfessionalPickRecord {
+﻿export interface ProfessionalPickRecord {
   id: string;
   argumentName: string;
   argumentNo: string;

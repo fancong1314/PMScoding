@@ -1,4 +1,4 @@
-export interface ItAcceptanceApplication {
+﻿export interface ItAcceptanceApplication {
   id: string;
   projectNo: string;
   projectName: string;

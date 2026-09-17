@@ -1,4 +1,4 @@
-import { getScheduleRecords } from '@/mocks/signboardMocks';
+﻿import { getScheduleRecords } from '@/mocks/signboardMocks';
 
 interface Props {
   contractId: string;

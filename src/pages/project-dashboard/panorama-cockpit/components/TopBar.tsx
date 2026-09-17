@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { mockRefreshTime } from '@/mocks/panoramaDashboardMocks';
 
 export default function TopBar() {

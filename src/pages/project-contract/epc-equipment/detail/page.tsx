@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+﻿import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { getEpcContractById, getEpcDevicesByContractId, EpcDevice } from '@/mocks/epcEquipmentMocks';

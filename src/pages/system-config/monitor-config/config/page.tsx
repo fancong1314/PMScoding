@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { monitorContracts, allHikvisionDevices, hikvisionSyncInfo, type MonitorContract, type HikvisionDevice } from '@/mocks/monitorConfigMocks';

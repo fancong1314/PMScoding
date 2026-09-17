@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import Layout from '@/components/feature/Layout';
 import DangerousWorkDetailModal from '../components/DangerousWorkDetailModal';
 import { dangerousWorks, dangerousWorkBusinessUnits, dangerousWorkDepartments, type DangerousWork } from '@/mocks/participantManagementMocks';

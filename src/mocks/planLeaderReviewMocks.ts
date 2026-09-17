@@ -1,4 +1,4 @@
-/** 项目部审查 — 演示数据（每个 TAB 分区均有可展示数据） */
+﻿/** 项目部审查 — 演示数据（每个 TAB 分区均有可展示数据） */
 
 import type { PlanPriorityLevel } from './planReviewMocks';
 export type { PlanPriorityLevel } from './planReviewMocks';
@@ -41,10 +41,10 @@ export const leaderReviewStatusMap: Record<LeaderReviewStatus, { label: string; 
 };
 
 export const leaderReviewYears = ['2024', '2025', '2026', '2027'];
-export const leaderReviewMajorCategories = ['新建', '技改', '零固', '大修'];
+export const leaderReviewMajorCategories = ['新建', '技改', '零固', '营缮'];
 export const leaderReviewCategories = [
   '设备升级', '智能制造/信息化', '安全环保', '品种质量', '基础设施',
-  '节能减排', '公辅配套', '产能扩张', '设备大修', '设备更新',
+  '节能减排', '公辅配套', '产能扩张', '设备营缮', '设备更新',
   '电力工程', '信息化建设', '土建工程', '环保改造', '智能化改造', '工艺改造',
 ];
 export const leaderReviewUnits = [
@@ -75,7 +75,7 @@ export const leaderReviewRecords: LeaderReviewRecord[] = [
   },
   {
     id: 'lr-pp-2', linkedPlanId: 'oh5', planName: '35kV主变压器及附属系统大修',
-    planYear: '2027', projectMajorCategory: '大修', projectCategory: '电力工程',
+    planYear: '2027', projectMajorCategory: '营缮', projectCategory: '电力工程',
     applicant: '孙丽', businessUnit: '动力事业部', budget: 680.00, benefit: 95.00,
     startDate: '2027-02-01', endDate: '2027-06-30', status: 'pending_present',
     priorityLevel: 'B',
@@ -119,7 +119,7 @@ export const leaderReviewRecords: LeaderReviewRecord[] = [
   },
   {
     id: 'lr-lv-2', linkedPlanId: 'oh6', planName: '烧结机台车及密封系统大修工程',
-    planYear: '2026', projectMajorCategory: '大修', projectCategory: '设备大修',
+    planYear: '2026', projectMajorCategory: '营缮', projectCategory: '设备营缮',
     applicant: '周涛', businessUnit: '原料事业部', budget: 540.00, benefit: 160.00,
     startDate: '2026-10-01', endDate: '2027-01-31', status: 'leader_reviewing',
     priorityLevel: 'B',
@@ -140,7 +140,7 @@ export const leaderReviewRecords: LeaderReviewRecord[] = [
   },
   {
     id: 'lr-lv-5', linkedPlanId: '1', planName: '3号高炉炉体大修及配套设备更新改造工程',
-    planYear: '2026', projectMajorCategory: '大修', projectCategory: '设备大修',
+    planYear: '2026', projectMajorCategory: '营缮', projectCategory: '设备营缮',
     applicant: '张伟', businessUnit: '炼铁事业部', budget: 850.00, benefit: 120.50,
     startDate: '2026-03-01', endDate: '2026-12-31', status: 'leader_reviewing',
     priorityLevel: 'A',
@@ -163,7 +163,7 @@ export const leaderReviewRecords: LeaderReviewRecord[] = [
   },
   {
     id: 'lr-lp-2', linkedPlanId: 'oh3', planName: '热轧加热炉蓄热式烧嘴大修',
-    planYear: '2025', projectMajorCategory: '大修', projectCategory: '设备大修',
+    planYear: '2025', projectMajorCategory: '营缮', projectCategory: '设备营缮',
     applicant: '王强', businessUnit: '热轧事业部', budget: 460.00, benefit: 85.00,
     startDate: '2025-08-01', endDate: '2026-01-31', status: 'leader_passed',
     priorityLevel: 'B',
@@ -191,7 +191,7 @@ export const leaderReviewRecords: LeaderReviewRecord[] = [
   },
   {
     id: 'lr-lp-6', linkedPlanId: 'oh4', planName: '高炉鼓风机本体及润滑系统大修',
-    planYear: '2026', projectMajorCategory: '大修', projectCategory: '设备大修',
+    planYear: '2026', projectMajorCategory: '营缮', projectCategory: '设备营缮',
     applicant: '张伟', businessUnit: '炼铁事业部', budget: 390.00, benefit: 66.00,
     startDate: '2026-09-01', endDate: '2026-12-31', status: 'leader_passed',
     priorityLevel: 'B',
@@ -208,7 +208,7 @@ export const leaderReviewRecords: LeaderReviewRecord[] = [
   },
   {
     id: 'lr-lr-2', linkedPlanId: 'oh1', planName: '转炉倾动机构及水冷系统大修',
-    planYear: '2025', projectMajorCategory: '大修', projectCategory: '设备大修',
+    planYear: '2025', projectMajorCategory: '营缮', projectCategory: '设备营缮',
     applicant: '陈刚', businessUnit: '炼钢事业部', budget: 420.00, benefit: 70.00,
     startDate: '2025-09-01', endDate: '2026-02-28', status: 'leader_returned',
     cancelReason: '计划开工时间与产线检修窗口冲突',
@@ -239,8 +239,8 @@ export const leaderReviewRecords: LeaderReviewRecord[] = [
     priorityLevel: 'A',
   },
   {
-    id: 'lr-lr-6', linkedPlanId: 'oh2', planName: '高线精轧机齿轮箱大修',
-    planYear: '2025', projectMajorCategory: '大修', projectCategory: '设备大修',
+    id: 'lr-lr-6', linkedPlanId: 'oh2', planName: '高线精轧机齿轮箱营缮',
+    planYear: '2025', projectMajorCategory: '营缮', projectCategory: '设备营缮',
     applicant: '刘洋', businessUnit: '特钢事业部', budget: 280.00, benefit: 48.00,
     startDate: '2025-11-01', endDate: '2026-03-31', status: 'leader_returned',
     cancelReason: '备件采购周期未论证，请完善采购计划',
@@ -258,7 +258,7 @@ export const leaderReviewRecords: LeaderReviewRecord[] = [
   },
   {
     id: 'lr-rt-2', linkedPlanId: 'oh9', planName: '转炉汽化冷却系统大修工程',
-    planYear: '2025', projectMajorCategory: '大修', projectCategory: '设备大修',
+    planYear: '2025', projectMajorCategory: '营缮', projectCategory: '设备营缮',
     applicant: '陈刚', businessUnit: '炼钢事业部', budget: 520.00, benefit: 75.00,
     startDate: '2025-02-01', endDate: '2025-10-31', status: 'returned',
     cancelReason: '检修窗口与年度大修计划冲突，请调整',
@@ -290,7 +290,7 @@ export const leaderReviewRecords: LeaderReviewRecord[] = [
   },
   {
     id: 'lr-rt-6', linkedPlanId: 'oh10', planName: '冷轧酸再生系统换热器大修',
-    planYear: '2026', projectMajorCategory: '大修', projectCategory: '设备大修',
+    planYear: '2026', projectMajorCategory: '营缮', projectCategory: '设备营缮',
     applicant: '吴晓燕', businessUnit: '冷轧事业部', budget: 295.00, benefit: 50.00,
     startDate: '2026-08-01', endDate: '2026-12-31', status: 'returned',
     cancelReason: '备件国产化方案未论证充分',

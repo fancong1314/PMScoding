@@ -1,4 +1,4 @@
-export interface OpinionSignRecord {
+﻿export interface OpinionSignRecord {
   id: string;
   applyNo: string;
   planNo: string;

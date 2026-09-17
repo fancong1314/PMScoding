@@ -1,4 +1,4 @@
-import Layout from '@/components/feature/Layout';
+﻿import Layout from '@/components/feature/Layout';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getContractById } from '@/mocks/contractProgressMocks';

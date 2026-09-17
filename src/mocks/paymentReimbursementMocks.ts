@@ -1,4 +1,4 @@
-// 合同款项报支 - Mock数据
+﻿// 合同款项报支 - Mock数据
 export interface ReimbursementContract {
   id: string;
   projectNo: string;
@@ -169,7 +169,7 @@ export const settlementApps: SettlementApp[] = [
     confirmed: false, serialNo: 'LS20250408017', contractNo: 'NG-HT-2024-1288',
     invoiceAmount: 45200000, settlementUnit: '南京钢铁股份有限公司', remark: '',
     financeSettlementDate: '', financeSettlementPerson: '', financeSettlementStatus: '',
-    modifier: '', modifyDate: '', attachmentFiles: ['高炉大修结算资料.zip'], hasApprovalFlow: false,
+    modifier: '', modifyDate: '', attachmentFiles: ['高炉营缮结算资料.zip'], hasApprovalFlow: false,
   },
   {
     id: 'st2', contractId: 'rc1', appNo: 'JSJS-2025-00038', changeType: '结算（设备）', costType: '设备',
@@ -319,7 +319,7 @@ export const settlementSAAItems: Record<string, SettlementSAAItem[]> = {
 
 // 合同列表
 export const reimbursementContracts: ReimbursementContract[] = [
-  { id: 'rc1', projectNo: 'LX2024-0088', contractNo: 'NG-HT-2024-1288', contractName: '炼铁厂高炉大修工程总承包合同', contractType: '工程总承包', contractorNo: 'QY-2023-0156', mainContent: '4号高炉本体大修、热风炉系统改造、出铁场环保升级、炉前除尘系统更新', signingDate: '2024-09-15', adjustedAmount: 89650000, status: '执行中' },
+  { id: 'rc1', projectNo: 'LX2024-0088', contractNo: 'NG-HT-2024-1288', contractName: '炼铁厂高炉营缮工程总承包合同', contractType: '工程总承包', contractorNo: 'QY-2023-0156', mainContent: '4号高炉本体大修、热风炉系统改造、出铁场环保升级、炉前除尘系统更新', signingDate: '2024-09-15', adjustedAmount: 89650000, status: '执行中' },
   { id: 'rc2', projectNo: 'LX2024-0091', contractNo: 'NG-HT-2024-1302', contractName: '中板厂热处理线技术改造施工分包合同', contractType: '施工分包', contractorNo: 'QY-2023-0189', mainContent: '热处理炉基础施工、淬火机安装、回火炉安装、配套管道及电气施工', signingDate: '2024-09-20', adjustedAmount: 32500000, status: '执行中' },
   { id: 'rc3', projectNo: 'LX2024-0095', contractNo: 'NG-HT-2024-1315', contractName: '宽厚板厂精轧机设备采购合同', contractType: '设备采购', contractorNo: 'QY-2023-0210', mainContent: '精轧机主机1套、主传动电机2台、液压AGC系统、弯辊系统、机架辊道及导卫装置', signingDate: '2024-10-08', adjustedAmount: 128000000, status: '执行中' },
   { id: 'rc4', projectNo: 'LX2024-0102', contractNo: 'NG-HT-2024-1340', contractName: '能源管控中心智能化改造技术服务合同', contractType: '技术服务', contractorNo: 'QY-2023-0255', mainContent: '能源管理系统升级、EMS平台搭建、数据采集系统部署、能耗分析与优化策略制定', signingDate: '2024-10-22', adjustedAmount: 8500000, status: '执行中' },
@@ -385,7 +385,7 @@ export const prepaymentApps: PrepaymentApp[] = [
     applicant: '王建国', applyDate: '2025-03-05', submitter: '赵志刚', submitDate: '2025-03-10',
     reimbursementNo: '', reimbursementStatus: '', financeStatus: '', reimbursementDate: '',
     confirmed: false, serialNo: 'LS20250305001', contractNo: 'NG-HT-2024-1288',
-    modifier: '', modifyDate: '', attachmentFiles: ['高炉大修预付款申请表.pdf'], prepayTableFile: '预付款申报表-高炉大修.xlsx',
+    modifier: '', modifyDate: '', attachmentFiles: ['高炉营缮预付款申请表.pdf'], prepayTableFile: '预付款申报表-高炉营缮.xlsx',
   },
   {
     id: 'pp2', contractId: 'rc1', appNo: 'JSHQ-2025-00058', changeType: '预付款（设备）', costType: '设备',

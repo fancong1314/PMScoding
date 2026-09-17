@@ -1,10 +1,15 @@
-﻿import { useMemo, useState } from 'react';
+﻿import { useState } from 'react';
 import type { ProjectPlan } from '@/mocks/projectPlans';
+import { projectCategories, projectManagers } from '@/mocks/projectPlans';
+import EquipmentSelectModal from './EquipmentSelectModal';
+import type { EquipmentItem } from '@/mocks/equipmentMocks';
 import {
-  businessDivisions,
-  overhaulDivisionUnitMap,
-  projectManagers,
-} from '@/mocks/projectPlans';
+  FormSection,
+  FormField,
+  formRow2Cls,
+  formInputCls,
+} from '@/components/feature/FormLayout';
+import SubmitOrgFields from './SubmitOrgFields';
 import AnnualPlanSelectModal from './AnnualPlanSelectModal';
 
 interface Props {
@@ -15,23 +20,17 @@ interface Props {
   sectionRef: (el: HTMLDivElement | null) => void;
 }
 
-const labelCls = 'flex justify-end items-center text-sm text-steel-600 pt-2 whitespace-nowrap';
-const requiredStar = <span className="text-red-500 ml-0.5">*</span>;
-const inputCls = (err?: string) =>
-  `w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-colors ${
-    err ? 'border-red-300 bg-red-50/30' : 'border-steel-200 bg-white'
-  }`;
+const nextYear = String(new Date().getFullYear() + 1);
+const yearOptions = Array.from({ length: 5 }, (_, i) => String(new Date().getFullYear() - 1 + i));
 
 export default function MinorFormSection({ data, errors, onChange, onPatch, sectionRef }: Props) {
   const [showManagerModal, setShowManagerModal] = useState(false);
+  const [showEquipModal, setShowEquipModal] = useState(false);
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [managerSearch, setManagerSearch] = useState('');
 
   const isInPlan = (data.isInPlanProject || '否') === '是';
-  const unitOptions = useMemo(
-    () => overhaulDivisionUnitMap[data.businessDivision || ''] || [],
-    [data.businessDivision]
-  );
+  const showAssetCode = (data.isNewMinor || '否') === '否';
 
   const filteredManagers = projectManagers.filter(
     (m) => !managerSearch || m.name.includes(managerSearch) || m.id.includes(managerSearch)
@@ -50,218 +49,298 @@ export default function MinorFormSection({ data, errors, onChange, onPatch, sect
       planName: plan.planName || data.planName,
       planYear: plan.planYear || data.planYear,
       businessDivision: plan.businessDivision || data.businessDivision,
+      submitDept: plan.submitDept || data.submitDept,
+      implementDept: plan.implementDept || data.implementDept,
+      projectCategory: plan.projectCategory || data.projectCategory,
       budgetAmount: plan.budgetAmount || data.budgetAmount,
-      declareFee: plan.declareFee ?? data.declareFee ?? plan.budgetAmount,
       projectManager: plan.projectManager || data.projectManager,
       projectManagerPhone: plan.projectManagerPhone || data.projectManagerPhone,
-      necessity: plan.necessity || data.necessity,
+      startDate: plan.startDate || data.startDate,
+      endDate: plan.endDate || data.endDate,
+      equipmentCode: plan.equipmentCode || data.equipmentCode,
+      equipmentName: plan.equipmentName || data.equipmentName,
+      equipmentStockQty: plan.equipmentStockQty ?? data.equipmentStockQty,
+      specModel: plan.specModel || data.specModel,
+      measureUnit: plan.measureUnit || data.measureUnit,
+      updateQty: plan.updateQty ?? data.updateQty,
+      purchaseApplyQty: plan.purchaseApplyQty ?? data.purchaseApplyQty,
+      unitPrice: plan.unitPrice ?? data.unitPrice,
+      isNewMinor: plan.isNewMinor || data.isNewMinor,
+      fixedAssetCode: plan.fixedAssetCode || data.fixedAssetCode,
+      updateReason: plan.updateReason || data.updateReason,
     });
     setShowPlanModal(false);
   };
 
-  const col = 'grid grid-cols-[130px_1fr] gap-3 items-start';
-
   return (
-    <div id="minor-info" ref={sectionRef} className="bg-white rounded-lg border border-steel-200 overflow-hidden">
-      <div className="flex items-center gap-2.5 px-5 py-3.5" style={{ borderBottom: '1px solid #e8edf3', backgroundColor: '#fafbfd' }}>
-        <i className="ri-file-info-line text-emerald-500" />
-        <h3 className="text-sm font-semibold text-steel-800">基本信息</h3>
-        <span className="text-xs text-steel-400 ml-1">零固立项申报基础字段</span>
-      </div>
-
-      <div className="p-5 space-y-4">
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-          <div className={col}>
-            <label className={labelCls}>项目类型{requiredStar}</label>
-            <input type="text" value="零固" readOnly className={inputCls() + ' bg-slate-50 text-steel-600'} />
-          </div>
-          <div className={col}>
-            <label className={labelCls}>是否计划内{requiredStar}</label>
-            <div>
-              <select
-                value={data.isInPlanProject || '否'}
-                onChange={(e) => {
-                  const v = e.target.value as '是' | '否';
-                  patch({
-                    isInPlanProject: v,
-                    ...(v === '否' ? { annualPlanNo: '', annualPlanId: '' } : {}),
-                  });
-                }}
-                className={inputCls(errors.isInPlanProject) + ' cursor-pointer'}
-              >
-                <option value="是">是</option>
-                <option value="否">否</option>
-              </select>
-              {errors.isInPlanProject && <p className="mt-1 text-xs text-red-500">{errors.isInPlanProject}</p>}
-            </div>
-          </div>
-        </div>
-
+    <FormSection
+      id="minor-info"
+      sectionRef={sectionRef}
+      title="基本资料维护"
+      subtitle="零固专项申报字段"
+      icon="ri-box-3-line"
+    >
+      <div className={formRow2Cls}>
+        <FormField label="是否计划内项目" required error={errors.isInPlanProject}>
+          <select
+            value={data.isInPlanProject || '否'}
+            onChange={(e) => {
+              const v = e.target.value as '是' | '否';
+              patch({
+                isInPlanProject: v,
+                ...(v === '否' ? { annualPlanNo: '', annualPlanId: '' } : {}),
+              });
+            }}
+            className={formInputCls(errors.isInPlanProject) + ' cursor-pointer'}
+          >
+            <option value="否">否</option>
+            <option value="是">是</option>
+          </select>
+        </FormField>
         {isInPlan && (
-          <div className={col}>
-            <label className={labelCls}>项目计划号{requiredStar}</label>
-            <div>
-              <div
-                onClick={() => setShowPlanModal(true)}
-                className={`${inputCls(errors.annualPlanNo)} cursor-pointer flex items-center justify-between`}
-              >
-                <span className={data.annualPlanNo ? 'text-steel-800 font-mono text-xs' : 'text-steel-400'}>
-                  {data.annualPlanNo || '点击选择已通过的年度计划'}
-                </span>
-                <i className="ri-search-line text-primary-500 text-sm" />
-              </div>
-              {errors.annualPlanNo && <p className="mt-1 text-xs text-red-500">{errors.annualPlanNo}</p>}
-            </div>
-          </div>
-        )}
-
-        <div className={col}>
-          <label className={labelCls}>项目名称{requiredStar}</label>
-          <div>
-            <input
-              type="text"
-              maxLength={100}
-              value={data.planName || ''}
-              onChange={(e) => onChange('planName', e.target.value.slice(0, 100))}
-              placeholder="请输入项目名称"
-              className={inputCls(errors.planName)}
-            />
-            {errors.planName && <p className="mt-1 text-xs text-red-500">{errors.planName}</p>}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-          <div className={col}>
-            <label className={labelCls}>论证申请单号</label>
-            <input
-              type="text"
-              maxLength={50}
-              value={data.argumentApplyNo || ''}
-              onChange={(e) => onChange('argumentApplyNo', e.target.value.slice(0, 50))}
-              placeholder="请输入论证申请单号"
-              className={inputCls()}
-            />
-          </div>
-          <div className={col}>
-            <label className={labelCls}>事业部 / 单位{requiredStar}</label>
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <select
-                  value={data.businessDivision || ''}
-                  onChange={(e) => {
-                    const div = e.target.value;
-                    const units = overhaulDivisionUnitMap[div] || [];
-                    patch({
-                      businessDivision: div,
-                      ownerUnit: units.includes(data.ownerUnit || '') ? data.ownerUnit : (units[0] || ''),
-                    });
-                  }}
-                  className={inputCls(errors.businessDivision) + ' cursor-pointer'}
-                >
-                  <option value="">请选择事业部</option>
-                  {businessDivisions.map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-                {errors.businessDivision && <p className="mt-1 text-xs text-red-500">{errors.businessDivision}</p>}
-              </div>
-              <div>
-                <select
-                  value={data.ownerUnit || ''}
-                  onChange={(e) => onChange('ownerUnit', e.target.value)}
-                  disabled={!data.businessDivision}
-                  className={inputCls(errors.ownerUnit) + ' cursor-pointer disabled:bg-slate-50'}
-                >
-                  <option value="">请选择单位</option>
-                  {unitOptions.map((u) => (
-                    <option key={u} value={u}>{u}</option>
-                  ))}
-                </select>
-                {errors.ownerUnit && <p className="mt-1 text-xs text-red-500">{errors.ownerUnit}</p>}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-x-6 gap-y-4">
-          <div className="grid grid-cols-[130px_1fr] gap-3 items-start">
-            <label className={labelCls}>是否报废更新{requiredStar}</label>
-            <select
-              value={data.isScrapRenew || '是'}
-              onChange={(e) => onChange('isScrapRenew', e.target.value)}
-              className={inputCls(errors.isScrapRenew) + ' cursor-pointer'}
-            >
-              <option value="是">是</option>
-              <option value="否">否</option>
-            </select>
-          </div>
-          <div className="grid grid-cols-[130px_1fr] gap-3 items-start">
-            <label className={labelCls}>申报费用(万元)</label>
-            <div className="relative">
-              <input
-                type="number"
-                min={0}
-                step={0.01}
-                value={data.declareFee ?? ''}
-                onChange={(e) => onChange('declareFee', Number(e.target.value))}
-                placeholder="0.00"
-                className={inputCls() + ' pr-10'}
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel-400">万元</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-[140px_1fr] gap-3 items-start">
-            <label className={labelCls}>项目计划金额(万元){requiredStar}</label>
-            <div>
-              <div className="relative">
-                <input
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={data.budgetAmount || ''}
-                  onChange={(e) => onChange('budgetAmount', Number(e.target.value))}
-                  placeholder="0.00"
-                  className={inputCls(errors.budgetAmount) + ' pr-10'}
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel-400">万元</span>
-              </div>
-              {errors.budgetAmount && <p className="mt-1 text-xs text-red-500">{errors.budgetAmount}</p>}
-            </div>
-          </div>
-        </div>
-
-        <div className={col}>
-          <label className={labelCls}>项目负责人{requiredStar}</label>
-          <div>
+          <FormField label="年度计划号" required error={errors.annualPlanNo}>
             <div
-              onClick={() => setShowManagerModal(true)}
-              className={`${inputCls(errors.projectManager)} cursor-pointer flex items-center justify-between`}
+              onClick={() => setShowPlanModal(true)}
+              className={`${formInputCls(errors.annualPlanNo)} cursor-pointer flex items-center justify-between`}
             >
-              <span className={data.projectManager ? 'text-steel-800' : 'text-steel-400'}>
-                {data.projectManager || '点击选择项目负责人'}
+              <span className={data.annualPlanNo ? 'text-steel-800 font-mono text-xs' : 'text-steel-400'}>
+                {data.annualPlanNo || '点击选择已通过的年度计划'}
               </span>
               <i className="ri-search-line text-primary-500 text-sm" />
             </div>
-            {errors.projectManager && <p className="mt-1 text-xs text-red-500">{errors.projectManager}</p>}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-[130px_1fr] gap-3 items-start">
-          <label className={labelCls + ' items-start'}>项目必要性{requiredStar}</label>
-          <div>
-            <textarea
-              rows={4}
-              maxLength={500}
-              value={data.necessity || ''}
-              onChange={(e) => onChange('necessity', e.target.value.slice(0, 500))}
-              placeholder="请输入项目必要性"
-              className={inputCls(errors.necessity) + ' resize-none'}
-            />
-            <p className="text-xs text-steel-400 mt-1 text-right">{(data.necessity || '').length}/500</p>
-            {errors.necessity && <p className="mt-1 text-xs text-red-500">{errors.necessity}</p>}
-          </div>
-        </div>
+          </FormField>
+        )}
       </div>
+
+      <SubmitOrgFields data={data} errors={errors} onChange={onChange} onPatch={onPatch} />
+
+      <div className={formRow2Cls}>
+        <FormField label="项目类别" required error={errors.projectCategory}>
+          <select
+            value={data.projectCategory || ''}
+            onChange={(e) => onChange('projectCategory', e.target.value)}
+            className={formInputCls(errors.projectCategory) + ' cursor-pointer'}
+          >
+            <option value="">请选择项目类别</option>
+            {projectCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </FormField>
+        <FormField label="计划年度" required error={errors.planYear}>
+          <select
+            value={data.planYear || nextYear}
+            onChange={(e) => onChange('planYear', e.target.value)}
+            className={formInputCls(errors.planYear) + ' cursor-pointer'}
+          >
+            {yearOptions.map((y) => <option key={y} value={y}>{y}年</option>)}
+          </select>
+        </FormField>
+      </div>
+
+      <FormField label="项目名称" required error={errors.planName}>
+        <input
+          type="text"
+          maxLength={100}
+          value={data.planName || ''}
+          onChange={(e) => onChange('planName', e.target.value.slice(0, 100))}
+          placeholder="请输入项目名称"
+          className={formInputCls(errors.planName)}
+        />
+        <p className="text-[10px] text-steel-300 text-right mt-0.5">{(data.planName || '').length}/100</p>
+      </FormField>
+
+      <div className={formRow2Cls}>
+        <FormField label="计划开工时间" required error={errors.startDate}>
+          <input
+            type="month"
+            value={data.startDate?.length === 10 ? data.startDate.slice(0, 7) : (data.startDate || '')}
+            onChange={(e) => onChange('startDate', e.target.value)}
+            className={formInputCls(errors.startDate) + ' cursor-pointer'}
+          />
+        </FormField>
+        <FormField label="计划完工时间" required error={errors.endDate}>
+          <input
+            type="month"
+            value={data.endDate?.length === 10 ? data.endDate.slice(0, 7) : (data.endDate || '')}
+            min={(data.startDate?.length === 10 ? data.startDate.slice(0, 7) : data.startDate) || ''}
+            onChange={(e) => onChange('endDate', e.target.value)}
+            className={formInputCls(errors.endDate) + ' cursor-pointer'}
+          />
+        </FormField>
+      </div>
+
+      <div className={formRow2Cls}>
+        <FormField label="设备编码">
+          <div
+            onClick={() => setShowEquipModal(true)}
+            className={`${formInputCls()} cursor-pointer flex items-center justify-between`}
+          >
+            <span className={data.equipmentCode ? 'text-steel-800 truncate' : 'text-steel-400'}>
+              {data.equipmentCode || '点击搜索并选择设备'}
+            </span>
+            <i className="ri-search-line text-primary-500" />
+          </div>
+        </FormField>
+        <FormField label="设备名称">
+          <input
+            type="text"
+            value={data.equipmentName || ''}
+            readOnly
+            placeholder="由设备选择后自动回填"
+            className={formInputCls(undefined, { readonly: true })}
+          />
+        </FormField>
+      </div>
+
+      <div className={formRow2Cls}>
+        <FormField label="设备库存数量">
+          <input
+            type="number"
+            readOnly
+            value={data.equipmentStockQty ?? ''}
+            placeholder="选择设备后自动带出"
+            className={formInputCls(undefined, { readonly: true })}
+          />
+        </FormField>
+        <FormField label="规格型号" required error={errors.specModel}>
+          <input
+            type="text"
+            maxLength={100}
+            value={data.specModel || ''}
+            onChange={(e) => onChange('specModel', e.target.value.slice(0, 100))}
+            placeholder="请输入规格型号"
+            className={formInputCls(errors.specModel)}
+          />
+          <p className="text-[10px] text-steel-300 text-right mt-0.5">{(data.specModel || '').length}/100</p>
+        </FormField>
+      </div>
+
+      <div className={formRow2Cls}>
+        <FormField label="计量单位" required error={errors.measureUnit}>
+          <input
+            type="text"
+            maxLength={25}
+            value={data.measureUnit || ''}
+            onChange={(e) => onChange('measureUnit', e.target.value.slice(0, 25))}
+            placeholder="如：台、套"
+            className={formInputCls(errors.measureUnit)}
+          />
+          <p className="text-[10px] text-steel-300 text-right mt-0.5">{(data.measureUnit || '').length}/25</p>
+        </FormField>
+        <FormField label="需求数量" required error={errors.updateQty}>
+          <input
+            type="number"
+            min={0}
+            step={1}
+            value={data.updateQty ?? ''}
+            onChange={(e) => onChange('updateQty', Number(e.target.value) || 0)}
+            placeholder="0"
+            className={formInputCls(errors.updateQty)}
+          />
+        </FormField>
+      </div>
+
+      <div className={formRow2Cls}>
+        <FormField label="申请采购数量" required error={errors.purchaseApplyQty}>
+          <input
+            type="number"
+            min={0}
+            step={1}
+            value={data.purchaseApplyQty ?? ''}
+            onChange={(e) => onChange('purchaseApplyQty', Number(e.target.value) || 0)}
+            placeholder="0"
+            className={formInputCls(errors.purchaseApplyQty)}
+          />
+        </FormField>
+        <FormField label="预估单价(万元)" required error={errors.unitPrice}>
+          <input
+            type="number"
+            min={0}
+            step={0.01}
+            value={data.unitPrice ?? ''}
+            onChange={(e) => onChange('unitPrice', Number(e.target.value) || 0)}
+            placeholder="0"
+            className={formInputCls(errors.unitPrice)}
+          />
+        </FormField>
+      </div>
+
+      <div className={formRow2Cls}>
+        <FormField label="立项总概算(万元)">
+          <div className="relative">
+            <input
+              type="number"
+              readOnly
+              value={data.budgetAmount ? Number(data.budgetAmount).toFixed(2) : '0.00'}
+              className={formInputCls(undefined, { readonly: true }) + ' cursor-not-allowed'}
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel-400">由费用概算合计</span>
+          </div>
+        </FormField>
+      </div>
+
+      <div className={formRow2Cls}>
+        <FormField label="是否新增零固" required>
+          <select
+            value={data.isNewMinor || '否'}
+            onChange={(e) => {
+              onChange('isNewMinor', e.target.value);
+              if (e.target.value === '是') onChange('fixedAssetCode', '');
+            }}
+            className={formInputCls() + ' cursor-pointer'}
+          >
+            <option value="否">否</option>
+            <option value="是">是</option>
+          </select>
+        </FormField>
+        {showAssetCode && (
+          <FormField label="固定资产编码" required error={errors.fixedAssetCode}>
+            <input
+              type="text"
+              maxLength={32}
+              value={data.fixedAssetCode || ''}
+              onChange={(e) => onChange('fixedAssetCode', e.target.value.slice(0, 32))}
+              placeholder="请输入固定资产编码"
+              className={formInputCls(errors.fixedAssetCode)}
+            />
+            <p className="text-[10px] text-steel-300 text-right mt-0.5">{(data.fixedAssetCode || '').length}/32</p>
+          </FormField>
+        )}
+      </div>
+
+      <div className={formRow2Cls}>
+        <FormField label="项目负责人" required error={errors.projectManager}>
+          <div
+            onClick={() => setShowManagerModal(true)}
+            className={`${formInputCls(errors.projectManager)} cursor-pointer flex items-center justify-between`}
+          >
+            <span className={data.projectManager ? 'text-steel-800' : 'text-steel-400'}>
+              {data.projectManager || '点击选择项目负责人'}
+            </span>
+            <i className="ri-user-search-line text-steel-400" />
+          </div>
+        </FormField>
+        <FormField label="负责人电话">
+          <input
+            type="text"
+            value={data.projectManagerPhone || ''}
+            onChange={(e) => onChange('projectManagerPhone', e.target.value)}
+            placeholder="选择负责人后自动带入，可修改"
+            className={formInputCls()}
+          />
+        </FormField>
+      </div>
+
+      <FormField label="更新理由" required error={errors.updateReason} topAlign>
+        <textarea
+          rows={3}
+          maxLength={250}
+          value={data.updateReason || ''}
+          onChange={(e) => onChange('updateReason', e.target.value.slice(0, 250))}
+          placeholder="请输入更新理由"
+          className={formInputCls(errors.updateReason) + ' resize-none'}
+        />
+        <p className="text-[10px] text-steel-300 text-right mt-0.5">{(data.updateReason || '').length}/250</p>
+      </FormField>
 
       <AnnualPlanSelectModal
         open={showPlanModal}
@@ -276,7 +355,12 @@ export default function MinorFormSection({ data, errors, onChange, onPatch, sect
           <div className="relative bg-white rounded-xl border border-steel-200 shadow-xl w-[480px] max-h-[70vh] flex flex-col">
             <div className="px-4 py-3 border-b border-steel-100 font-semibold text-sm text-steel-800">选择项目负责人</div>
             <div className="px-4 py-2 border-b border-steel-100">
-              <input value={managerSearch} onChange={(e) => setManagerSearch(e.target.value)} placeholder="输入姓名或工号搜索" className={inputCls()} />
+              <input
+                value={managerSearch}
+                onChange={(e) => setManagerSearch(e.target.value)}
+                placeholder="输入姓名或工号搜索"
+                className={formInputCls()}
+              />
             </div>
             <div className="flex-1 overflow-y-auto p-2">
               {filteredManagers.map((m) => (
@@ -284,7 +368,8 @@ export default function MinorFormSection({ data, errors, onChange, onPatch, sect
                   key={m.id}
                   type="button"
                   onClick={() => {
-                    patch({ projectManager: m.name, projectManagerPhone: m.phone });
+                    onChange('projectManager', m.name);
+                    onChange('projectManagerPhone', m.phone);
                     setShowManagerModal(false);
                     setManagerSearch('');
                   }}
@@ -298,6 +383,27 @@ export default function MinorFormSection({ data, errors, onChange, onPatch, sect
           </div>
         </div>
       )}
-    </div>
+
+      <EquipmentSelectModal
+        open={showEquipModal}
+        multiple={false}
+        title="搜索并选择设备明细清单"
+        selectedCodes={(data.equipmentCode || '').split(',').map((s) => s.trim()).filter(Boolean)}
+        onClose={() => setShowEquipModal(false)}
+        onConfirm={(items: EquipmentItem[]) => {
+          const item = items[0];
+          if (item) {
+            onChange('equipmentCode', item.code);
+            onChange('equipmentName', item.name);
+            onChange('equipmentStockQty', item.stockQty);
+            if (item.model) onChange('specModel', item.model);
+          } else {
+            onChange('equipmentCode', '');
+            onChange('equipmentName', '');
+            onChange('equipmentStockQty', 0);
+          }
+        }}
+      />
+    </FormSection>
   );
 }

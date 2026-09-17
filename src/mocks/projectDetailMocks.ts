@@ -1,4 +1,4 @@
-export interface ProjectOption {
+﻿export interface ProjectOption {
   id: string;
   name: string;
   number: string;
@@ -6,7 +6,7 @@ export interface ProjectOption {
 
 export const projectOptions: ProjectOption[] = [
   { id: '2026121324', name: '新建工业厂房项目', number: '2026121324' },
-  { id: '2025120345', name: '高炉大修改造项目', number: '2025120345' },
+  { id: '2025120345', name: '高炉营缮改造项目', number: '2025120345' },
   { id: '2026110234', name: '智能化产线升级项目', number: '2026110234' },
   { id: '2026090123', name: '环保脱硫改造项目', number: '2026090123' },
   { id: '2026080034', name: '轧钢生产线改造项目', number: '2026080034' },

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+﻿import { useState, useRef, useCallback } from 'react';
 import { availableApprovers, type ApprovalNodeConfig } from '@/mocks/approvalMocks';
 
 interface BatchPresentModalProps {
@@ -439,7 +439,7 @@ export default function BatchPresentModal({ open, selectedCount, onClose, onConf
             </div>
             <div>
               <h2 className="text-base font-semibold text-slate-800">批量呈核</h2>
-              <p className="text-xs text-slate-400">已选择 {selectedCount} 个年度计划</p>
+              <p className="text-xs text-slate-400">已选择 {selectedCount} 个项目</p>
             </div>
           </div>
           <div className="flex items-center gap-3">

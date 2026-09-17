@@ -1,4 +1,4 @@
-export interface ProjectPoint {
+﻿export interface ProjectPoint {
   id: string;
   name: string;
   projectNo: string;
@@ -129,7 +129,7 @@ export const mockSummary: DashboardSummary = {
 };
 
 export const mockProjectPoints: ProjectPoint[] = [
-  { id: 'p1', name: '炼铁厂2#高炉大修', projectNo: 'XM-2026-001', type: '大中修', approvedAmount: 8560, progress: 68, status: '执行中', x: 35, y: 30 },
+  { id: 'p1', name: '炼铁厂2#高炉营缮', projectNo: 'XM-2026-001', type: '大中修', approvedAmount: 8560, progress: 68, status: '执行中', x: 35, y: 30 },
   { id: 'p2', name: '板材厂智能化改造', projectNo: 'XM-2026-002', type: '技改', approvedAmount: 12500, progress: 45, status: '执行中', x: 52, y: 25 },
   { id: 'p3', name: '公辅系统节能改造', projectNo: 'XM-2026-003', type: '技改', approvedAmount: 6800, progress: 82, status: '执行中', x: 28, y: 55 },
   { id: 'p4', name: '炼钢连铸机零固', projectNo: 'XM-2026-004', type: '零固', approvedAmount: 3200, progress: 92, status: '收尾中', x: 48, y: 42 },
@@ -200,7 +200,7 @@ export const mockCostDeviationStacks: CostDeviationStack[] = [
 export const mockTopOverspend: TopOverspendProject[] = [
   { name: '特钢事业部设备升级', amount: 2850, pct: 18.3 },
   { name: '板材厂智能化改造', amount: 2160, pct: 17.3 },
-  { name: '炼铁厂2#高炉大修', amount: 1580, pct: 18.4 },
+  { name: '炼铁厂2#高炉营缮', amount: 1580, pct: 18.4 },
   { name: '能环部脱硫脱硝改造', amount: 1250, pct: 12.8 },
   { name: '公辅系统节能改造', amount: 980, pct: 14.4 },
 ];
@@ -258,7 +258,7 @@ export const mockTypeInvestPct = [
 ];
 
 export const mockMonitorFeeds: MonitorFeed[] = [
-  { id: 'm1', name: '炼铁厂2#高炉', online: true, contractName: '炼铁厂2#高炉大修项目' },
+  { id: 'm1', name: '炼铁厂2#高炉', online: true, contractName: '炼铁厂2#高炉营缮项目' },
   { id: 'm2', name: '板材厂轧机车间', online: true, contractName: '板材厂智能化改造项目' },
   { id: 'm3', name: '公辅系统泵站', online: true, contractName: '公辅系统节能改造项目' },
   { id: 'm4', name: '特钢事业部厂房', online: false, contractName: '特钢事业部设备升级项目' },
@@ -304,7 +304,7 @@ export interface TickerEvent {
 }
 
 export const mockTickerEvents: TickerEvent[] = [
-  { id: 't1', time: '14:32', type: '重大风险', description: '炼铁厂2#高炉大修项目关键节点延迟3天' },
+  { id: 't1', time: '14:32', type: '重大风险', description: '炼铁厂2#高炉营缮项目关键节点延迟3天' },
   { id: 't2', time: '14:28', type: '里程碑达成', description: '板材厂智能化改造项目完成设备调试' },
   { id: 't3', time: '14:15', type: '进度预警', description: '公辅系统节能改造项目进度低于计划5%' },
   { id: 't4', time: '14:05', type: '合同签订', description: '特钢事业部设备升级项目EPC合同签订' },
@@ -341,7 +341,7 @@ export interface RiskItem {
 
 export const mockRiskAnalysis: RiskItem[] = [
   { id: 1, name: '数据中心机房建设项目', riskLevel: '高', score: 94.6 },
-  { id: 2, name: '炼铁厂高炉大修工程', riskLevel: '高', score: 93.5 },
+  { id: 2, name: '炼铁厂高炉营缮工程', riskLevel: '高', score: 93.5 },
   { id: 3, name: '公辅系统节能改造', riskLevel: '中', score: 91.5 },
   { id: 4, name: '板材厂智能化升级', riskLevel: '中', score: 89.3 },
   { id: 5, name: '物流中心仓储系统', riskLevel: '低', score: 85.4 },

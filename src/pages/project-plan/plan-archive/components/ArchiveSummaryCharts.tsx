@@ -65,7 +65,7 @@ export default function ArchiveSummaryCharts({ records }: Props) {
       cur.budget += r.budget;
       map.set(r.projectMajorCategory, cur);
     });
-    return ['新建', '技改', '零固', '大修']
+    return ['新建', '技改', '零固', '营缮']
       .filter((k) => map.has(k))
       .map((name) => ({
         name,

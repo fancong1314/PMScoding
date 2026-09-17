@@ -1,4 +1,4 @@
-export interface ProjectTypeData {
+﻿export interface ProjectTypeData {
   declareAmount: number;
   benefit: number;
   count: number;

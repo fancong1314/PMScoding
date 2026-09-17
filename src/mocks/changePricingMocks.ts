@@ -1,4 +1,4 @@
-export interface ChangePricingProject {
+﻿export interface ChangePricingProject {
   id: string;
   approvalNo: string;
   planNo: string;

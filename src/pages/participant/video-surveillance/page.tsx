@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import Layout from '@/components/feature/Layout';
 import { mockMonitorContracts, type MonitorContract, type CameraInfo } from '@/mocks/participantManagementMocks';
 

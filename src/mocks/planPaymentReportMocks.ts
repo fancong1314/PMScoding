@@ -1,4 +1,4 @@
-/** 年度付款计划报表 — 由各计划「付款计划」汇总生成财务月度付款表 */
+﻿/** 年度付款计划报表 — 由各计划「付款计划」汇总生成财务月度付款表 */
 
 export interface PlanPaymentItem {
   /** YYYY-MM */
@@ -22,7 +22,7 @@ export interface PlanPaymentSource {
 }
 
 export const paymentReportYears = ['2025', '2026', '2027'];
-export const paymentReportMajorCategories = ['新建', '技改', '零固', '大修'];
+export const paymentReportMajorCategories = ['新建', '技改', '零固', '营缮'];
 export const paymentReportUnits = [
   '炼铁事业部', '炼钢事业部', '热轧事业部', '冷轧事业部', '特钢事业部',
   '动力事业部', '原料事业部', '物流事业部', '工程技术部',
@@ -37,7 +37,7 @@ export const MONTH_LABELS = ['1月', '2月', '3月', '4月', '5月', '6月', '7�
 export const planPaymentSources: PlanPaymentSource[] = [
   {
     id: 'pps-01', planNo: 'JH-2026-DX-001', planName: '3号高炉炉体大修及配套设备更新改造工程',
-    planYear: '2026', projectMajorCategory: '大修', projectType: '设备大修',
+    planYear: '2026', projectMajorCategory: '营缮', projectType: '设备营缮',
     businessUnit: '炼铁事业部', budget: 850,
     payments: [
       { paymentMonth: '2026-03', amount: 120, paymentType: '预付款' },
@@ -91,7 +91,7 @@ export const planPaymentSources: PlanPaymentSource[] = [
   },
   {
     id: 'pps-06', planNo: 'JH-2026-DX-014', planName: '烧结机台车及密封系统大修工程',
-    planYear: '2026', projectMajorCategory: '大修', projectType: '设备大修',
+    planYear: '2026', projectMajorCategory: '营缮', projectType: '设备营缮',
     businessUnit: '原料事业部', budget: 540,
     payments: [
       { paymentMonth: '2026-10', amount: 180, paymentType: '预付款' },
@@ -142,7 +142,7 @@ export const planPaymentSources: PlanPaymentSource[] = [
   },
   {
     id: 'pps-11', planNo: 'JH-2025-DX-008', planName: '热轧加热炉蓄热式烧嘴大修',
-    planYear: '2025', projectMajorCategory: '大修', projectType: '设备大修',
+    planYear: '2025', projectMajorCategory: '营缮', projectType: '设备营缮',
     businessUnit: '热轧事业部', budget: 460,
     payments: [
       { paymentMonth: '2025-08', amount: 150, paymentType: '预付款' },
@@ -162,7 +162,7 @@ export const planPaymentSources: PlanPaymentSource[] = [
   },
   {
     id: 'pps-13', planNo: 'JH-2027-DX-002', planName: '35kV主变压器及附属系统大修',
-    planYear: '2027', projectMajorCategory: '大修', projectType: '电力工程',
+    planYear: '2027', projectMajorCategory: '营缮', projectType: '电力工程',
     businessUnit: '动力事业部', budget: 680,
     payments: [
       { paymentMonth: '2027-02', amount: 200, paymentType: '预付款' },
@@ -219,7 +219,7 @@ export const planPaymentSources: PlanPaymentSource[] = [
   },
   {
     id: 'pps-19', planNo: 'JH-2025-DX-021', planName: '转炉汽化冷却系统大修工程',
-    planYear: '2025', projectMajorCategory: '大修', projectType: '设备大修',
+    planYear: '2025', projectMajorCategory: '营缮', projectType: '设备营缮',
     businessUnit: '炼钢事业部', budget: 520,
     payments: [
       { paymentMonth: '2025-02', amount: 150, paymentType: '预付款' },

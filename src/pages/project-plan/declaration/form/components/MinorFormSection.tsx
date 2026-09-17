@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { ProjectPlan } from '@/mocks/projectPlans';
 import { projectCategories, projectManagers } from '@/mocks/projectPlans';
 import EquipmentSelectModal from './EquipmentSelectModal';

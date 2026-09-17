@@ -1,4 +1,4 @@
-// 项目档案配置 - Mock数据
+﻿// 项目档案配置 - Mock数据
 
 export interface FunctionNode {
   id: string;
@@ -83,7 +83,6 @@ export const functionNodeTree: FunctionNode[] = [
   // 一级菜单 - 项目准备管理
   { id: 'n-2', name: '项目准备管理', level: 1, parentId: null, path: '项目准备管理', configStatus: 'partial' },
   { id: 'n-2-1', name: '项目成员管理', level: 2, parentId: 'n-2', path: '项目准备管理 > 项目成员管理', configStatus: 'configured' },
-  { id: 'n-2-2', name: '初步设计审查', level: 2, parentId: 'n-2', path: '项目准备管理 > 初步设计审查', configStatus: 'unconfigured' },
   { id: 'n-2-3', name: '概算管理', level: 2, parentId: 'n-2', path: '项目准备管理 > 概算管理', configStatus: 'unconfigured' },
   // 一级菜单 - 项目执行管理
   { id: 'n-3', name: '项目执行管理', level: 1, parentId: null, path: '项目执行管理', configStatus: 'partial' },
@@ -95,6 +94,9 @@ export const functionNodeTree: FunctionNode[] = [
   { id: 'n-plan-2', name: '会审意见签署', level: 2, parentId: 'n-plan', path: '年度计划管理 > 会审意见签署', configStatus: 'configured' },
   { id: 'n-init', name: '项目立项管理', level: 1, parentId: null, path: '项目立项管理', configStatus: 'configured' },
   { id: 'n-init-1', name: '项目立项申请', level: 2, parentId: 'n-init', path: '项目立项管理 > 项目立项申请', configStatus: 'configured' },
+  { id: 'n-sporadic', name: '零星工程项目管理', level: 1, parentId: null, path: '零星工程项目管理', configStatus: 'configured' },
+  { id: 'n-sporadic-1', name: '零星协议单申报', level: 2, parentId: 'n-sporadic', path: '零星工程项目管理 > 零星协议单申报', configStatus: 'configured' },
+  { id: 'n-sporadic-2', name: '零星协议单审查', level: 2, parentId: 'n-sporadic', path: '零星工程项目管理 > 零星协议单审查', configStatus: 'configured' },
 ];
 
 // 生成节点子节点映射
@@ -174,17 +176,25 @@ export const attachmentConfigs: Record<string, AttachmentConfig[]> = {
   ],
   // 年度计划申报（按项目大类区分配置项，与项目档案配置模块一致）
   'n-plan-1': [
-    { id: 'ac-plan-1', nodeId: 'n-plan-1', docName: '项目建议书', type: '多选', projectMajorTypes: ['新建', '技改', '大修', '零固'], versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '含项目建设必要性、初步方案及投资匡算', templateFile: '项目建议书模板.docx', enabled: true },
-    { id: 'ac-plan-2', nodeId: 'n-plan-1', docName: '可行性研究报告', type: '多选', projectMajorTypes: ['新建', '技改', '大修', '零固'], versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '须为正式版可研报告，含投资估算与效益分析', templateFile: '可行性研究报告模板.docx', enabled: true },
+    { id: 'ac-plan-1', nodeId: 'n-plan-1', docName: '项目建议书', type: '多选', projectMajorTypes: ['新建', '技改', '营缮', '零固'], versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '含项目建设必要性、初步方案及投资匡算', templateFile: '项目建议书模板.docx', enabled: true },
+    { id: 'ac-plan-2', nodeId: 'n-plan-1', docName: '可行性研究报告', type: '多选', projectMajorTypes: ['新建', '技改', '营缮', '零固'], versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '须为正式版可研报告，含投资估算与效益分析', templateFile: '可行性研究报告模板.docx', enabled: true },
   ],
   // 会审意见签署
   'n-plan-2': [
-    { id: 'ac-jos-1', nodeId: 'n-plan-2', docName: '论证文件', type: '多选', projectMajorTypes: ['新建', '技改', '大修', '零固'], versionManaged: true, required: false, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '仅限 word、pdf、excel、jpg 等常规格式文件，大小不超过 100MB', templateFile: '论证文件示例模板.docx', enabled: true },
+    { id: 'ac-jos-1', nodeId: 'n-plan-2', docName: '论证文件', type: '多选', projectMajorTypes: ['新建', '技改', '营缮', '零固'], versionManaged: true, required: false, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '仅限 word、pdf、excel、jpg 等常规格式文件，大小不超过 100MB', templateFile: '论证文件示例模板.docx', enabled: true },
   ],
   // 项目立项申请（新建/技改）
   'n-init-1': [
-    { id: 'ac-init-1', nodeId: 'n-init-1', docName: '建设工期附件', type: '多选', projectMajorTypes: ['新建', '技改', '大修', '零固'], versionManaged: false, required: false, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 50, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '建设工期甘特图、节点计划等支撑材料', templateFile: '建设工期计划模板.xlsx', enabled: true },
-    { id: 'ac-init-2', nodeId: 'n-init-1', docName: '论证文件', type: '多选', projectMajorTypes: ['新建', '技改', '大修', '零固'], versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '立项论证相关正式文件，须加盖单位公章', templateFile: '论证文件示例模板.docx', enabled: true },
+    { id: 'ac-init-1', nodeId: 'n-init-1', docName: '建设工期附件', type: '多选', projectMajorTypes: ['新建', '技改', '营缮', '零固'], versionManaged: false, required: false, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 50, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '建设工期甘特图、节点计划等支撑材料', templateFile: '建设工期计划模板.xlsx', enabled: true },
+    { id: 'ac-init-2', nodeId: 'n-init-1', docName: '论证文件', type: '多选', projectMajorTypes: ['新建', '技改', '营缮', '零固'], versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '立项论证相关正式文件，须加盖单位公章', templateFile: '论证文件示例模板.docx', enabled: true },
+  ],
+  // 零星协议单申报
+  'n-sporadic-1': [
+    { id: 'ac-sporadic-1', nodeId: 'n-sporadic-1', docName: '现场影像', type: '多选', versionManaged: false, required: true, fileFormats: ['图片(jpg/png/bmp)', '视频(mp4/avi)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '上传现场隐患点、施工过程及完工对比照片/视频等影像资料', templateFile: '现场影像拍摄要求说明.docx', enabled: true },
+  ],
+  // 零星协议单审查 · 方案上传
+  'n-sporadic-2': [
+    { id: 'ac-sporadic-plan-1', nodeId: 'n-sporadic-2', docName: '方案上传', type: '多选', versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 50, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '上传零星工程施工方案、技术交底及安全措施等支撑材料', templateFile: '零星工程施工方案模板.docx', enabled: true },
   ],
 };
 
@@ -244,6 +254,12 @@ export const JOINT_OPINION_SIGN_NODE_ID = 'n-plan-2';
 /** 项目立项申请节点 ID */
 export const INITIATION_DECLARATION_NODE_ID = 'n-init-1';
 
+/** 零星协议单申报节点 ID */
+export const SPORADIC_AGREEMENT_NODE_ID = 'n-sporadic-1';
+
+/** 零星协议单审查 · 方案上传节点 ID */
+export const SPORADIC_PLAN_UPLOAD_NODE_ID = 'n-sporadic-2';
+
 /** 按项目大类获取年度计划申报节点的附件配置（演示数据，对应档案配置模块） */
 export function getPlanDeclarationAttachmentConfigs(majorType: string): AttachmentConfig[] {
   return getAttachmentConfigs(PLAN_DECLARATION_NODE_ID).filter((c) => {
@@ -263,9 +279,9 @@ export function getJointOpinionSignAttachmentConfigs(majorType?: string): Attach
   });
 }
 
-/** 项目立项申请附件配置：新建/技改/大修/零固均为建设工期附件+论证文件 */
+/** 项目立项申请附件配置：新建/技改/营缮/零固均为建设工期附件+论证文件 */
 export function getInitiationDeclarationAttachmentConfigs(majorType: string): AttachmentConfig[] {
-  if (majorType === '新建' || majorType === '技改' || majorType === '大修' || majorType === '零固') {
+  if (majorType === '新建' || majorType === '技改' || majorType === '营缮' || majorType === '零固') {
     return getAttachmentConfigs(INITIATION_DECLARATION_NODE_ID).filter((c) => {
       if (!c.enabled) return false;
       if (!c.projectMajorTypes || c.projectMajorTypes.length === 0) return true;
@@ -273,6 +289,16 @@ export function getInitiationDeclarationAttachmentConfigs(majorType: string): At
     });
   }
   return getPlanDeclarationAttachmentConfigs(majorType);
+}
+
+/** 零星协议单申报附件配置：现场影像 */
+export function getSporadicAgreementAttachmentConfigs(): AttachmentConfig[] {
+  return getAttachmentConfigs(SPORADIC_AGREEMENT_NODE_ID).filter((c) => c.enabled);
+}
+
+/** 零星协议单审查 · 方案上传附件配置：方案上传 */
+export function getSporadicPlanUploadAttachmentConfigs(): AttachmentConfig[] {
+  return getAttachmentConfigs(SPORADIC_PLAN_UPLOAD_NODE_ID).filter((c) => c.enabled);
 }
 
 // 获取节点条件配置

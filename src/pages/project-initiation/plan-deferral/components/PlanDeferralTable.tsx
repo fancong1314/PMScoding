@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+﻿import type { CSSProperties } from 'react';
 import type { PlanDeferralRecord, PlanApplicationType } from '@/mocks/planDeferralMocks';
 import { planDeferralStatusMap, planApprovalStatusMap, planActionConfig } from '@/mocks/planDeferralMocks';
 
@@ -20,9 +20,8 @@ const COLUMNS: ColDef[] = [
   { id: 'planName', label: '项目名称', width: 240 },
   { id: 'projectMajorCategory', label: '项目大类', width: 90, align: 'center' },
   { id: 'projectType', label: '项目类型', width: 120 },
-  { id: 'investAmount', label: '投资总估算（万元）', width: 150, align: 'right' },
   { id: 'planYear', label: '计划年度', width: 90, align: 'center' },
-  { id: 'planStatus', label: '计划状态', width: 100, align: 'center' },
+  { id: 'planStatus', label: '项目状态', width: 100, align: 'center' },
   { id: 'approvalStatus', label: '审批状态', width: 110, align: 'center' },
 ];
 
@@ -103,12 +102,6 @@ export default function PlanDeferralTable({ records, pageOffset, onViewLog, onAp
         );
       case 'projectType':
         return <span className="text-sm text-steel-600 whitespace-nowrap">{record.projectType}</span>;
-      case 'investAmount':
-        return (
-          <span className="text-sm text-steel-800 font-medium tabular-nums whitespace-nowrap">
-            {record.investAmount.toFixed(2)}
-          </span>
-        );
       case 'planYear':
         return <span className="text-sm text-steel-700 whitespace-nowrap">{record.planYear}年</span>;
       case 'planStatus': {

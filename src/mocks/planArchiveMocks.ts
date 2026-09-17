@@ -1,4 +1,4 @@
-/** 计划资料管理 — 已通过年度计划档案库演示数据 */
+﻿/** 计划资料管理 — 已通过年度计划档案库演示数据 */
 
 import type { PlanPriorityLevel } from './planReviewMocks';
 export type { PlanPriorityLevel } from './planReviewMocks';
@@ -62,9 +62,9 @@ export function getAvailableAmount(r: PlanArchiveRecord): number {
 }
 
 export const planArchiveYears = ['2024', '2025', '2026', '2027'];
-export const planArchiveMajorCategories = ['新建', '技改', '零固', '大修'];
+export const planArchiveMajorCategories = ['新建', '技改', '零固', '营缮'];
 export const planArchiveProjectTypes = [
-  '环保改造', '智能化改造', '设备大修', '电力工程', '信息化建设',
+  '环保改造', '智能化改造', '设备营缮', '电力工程', '信息化建设',
   '土建工程', '工艺改造', '设备更新', '安全环保', '基础设施',
   '节能减排', '产能扩张',
 ];
@@ -103,7 +103,7 @@ const planArchiveSeeds: PlanArchiveSeed[] = [
   {
     id: 'pa-02', linkedPlanId: 'oh3', planNo: 'JH-2025-DX-008',
     planName: '热轧加热炉蓄热式烧嘴大修',
-    planYear: '2025', projectMajorCategory: '大修', projectType: '设备大修',
+    planYear: '2025', projectMajorCategory: '营缮', projectType: '设备营缮',
     businessUnit: '热轧事业部', budget: 460.00, benefit: 85.00,
     applicant: '王强', approveDate: '2025-04-02', startDate: '2025-08-01', endDate: '2026-01-31',
     execStatus: '执行中', priorityLevel: 'B', reviewOutcome: 'approved',
@@ -143,7 +143,7 @@ const planArchiveSeeds: PlanArchiveSeed[] = [
   {
     id: 'pa-07', linkedPlanId: 'oh4', planNo: 'JH-2026-DX-006',
     planName: '高炉鼓风机本体及润滑系统大修',
-    planYear: '2026', projectMajorCategory: '大修', projectType: '设备大修',
+    planYear: '2026', projectMajorCategory: '营缮', projectType: '设备营缮',
     businessUnit: '炼铁事业部', budget: 390.00, benefit: 66.00,
     applicant: '张伟', approveDate: '2026-03-05', startDate: '2026-09-01', endDate: '2026-12-31',
     execStatus: '未启动', priorityLevel: 'C', reviewOutcome: 'approved',
@@ -167,7 +167,7 @@ const planArchiveSeeds: PlanArchiveSeed[] = [
   {
     id: 'pa-10', linkedPlanId: '1', planNo: 'JH-2026-DX-001',
     planName: '3号高炉炉体大修及配套设备更新改造工程',
-    planYear: '2026', projectMajorCategory: '大修', projectType: '设备大修',
+    planYear: '2026', projectMajorCategory: '营缮', projectType: '设备营缮',
     businessUnit: '炼铁事业部', budget: 850.00, benefit: 120.50,
     applicant: '张伟', approveDate: '2026-04-20', startDate: '2026-03-01', endDate: '2026-12-31',
     execStatus: '执行中', priorityLevel: 'B', reviewOutcome: 'approved',
@@ -199,7 +199,7 @@ const planArchiveSeeds: PlanArchiveSeed[] = [
   {
     id: 'pa-14', linkedPlanId: 'oh6', planNo: 'JH-2026-DX-014',
     planName: '烧结机台车及密封系统大修工程',
-    planYear: '2026', projectMajorCategory: '大修', projectType: '设备大修',
+    planYear: '2026', projectMajorCategory: '营缮', projectType: '设备营缮',
     businessUnit: '原料事业部', budget: 540.00, benefit: 160.00,
     applicant: '周涛', approveDate: '2026-06-15', startDate: '2026-10-01', endDate: '2027-01-31',
     execStatus: '未启动', priorityLevel: 'B', reviewOutcome: 'approved',
@@ -231,7 +231,7 @@ const planArchiveSeeds: PlanArchiveSeed[] = [
   {
     id: 'pa-18', linkedPlanId: 'oh5', planNo: 'JH-2027-DX-002',
     planName: '35kV主变压器及附属系统大修',
-    planYear: '2027', projectMajorCategory: '大修', projectType: '电力工程',
+    planYear: '2027', projectMajorCategory: '营缮', projectType: '电力工程',
     businessUnit: '动力事业部', budget: 680.00, benefit: 95.00,
     applicant: '孙丽', approveDate: '2026-08-10', startDate: '2027-02-01', endDate: '2027-06-30',
     execStatus: '未启动', priorityLevel: 'B', reviewOutcome: 'approved',
@@ -270,8 +270,8 @@ const planArchiveSeeds: PlanArchiveSeed[] = [
   },
   {
     id: 'pa-23', linkedPlanId: 'oh2', planNo: 'JH-2024-DX-019',
-    planName: '高线精轧机齿轮箱大修（归档）',
-    planYear: '2024', projectMajorCategory: '大修', projectType: '设备大修',
+    planName: '高线精轧机齿轮箱营缮（归档）',
+    planYear: '2024', projectMajorCategory: '营缮', projectType: '设备营缮',
     businessUnit: '特钢事业部', budget: 280.00, benefit: 48.00,
     applicant: '刘洋', approveDate: '2024-05-08', startDate: '2024-08-01', endDate: '2025-01-31',
     execStatus: '已完工', priorityLevel: 'C', reviewOutcome: 'approved',
@@ -312,7 +312,7 @@ const planArchiveSeeds: PlanArchiveSeed[] = [
   {
     id: 'pa-rj-04', linkedPlanId: 'oh7', planNo: 'JH-2026-DX-055',
     planName: '烧结主抽风机叶轮大修（驳回）',
-    planYear: '2026', projectMajorCategory: '大修', projectType: '设备大修',
+    planYear: '2026', projectMajorCategory: '营缮', projectType: '设备营缮',
     businessUnit: '原料事业部', budget: 260.00, benefit: 42.00,
     applicant: '赵芳', approveDate: '2026-05-15', startDate: '2026-06-01', endDate: '2026-09-30',
     execStatus: '未启动', priorityLevel: 'D', reviewOutcome: 'rejected',
@@ -474,5 +474,5 @@ export const MAJOR_CHART_COLORS: Record<string, string> = {
   '新建': '#2563eb',
   '技改': '#059669',
   '零固': '#d97706',
-  '大修': '#7c3aed',
+  '营缮': '#7c3aed',
 };

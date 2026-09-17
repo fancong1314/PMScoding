@@ -1,4 +1,4 @@
-import { type Issue } from '@/mocks/qualitySafetyMocks';
+﻿import { type Issue } from '@/mocks/qualitySafetyMocks';
 
 interface ApprovalDetailModalProps {
   open: boolean;

@@ -19,7 +19,7 @@ import LeaderActionModal from './components/LeaderActionModal';
 import PlanReviewDetailModal from '@/pages/project-plan/plan-review/components/PlanReviewDetailModal';
 import PriorityBatchModal from '@/pages/project-plan/plan-review/components/PriorityBatchModal';
 
-const STORAGE_KEY = 'ng_plan_leader_review_v6';
+const STORAGE_KEY = 'ng_plan_leader_review_v7';
 
 function getStored(): LeaderReviewRecord[] {
   try {

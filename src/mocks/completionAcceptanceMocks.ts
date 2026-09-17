@@ -1,4 +1,4 @@
-export interface CompletionProject {
+﻿export interface CompletionProject {
   id: string;
   projectNo: string;
   planNo: string;
@@ -76,7 +76,7 @@ export interface CompletionAttachment {
 
 export const completionProjects: CompletionProject[] = [
   { id: 'cp-1', projectNo: 'NG-2024-0012', planNo: 'JH-2024-0088', projectName: '炼钢事业部转炉智能吹炼系统升级', projectType: '零固', approvalAmount: 38500000, preApprovalAmount: 35000000, actualApprovalAmount: 38200000, originalContractAmount: 36800000, adjustedContractAmount: 37500000, approvalDate: '2024-03-15', proDept: '炼钢事业部', ownerUnit: '南钢股份炼钢厂', projectManager: '周建国' },
-  { id: 'cp-2', projectNo: 'NG-2024-0018', planNo: 'JH-2024-0102', projectName: '中板厂热处理线节能改造', projectType: '大修', approvalAmount: 12600000, preApprovalAmount: 12000000, actualApprovalAmount: 12600000, originalContractAmount: 11800000, adjustedContractAmount: 12200000, approvalDate: '2024-04-08', proDept: '中板事业部', ownerUnit: '南钢股份中板厂', projectManager: '李明辉' },
+  { id: 'cp-2', projectNo: 'NG-2024-0018', planNo: 'JH-2024-0102', projectName: '中板厂热处理线节能改造', projectType: '营缮', approvalAmount: 12600000, preApprovalAmount: 12000000, actualApprovalAmount: 12600000, originalContractAmount: 11800000, adjustedContractAmount: 12200000, approvalDate: '2024-04-08', proDept: '中板事业部', ownerUnit: '南钢股份中板厂', projectManager: '李明辉' },
   { id: 'cp-3', projectNo: 'NG-2024-0025', planNo: 'JH-2024-0125', projectName: '高炉出铁场除尘超低排放改造', projectType: '环保提升', approvalAmount: 25800000, preApprovalAmount: 24000000, actualApprovalAmount: 25600000, originalContractAmount: 24800000, adjustedContractAmount: 25300000, approvalDate: '2024-05-20', proDept: '炼铁事业部', ownerUnit: '南钢股份炼铁厂', projectManager: '张伟强' },
   { id: 'cp-4', projectNo: 'NG-2024-0031', planNo: 'JH-2024-0148', projectName: '宽厚板厂轧机主传动系统技改', projectType: '技改', approvalAmount: 46200000, preApprovalAmount: 45000000, actualApprovalAmount: 46000000, originalContractAmount: 44500000, adjustedContractAmount: 45200000, approvalDate: '2024-06-12', proDept: '宽厚板事业部', ownerUnit: '南钢股份宽厚板厂', projectManager: '陈志远' },
   { id: 'cp-5', projectNo: 'NG-2024-0045', planNo: 'JH-2024-0188', projectName: '智慧能源管控平台二期建设', projectType: '信息化', approvalAmount: 18500000, preApprovalAmount: 17000000, actualApprovalAmount: 18300000, originalContractAmount: 17500000, adjustedContractAmount: 18000000, approvalDate: '2024-07-25', proDept: '能源环保部', ownerUnit: '南钢股份', projectManager: '王志刚' },
@@ -170,7 +170,7 @@ export const approvalHistories: { id: string; applicationId: string; sequence: n
   { id: 'ah-5', applicationId: 'ca-4', sequence: 2, nodeName: '专业主管单位审批', approver: '郑文斌', status: '审批中', opinion: '', time: '' },
 ];
 
-export const projectTypes = ['零固', '大修', '环保提升', '技改', '信息化', '节能', '人工智能'];
+export const projectTypes = ['零固', '营缮', '环保提升', '技改', '信息化', '节能', '人工智能'];
 export const ownerUnits = ['南钢股份炼钢厂', '南钢股份炼铁厂', '南钢股份中板厂', '南钢股份宽厚板厂', '南钢股份棒材厂', '南钢股份烧结厂', '南钢股份中厚板卷厂', '南钢股份物流中心', '南钢股份'];
 
 export const changeTypeOptions = ['P10 项目竣工', 'P10 项目交工', 'P08 交工', 'P08 竣工', 'P12 交工', 'P12 竣工'];

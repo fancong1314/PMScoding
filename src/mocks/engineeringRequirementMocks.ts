@@ -1,4 +1,4 @@
-import { estimateProjects } from './estimateManagementMocks';
+﻿import { estimateProjects } from './estimateManagementMocks';
 
 export interface ProjectForRequirement {
   id: string;

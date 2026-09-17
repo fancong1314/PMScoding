@@ -1,4 +1,4 @@
-export interface QualityDispute {
+﻿export interface QualityDispute {
   id: string;
   disputeNo: string;
   contractNo: string;
@@ -95,7 +95,7 @@ const contractNos = [
 ];
 
 const contractNames = [
-  '炼铁厂1号高炉大修工程钢材采购合同',
+  '炼铁厂1号高炉营缮工程钢材采购合同',
   '炼钢厂转炉除尘系统改造设备采购合同',
   '轧钢事业部热轧产线升级材料供应合同',
   '能源事业部余热发电项目钢管采购合同',

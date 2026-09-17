@@ -1,4 +1,4 @@
-export interface ApplyRecord {
+﻿export interface ApplyRecord {
   id: string;
   applyNo: string;
   applyName: string;

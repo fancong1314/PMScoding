@@ -1,9 +1,10 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import type { ProjectPlan } from '@/mocks/projectPlans';
 import { reviewStatusMap } from '@/mocks/projectPlans';
 import type { ColumnDef } from '@/hooks/useColumnConfig';
 import ColumnSettingsPanel from './ColumnSettingsPanel';
 import type { ApprovalRecord } from '@/mocks/approvalMocks';
+import { canWithdrawDeclaration } from '@/mocks/approvalMocks';
 
 interface Props {
   plans: ProjectPlan[];
@@ -16,6 +17,7 @@ interface Props {
   onViewLog: (plan: ProjectPlan) => void;
   onViewApproval: (plan: ProjectPlan) => void;
   onProcessApproval: (plan: ProjectPlan) => void;
+  onWithdraw: (plan: ProjectPlan) => void;
   getApprovalRecord: (planId: string) => ApprovalRecord | undefined;
   pageOffset: number;
   budgetSort: 'desc' | 'asc' | null;
@@ -122,10 +124,22 @@ function renderCell(col: ColumnDef, plan: ProjectPlan): React.ReactNode {
       );
     case 'implementUnit':
       return <span className="whitespace-nowrap text-steel-600">{plan.implementUnit || '—'}</span>;
+    case 'implementDept':
+      return <span className="whitespace-nowrap text-steel-600">{plan.implementDept || '—'}</span>;
+    case 'submitDept':
+      return <span className="whitespace-nowrap text-steel-600">{plan.submitDept || '—'}</span>;
     case 'professionalUnit':
       return <span className="whitespace-nowrap text-steel-600">{plan.professionalUnit || '—'}</span>;
     case 'ownerUnit':
       return <span className="whitespace-nowrap text-steel-600">{plan.ownerUnit || '—'}</span>;
+    case 'hasJobChange': {
+      const v = plan.hasJobChange || '否';
+      const text =
+        v === '是' || v === '增加' || v === '减少'
+          ? `${v === '是' ? '是' : v}${plan.jobChangeCount ? ` ${plan.jobChangeCount}人` : ''}`
+          : v === '无' ? '否' : v;
+      return <span className="whitespace-nowrap text-steel-600">{text}</span>;
+    }
     case 'declareFee':
       return (
         <span className="whitespace-nowrap text-steel-600">
@@ -177,6 +191,7 @@ export default function DeclarationTable({
   onViewLog,
   onViewApproval,
   onProcessApproval,
+  onWithdraw,
   getApprovalRecord,
   pageOffset,
   budgetSort,
@@ -363,7 +378,7 @@ export default function DeclarationTable({
                       <button
                         onClick={() => onViewLog(plan)}
                         className="w-7 h-7 flex items-center justify-center rounded hover:bg-slate-100 text-steel-400 hover:text-steel-700 transition-colors cursor-pointer"
-                        title="操作日志"
+                        title="操作记录"
                       >
                         <i className="ri-history-line text-sm" />
                       </button>
@@ -374,6 +389,15 @@ export default function DeclarationTable({
                           title="删除"
                         >
                           <i className="ri-delete-bin-line text-sm" />
+                        </button>
+                      )}
+                      {canWithdrawDeclaration(plan, getApprovalRecord(plan.id)) && (
+                        <button
+                          onClick={() => onWithdraw(plan)}
+                          className="w-7 h-7 flex items-center justify-center rounded hover:bg-orange-50 text-steel-400 hover:text-orange-500 transition-colors cursor-pointer"
+                          title="撤回（尚未审批时可撤回后重新发起）"
+                        >
+                          <i className="ri-arrow-go-back-line text-sm" />
                         </button>
                       )}
                       {getApprovalRecord(plan.id) && (
