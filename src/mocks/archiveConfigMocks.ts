@@ -53,12 +53,8 @@ export const functionNodeTree: FunctionNode[] = [
   { id: 'n-1-8', name: '合同中标文号查询', level: 2, parentId: 'n-1', path: '项目合同管理 > 合同中标文号查询', configStatus: 'unconfigured' },
   // 三级菜单 - 合同业务执行管理下
   { id: 'n-1-5-1', name: '合同举牌验收', level: 3, parentId: 'n-1-5', path: '项目合同管理 > 合同业务执行管理 > 合同举牌验收', configStatus: 'configured' },
-  { id: 'n-1-5-2', name: '合同施工分包审核', level: 3, parentId: 'n-1-5', path: '项目合同管理 > 合同业务执行管理 > 合同施工分包审核', configStatus: 'unconfigured' },
-  { id: 'n-1-5-3', name: 'EPC合同设备验收', level: 3, parentId: 'n-1-5', path: '项目合同管理 > 合同业务执行管理 > EPC合同设备验收', configStatus: 'unconfigured' },
   { id: 'n-1-5-4', name: '合同超期申请', level: 3, parentId: 'n-1-5', path: '项目合同管理 > 合同业务执行管理 > 合同超期申请', configStatus: 'partial' },
   { id: 'n-1-5-5', name: '合同变更核价管理', level: 3, parentId: 'n-1-5', path: '项目合同管理 > 合同业务执行管理 > 合同变更核价管理', configStatus: 'unconfigured' },
-  { id: 'n-1-5-6', name: '合同超期免考申请', level: 3, parentId: 'n-1-5', path: '项目合同管理 > 合同业务执行管理 > 合同超期免考申请', configStatus: 'configured' },
-  { id: 'n-1-5-7', name: '合同质量异议', level: 3, parentId: 'n-1-5', path: '项目合同管理 > 合同业务执行管理 > 合同质量异议', configStatus: 'unconfigured' },
   // 业务阶段 - 合同举牌验收下
   { id: 'n-1-5-1-1', name: '合同举牌验收-工序预排', level: 4, parentId: 'n-1-5-1', path: '项目合同管理 > 合同业务执行管理 > 合同举牌验收 > 工序预排', configStatus: 'unconfigured' },
   { id: 'n-1-5-1-2', name: '合同举牌验收-验收管理', level: 4, parentId: 'n-1-5-1', path: '项目合同管理 > 合同业务执行管理 > 合同举牌验收 > 验收管理', configStatus: 'configured' },
@@ -83,11 +79,10 @@ export const functionNodeTree: FunctionNode[] = [
   // 一级菜单 - 项目准备管理
   { id: 'n-2', name: '项目准备管理', level: 1, parentId: null, path: '项目准备管理', configStatus: 'partial' },
   { id: 'n-2-1', name: '项目成员管理', level: 2, parentId: 'n-2', path: '项目准备管理 > 项目成员管理', configStatus: 'configured' },
-  { id: 'n-2-3', name: '概算管理', level: 2, parentId: 'n-2', path: '项目准备管理 > 概算管理', configStatus: 'unconfigured' },
+  { id: 'n-2-3', name: '项目概算管理', level: 2, parentId: 'n-2', path: '项目准备管理 > 项目概算管理', configStatus: 'unconfigured' },
   // 一级菜单 - 项目执行管理
   { id: 'n-3', name: '项目执行管理', level: 1, parentId: null, path: '项目执行管理', configStatus: 'partial' },
   { id: 'n-3-1', name: '质量安全管理', level: 2, parentId: 'n-3', path: '项目执行管理 > 质量安全管理', configStatus: 'configured' },
-  { id: 'n-3-2', name: '危险作业管理', level: 2, parentId: 'n-3', path: '项目执行管理 > 危险作业管理', configStatus: 'unconfigured' },
   // 一级菜单 - 年度计划管理
   { id: 'n-plan', name: '年度计划管理', level: 1, parentId: null, path: '年度计划管理', configStatus: 'configured' },
   { id: 'n-plan-1', name: '年度计划申报', level: 2, parentId: 'n-plan', path: '年度计划管理 > 年度计划申报', configStatus: 'configured' },
@@ -97,6 +92,7 @@ export const functionNodeTree: FunctionNode[] = [
   { id: 'n-sporadic', name: '零星工程项目管理', level: 1, parentId: null, path: '零星工程项目管理', configStatus: 'configured' },
   { id: 'n-sporadic-1', name: '零星协议单申报', level: 2, parentId: 'n-sporadic', path: '零星工程项目管理 > 零星协议单申报', configStatus: 'configured' },
   { id: 'n-sporadic-2', name: '零星协议单审查', level: 2, parentId: 'n-sporadic', path: '零星工程项目管理 > 零星协议单审查', configStatus: 'configured' },
+  { id: 'n-sporadic-budget', name: '预算上传', level: 3, parentId: 'n-sporadic-2', path: '零星工程项目管理 > 零星协议单审查 > 预算上传', configStatus: 'configured' },
 ];
 
 // 生成节点子节点映射
@@ -196,6 +192,10 @@ export const attachmentConfigs: Record<string, AttachmentConfig[]> = {
   'n-sporadic-2': [
     { id: 'ac-sporadic-plan-1', nodeId: 'n-sporadic-2', docName: '方案上传', type: '多选', versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', 'Excel(xls/xlsx)', '图片(jpg/png/bmp)'], fileSize: 50, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '上传零星工程施工方案、技术交底及安全措施等支撑材料', templateFile: '零星工程施工方案模板.docx', enabled: true },
   ],
+  // 零星协议单审查 · 预算上传
+  'n-sporadic-budget': [
+    { id: 'ac-sporadic-budget-1', nodeId: 'n-sporadic-budget', docName: '预算明细表', type: '多选', versionManaged: true, required: true, fileFormats: ['Excel(xls/xlsx)', 'PDF'], fileSize: 30, fileSizeUnit: 'MB', fileCount: 5, archived: true, remark: '上传零星工程预算明细表，含费用分项及测算依据', templateFile: '零星工程预算明细表模板.xlsx', enabled: true },
+  ],
 };
 
 // 条件配置数据
@@ -260,6 +260,9 @@ export const SPORADIC_AGREEMENT_NODE_ID = 'n-sporadic-1';
 /** 零星协议单审查 · 方案上传节点 ID */
 export const SPORADIC_PLAN_UPLOAD_NODE_ID = 'n-sporadic-2';
 
+/** 零星协议单审查 · 预算上传节点 ID */
+export const SPORADIC_BUDGET_UPLOAD_NODE_ID = 'n-sporadic-budget';
+
 /** 按项目大类获取年度计划申报节点的附件配置（演示数据，对应档案配置模块） */
 export function getPlanDeclarationAttachmentConfigs(majorType: string): AttachmentConfig[] {
   return getAttachmentConfigs(PLAN_DECLARATION_NODE_ID).filter((c) => {
@@ -299,6 +302,11 @@ export function getSporadicAgreementAttachmentConfigs(): AttachmentConfig[] {
 /** 零星协议单审查 · 方案上传附件配置：方案上传 */
 export function getSporadicPlanUploadAttachmentConfigs(): AttachmentConfig[] {
   return getAttachmentConfigs(SPORADIC_PLAN_UPLOAD_NODE_ID).filter((c) => c.enabled);
+}
+
+/** 零星协议单审查 · 预算上传附件配置：预算明细表 */
+export function getSporadicBudgetUploadAttachmentConfigs(): AttachmentConfig[] {
+  return getAttachmentConfigs(SPORADIC_BUDGET_UPLOAD_NODE_ID).filter((c) => c.enabled);
 }
 
 // 获取节点条件配置

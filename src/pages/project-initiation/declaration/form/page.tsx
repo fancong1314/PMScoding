@@ -54,7 +54,7 @@ const PATH_TYPE_MAP: Record<string, ProjectMajorType> = {
   '/project-initiation/declaration/form/minor': '零固',
 };
 
-const STORAGE_KEY = 'ng_init_decl_plans_v9';
+const STORAGE_KEY = 'ng_init_decl_plans_v10';
 const nextPlanYear = String(new Date().getFullYear() + 1);
 
 function normalizePlan(p: ProjectPlan): ProjectPlan {
@@ -130,6 +130,7 @@ const emptyForm: Partial<ProjectPlan> = {
   otherFeeRemark: '',
   hasJobChange: '否',
   jobChangeCount: 0,
+  involvedStages: [],
   isInPlanProject: '否',
   annualPlanNo: '',
   annualPlanId: '',

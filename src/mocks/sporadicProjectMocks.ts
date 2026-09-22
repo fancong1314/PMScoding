@@ -3,6 +3,105 @@ import { defaultResearchPersons } from './projectPlans';
 
 /** 零星工程项目管理 — 演示数据（5万以内零星施工） */
 
+/* ========== 需求计划 ========== */
+
+export type SporadicRequirementPlanStatus =
+  | 'draft'
+  | 'pending'
+  | 'reviewing'
+  | 'approved'
+  | 'rejected';
+
+export interface SporadicRequirementPlanRecord {
+  id: string;
+  planNo: string;
+  planName: string;
+  projectType: string;
+  submitUnit: string;
+  submitter: string;
+  submitTime: string;
+  planAmount: number;
+  startDate: string;
+  endDate: string;
+  status: SporadicRequirementPlanStatus;
+  remark: string;
+}
+
+export const sporadicRequirementPlanStatusMap: Record<
+  SporadicRequirementPlanStatus,
+  { label: string; cls: string }
+> = {
+  draft: { label: '草稿', cls: 'bg-slate-100 text-steel-600' },
+  pending: { label: '待审批', cls: 'bg-amber-100 text-amber-700' },
+  reviewing: { label: '审批中', cls: 'bg-sky-100 text-sky-700' },
+  approved: { label: '已通过', cls: 'bg-emerald-100 text-emerald-700' },
+  rejected: { label: '已驳回', cls: 'bg-red-100 text-red-600' },
+};
+
+export const sporadicRequirementPlanStatusOptions: {
+  value: SporadicRequirementPlanStatus | '';
+  label: string;
+}[] = [
+  { value: '', label: '全部状态' },
+  { value: 'draft', label: '草稿' },
+  { value: 'pending', label: '待审批' },
+  { value: 'reviewing', label: '审批中' },
+  { value: 'approved', label: '已通过' },
+  { value: 'rejected', label: '已驳回' },
+];
+
+/** 需求计划演示数据：覆盖全部审批状态，≥8 条 */
+export const sporadicRequirementPlanRecords: SporadicRequirementPlanRecord[] = [
+  {
+    id: 'srp-01', planNo: 'XQJH-2026-001', planName: '炼铁厂高炉区域地坪修补需求计划',
+    projectType: '土建', submitUnit: '炼铁厂', submitter: '王强',
+    submitTime: '2026-03-10 09:20:00', planAmount: 3.6, startDate: '2026-03-20', endDate: '2026-03-28',
+    status: 'approved', remark: '高炉出铁场局部地坪破损，需尽快组织修补',
+  },
+  {
+    id: 'srp-02', planNo: 'XQJH-2026-002', planName: '炼钢转炉液压站管路更换需求计划',
+    projectType: '机电', submitUnit: '炼钢厂', submitter: '张伟',
+    submitTime: '2026-03-11 14:05:00', planAmount: 4.2, startDate: '2026-03-22', endDate: '2026-03-30',
+    status: 'reviewing', remark: '液压软管老化渗漏，计划分区域更换',
+  },
+  {
+    id: 'srp-03', planNo: 'XQJH-2026-003', planName: '热轧厂电气柜接地线检修需求计划',
+    projectType: '电气', submitUnit: '热轧厂', submitter: '周涛',
+    submitTime: '2026-03-12 10:40:00', planAmount: 1.8, startDate: '2026-03-25', endDate: '2026-03-27',
+    status: 'pending', remark: '接地电阻超标，需安排零星检修',
+  },
+  {
+    id: 'srp-04', planNo: 'XQJH-2026-004', planName: '焦化区管道防腐刷漆需求计划',
+    projectType: '防腐', submitUnit: '动力厂', submitter: '吴晓燕',
+    submitTime: '2026-03-08 16:15:00', planAmount: 2.9, startDate: '2026-03-18', endDate: '2026-03-26',
+    status: 'rejected', remark: '请补充防腐等级及材料明细后重报',
+  },
+  {
+    id: 'srp-05', planNo: 'XQJH-2026-005', planName: '动力厂冷却水管路堵漏需求计划',
+    projectType: '管道', submitUnit: '设备管理部', submitter: '李明',
+    submitTime: '2026-03-13 08:50:00', planAmount: 2.1, startDate: '2026-03-21', endDate: '2026-03-24',
+    status: 'draft', remark: '草稿，待完善现场勘查说明',
+  },
+  {
+    id: 'srp-06', planNo: 'XQJH-2026-006', planName: '原料场护栏更新需求计划',
+    projectType: '土建', submitUnit: '原料厂', submitter: '孙丽',
+    submitTime: '2026-03-14 11:30:00', planAmount: 3.5, startDate: '2026-04-01', endDate: '2026-04-10',
+    status: 'approved', remark: '破损护栏更换，保障人员通行安全',
+  },
+  {
+    id: 'srp-07', planNo: 'XQJH-2026-007', planName: '烧结区风机基础加固需求计划',
+    projectType: '其他', submitUnit: '工程管理部', submitter: '陈建华',
+    submitTime: '2026-03-15 09:10:00', planAmount: 4.8, startDate: '2026-04-05', endDate: '2026-04-15',
+    status: 'pending', remark: '振动偏大，拟做基础加固',
+  },
+  {
+    id: 'srp-08', planNo: 'XQJH-2026-008', planName: '办公区弱电桥架调整需求计划',
+    projectType: '电气', submitUnit: '冷轧厂', submitter: '王强',
+    submitTime: '2026-03-09 15:45:00', planAmount: 1.2, startDate: '2026-03-16', endDate: '2026-03-19',
+    status: 'reviewing', remark: '配合信息化改造调整弱电桥架路径',
+  },
+];
+
 /* ========== 框架合同 ========== */
 
 export type FrameworkContractStatus = 'executing' | 'expired' | 'terminated' | 'pending_sign';
@@ -154,6 +253,7 @@ export type SporadicUploadApproveStatus =
   | 'reviewing'
   | 'approved'
   | 'rejected'
+  | 'returned'
   | 'withdrawn';
 
 export const sporadicUploadApproveStatusMap: Record<
@@ -165,6 +265,7 @@ export const sporadicUploadApproveStatusMap: Record<
   reviewing: { label: '审批中', cls: 'bg-sky-100 text-sky-700' },
   approved: { label: '已通过', cls: 'bg-emerald-100 text-emerald-700' },
   rejected: { label: '已驳回', cls: 'bg-red-100 text-red-600' },
+  returned: { label: '已退回', cls: 'bg-orange-100 text-orange-700' },
   withdrawn: { label: '已撤回', cls: 'bg-orange-100 text-orange-600' },
 };
 
@@ -175,6 +276,7 @@ export const sporadicUploadApproveStatusOptions: { value: SporadicUploadApproveS
   { value: 'reviewing', label: '审批中' },
   { value: 'approved', label: '已通过' },
   { value: 'rejected', label: '已驳回' },
+  { value: 'returned', label: '已退回' },
   { value: 'withdrawn', label: '已撤回' },
 ];
 
@@ -263,31 +365,42 @@ export interface SporadicAgreementRecord {
   planUploader?: string;
   planUploadTime?: string;
   planAttachments?: SporadicAttachmentMap;
+  /** 是否需要方案 */
+  needPlan?: boolean;
+  /** 方案上传备注（≤100字） */
+  planRemark?: string;
   /** 预算审批 */
   budgetStatus?: SporadicUploadApproveStatus;
   budgetUploader?: string;
   budgetUploadTime?: string;
   budgetEstimate?: SporadicBudgetEstimate;
+  /** 预算上传备注（≤200字） */
+  budgetRemark?: string;
+  /** 预算明细表附件（档案配置） */
+  budgetAttachments?: SporadicAttachmentMap;
   /** 签发状态 */
   issueStatus?: SporadicIssueStatus;
   issuer?: string;
   issueTime?: string;
+  /** 最近一次退回/驳回原因 */
+  lastReturnRejectReason?: string;
 }
 
-export const AGREEMENT_DECLARE_STORAGE_KEY = 'ng_sporadic_agreement_v6';
+export const AGREEMENT_DECLARE_STORAGE_KEY = 'ng_sporadic_agreement_v8';
 
 const SITE_IMAGE_CONFIG_ID = 'ac-sporadic-1';
 const PLAN_DOC_CONFIG_ID = 'ac-sporadic-plan-1';
+const BUDGET_DOC_CONFIG_ID = 'ac-sporadic-budget-1';
 
 const PLAN_STATUS_CYCLE: SporadicUploadApproveStatus[] = [
-  'none', 'pending', 'reviewing', 'approved', 'rejected', 'withdrawn', 'pending', 'approved',
+  'none', 'pending', 'reviewing', 'approved', 'rejected', 'returned', 'withdrawn', 'pending',
 ];
 const BUDGET_STATUS_CYCLE: SporadicUploadApproveStatus[] = [
-  'pending', 'none', 'approved', 'reviewing', 'withdrawn', 'rejected', 'approved', 'none',
+  'pending', 'none', 'approved', 'reviewing', 'withdrawn', 'rejected', 'returned', 'approved',
 ];
-/** 签发演示：保证待签发/已签发各不少于 5 条，其余不进入签发池 */
+/** 签发演示：待签发/已签发各 ≥5；其余 none 供审查页方案/预算状态轮转（可上传/撤回） */
 const ISSUE_STATUS_CYCLE: SporadicIssueStatus[] = [
-  'pending', 'pending', 'issued', 'issued', 'none', 'pending', 'issued', 'pending',
+  'none', 'none', 'pending', 'pending', 'pending', 'issued', 'issued', 'issued',
 ];
 
 function demoIndexFromId(id: string): number {
@@ -319,6 +432,18 @@ function demoPlanAttachments(recordId: string, declareName: string): SporadicAtt
         id: `${recordId}-plan-1`,
         name: `${declareName || '协议'}-方案上传.pdf`,
         size: 1_048_576,
+      },
+    ],
+  };
+}
+
+function demoBudgetAttachments(recordId: string, declareName: string): SporadicAttachmentMap {
+  return {
+    [BUDGET_DOC_CONFIG_ID]: [
+      {
+        id: `${recordId}-budget-1`,
+        name: `${declareName || '协议'}-预算明细表.xlsx`,
+        size: 256_000,
       },
     ],
   };
@@ -408,13 +533,18 @@ export function emptyAgreementForm(): SporadicAgreementRecord {
     planUploader: '',
     planUploadTime: '',
     planAttachments: {},
+    needPlan: true,
+    planRemark: '',
     budgetStatus: 'none',
     budgetUploader: '',
     budgetUploadTime: '',
     budgetEstimate: emptyBudgetEstimate(),
+    budgetRemark: '',
+    budgetAttachments: {},
     issueStatus: 'none',
     issuer: '',
     issueTime: '',
+    lastReturnRejectReason: '',
   };
 }
 
@@ -427,14 +557,15 @@ export function withAgreementFormFields(r: SporadicAgreementRecord): SporadicAgr
   const idx = demoIndexFromId(r.id);
   const issueStatus: SporadicIssueStatus = r.issueStatus ?? ISSUE_STATUS_CYCLE[idx % ISSUE_STATUS_CYCLE.length];
   const inIssuePool = issueStatus === 'pending' || issueStatus === 'issued';
-  const planStatus = inIssuePool
+  // 仅已签发强制方案/预算已通过；其余走轮转，保证审查页可上传/撤回
+  const planStatus = issueStatus === 'issued'
     ? 'approved'
     : (r.planStatus ?? PLAN_STATUS_CYCLE[idx % PLAN_STATUS_CYCLE.length]);
-  const budgetStatus = inIssuePool
+  const budgetStatus = issueStatus === 'issued'
     ? 'approved'
     : (r.budgetStatus ?? BUDGET_STATUS_CYCLE[idx % BUDGET_STATUS_CYCLE.length]);
-  const planUploaded = planStatus !== 'none';
-  const budgetUploaded = budgetStatus !== 'none';
+  const planUploaded = planStatus !== 'none' || inIssuePool;
+  const budgetUploaded = budgetStatus !== 'none' || inIssuePool;
   return {
     ...emptyAgreementForm(),
     ...r,
@@ -466,13 +597,18 @@ export function withAgreementFormFields(r: SporadicAgreementRecord): SporadicAgr
     planAttachments: (r.planAttachments?.[PLAN_DOC_CONFIG_ID] || []).length > 0
       ? r.planAttachments
       : (planUploaded ? demoPlanAttachments(r.id, r.declareName) : {}),
+    needPlan: r.needPlan !== false,
+    planRemark: r.planRemark || '',
     budgetStatus,
     budgetUploader: r.budgetUploader || (budgetUploaded ? (r.projectManager || '王强') : ''),
     budgetUploadTime: r.budgetUploadTime || (budgetUploaded ? `${r.declareTime?.slice(0, 10) || '2026-03-12'} 15:20:00` : ''),
     budgetEstimate: r.budgetEstimate || (budgetUploaded ? demoBudgetEstimate(budget) : emptyBudgetEstimate()),
+    budgetRemark: r.budgetRemark || '',
+    budgetAttachments: r.budgetAttachments || (budgetUploaded ? demoBudgetAttachments(r.id, r.declareName) : {}),
     issueStatus,
     issuer: r.issuer || (issueStatus === 'issued' ? '樊聪' : ''),
     issueTime: r.issueTime || (issueStatus === 'issued' ? `${r.declareTime?.slice(0, 10) || '2026-03-16'} 09:00:00` : ''),
+    lastReturnRejectReason: r.lastReturnRejectReason || '',
   };
 }
 
@@ -681,6 +817,38 @@ export interface SporadicApprovalFlowNode {
 
 /** 审批编号 → 可视化流程 */
 export const sporadicApprovalFlows: Record<string, { title: string; nodes: SporadicApprovalFlowNode[] }> = {
+  'SP-FA-2026-U06': {
+    title: '冷轧酸洗段接地线紧急恢复 · 方案审批',
+    nodes: [
+      { name: '孙丽', role: '方案上传人', status: 'passed', time: '2026-03-14 14:20', opinion: '已上传施工方案' },
+      { name: '项目办·刘工', role: '方案审查', status: 'passed', time: '2026-03-14 15:00', opinion: '方案可行' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2026-03-14 16:00', opinion: '同意' },
+    ],
+  },
+  'SP-YS-2026-U06': {
+    title: '冷轧酸洗段接地线紧急恢复 · 预算审批',
+    nodes: [
+      { name: '孙丽', role: '预算上传人', status: 'passed', time: '2026-03-14 16:40', opinion: '已提交预算' },
+      { name: '项目办·刘工', role: '预算审查', status: 'passed', time: '2026-03-14 17:20', opinion: '费用合理' },
+      { name: '李副总', role: '分管领导', status: 'passed', time: '2026-03-14 18:00', opinion: '同意' },
+    ],
+  },
+  'SP-FA-2026-N08': {
+    title: '设备管理部行车轨道微调 · 方案审批',
+    nodes: [
+      { name: '王强', role: '方案上传人', status: 'passed', time: '2026-03-15 14:20', opinion: '已上传微调方案' },
+      { name: '项目办·刘工', role: '方案审查', status: 'passed', time: '2026-03-15 15:00', opinion: '同意' },
+      { name: '王总工', role: '分管领导', status: 'passed', time: '2026-03-15 16:00', opinion: '同意实施' },
+    ],
+  },
+  'SP-YS-2026-N08': {
+    title: '设备管理部行车轨道微调 · 预算审批',
+    nodes: [
+      { name: '王强', role: '预算上传人', status: 'passed', time: '2026-03-15 15:40', opinion: '已提交预算' },
+      { name: '项目办·刘工', role: '预算审查', status: 'passed', time: '2026-03-15 16:20', opinion: '费用可控' },
+      { name: '王总工', role: '分管领导', status: 'passed', time: '2026-03-15 17:00', opinion: '同意' },
+    ],
+  },
   'SP-LX-2026-U01': {
     title: '3号高炉炉前地坪紧急修补 · 待审查',
     nodes: [
@@ -811,6 +979,34 @@ export const sporadicAgreementOpLogs: SporadicOpLog[] = [
   { id: 'sal-29', bizId: 'sa-u-07', operateTime: '2026-03-13 12:00:00', operator: '王强', operation: '提交', remark: '提交审查', approvalNo: 'SP-LX-2026-U07' },
   { id: 'sal-30', bizId: 'sa-u-08', operateTime: '2026-03-09 16:20:00', operator: '陈建华', operation: '新增', remark: '消防管道抢修' },
   { id: 'sal-31', bizId: 'sa-u-08', operateTime: '2026-03-09 17:00:00', operator: '项目办·刘工', operation: '审查', remark: '审查中', approvalNo: 'SP-LX-2026-U08' },
+  /* —— 签发链路演示（已签发） —— */
+  { id: 'sal-32', bizId: 'sa-u-06', operateTime: '2026-03-14 10:05:00', operator: '孙丽', operation: '新增', remark: '接地线紧急恢复草稿' },
+  { id: 'sal-33', bizId: 'sa-u-06', operateTime: '2026-03-14 11:00:00', operator: '孙丽', operation: '修改', remark: '补充现场说明' },
+  { id: 'sal-34', bizId: 'sa-u-06', operateTime: '2026-03-14 14:20:00', operator: '孙丽', operation: '方案上传', remark: '上传施工方案', approvalNo: 'SP-FA-2026-U06' },
+  { id: 'sal-35', bizId: 'sa-u-06', operateTime: '2026-03-14 16:40:00', operator: '孙丽', operation: '预算上传', remark: '提交项目预算', approvalNo: 'SP-YS-2026-U06' },
+  { id: 'sal-36', bizId: 'sa-u-06', operateTime: '2026-03-15 09:00:00', operator: '樊聪', operation: '签发', remark: '协议单签发完成' },
+  { id: 'sal-37', bizId: 'sa-u-07', operateTime: '2026-03-13 11:40:00', operator: '王强', operation: '新增', remark: '风机基础加固抢修' },
+  { id: 'sal-38', bizId: 'sa-u-07', operateTime: '2026-03-13 13:10:00', operator: '王强', operation: '方案上传', remark: '上传抢修方案', approvalNo: 'SP-FA-2026-U07' },
+  { id: 'sal-39', bizId: 'sa-u-07', operateTime: '2026-03-13 15:30:00', operator: '王强', operation: '预算上传', remark: '提交抢修预算', approvalNo: 'SP-YS-2026-U07' },
+  { id: 'sal-40', bizId: 'sa-u-07', operateTime: '2026-03-14 09:20:00', operator: '樊聪', operation: '签发', remark: '紧急抢修协议单签发' },
+  { id: 'sal-41', bizId: 'sa-u-08', operateTime: '2026-03-09 16:20:00', operator: '陈建华', operation: '新增', remark: '消防管道抢修' },
+  { id: 'sal-42', bizId: 'sa-u-08', operateTime: '2026-03-10 10:00:00', operator: '陈建华', operation: '方案上传', remark: '上传封堵方案', approvalNo: 'SP-FA-2026-U08' },
+  { id: 'sal-43', bizId: 'sa-u-08', operateTime: '2026-03-10 11:30:00', operator: '陈建华', operation: '预算上传', remark: '提交封堵预算', approvalNo: 'SP-YS-2026-U08' },
+  { id: 'sal-44', bizId: 'sa-u-08', operateTime: '2026-03-11 08:40:00', operator: '樊聪', operation: '签发', remark: '协议单签发' },
+  { id: 'sal-45', bizId: 'sa-n-06', operateTime: '2026-03-13 09:50:00', operator: '孙丽', operation: '新增', remark: '支吊架加固' },
+  { id: 'sal-46', bizId: 'sa-n-06', operateTime: '2026-03-13 11:00:00', operator: '孙丽', operation: '修改', remark: '调整施工范围' },
+  { id: 'sal-47', bizId: 'sa-n-06', operateTime: '2026-03-14 09:10:00', operator: '孙丽', operation: '方案上传', remark: '上传加固方案', approvalNo: 'SP-FA-2026-N06' },
+  { id: 'sal-48', bizId: 'sa-n-06', operateTime: '2026-03-14 10:50:00', operator: '孙丽', operation: '预算上传', remark: '提交加固预算', approvalNo: 'SP-YS-2026-N06' },
+  { id: 'sal-49', bizId: 'sa-n-06', operateTime: '2026-03-15 09:00:00', operator: '樊聪', operation: '签发', remark: '协议单签发完成' },
+  { id: 'sal-50', bizId: 'sa-n-07', operateTime: '2026-03-14 13:00:00', operator: '陈建华', operation: '新增', remark: '道路修补申报' },
+  { id: 'sal-51', bizId: 'sa-n-07', operateTime: '2026-03-14 15:20:00', operator: '陈建华', operation: '方案上传', remark: '上传修补方案', approvalNo: 'SP-FA-2026-N07' },
+  { id: 'sal-52', bizId: 'sa-n-07', operateTime: '2026-03-14 16:40:00', operator: '陈建华', operation: '预算上传', remark: '提交修补预算', approvalNo: 'SP-YS-2026-N07' },
+  { id: 'sal-53', bizId: 'sa-n-07', operateTime: '2026-03-15 10:10:00', operator: '樊聪', operation: '签发', remark: '协议单签发' },
+  { id: 'sal-54', bizId: 'sa-n-08', operateTime: '2026-03-15 08:35:00', operator: '王强', operation: '新增', remark: '轨道微调' },
+  { id: 'sal-55', bizId: 'sa-n-08', operateTime: '2026-03-15 11:00:00', operator: '王强', operation: '修改', remark: '补充轨道偏差数据' },
+  { id: 'sal-56', bizId: 'sa-n-08', operateTime: '2026-03-15 14:20:00', operator: '王强', operation: '方案上传', remark: '上传微调方案', approvalNo: 'SP-FA-2026-N08' },
+  { id: 'sal-57', bizId: 'sa-n-08', operateTime: '2026-03-15 15:40:00', operator: '王强', operation: '预算上传', remark: '提交微调预算', approvalNo: 'SP-YS-2026-N08' },
+  { id: 'sal-58', bizId: 'sa-n-08', operateTime: '2026-03-16 09:00:00', operator: '樊聪', operation: '签发', remark: '协议单签发完成' },
 ];
 
 export function getSporadicAgreementOpLogs(bizId: string): SporadicOpLog[] {
@@ -835,9 +1031,9 @@ export function canEditAgreement(status: SporadicAgreementStatus): boolean {
   return status === 'draft' || status === 'withdrawn' || status === 'rejected';
 }
 
-/** 方案/预算：可上传（未上传、已撤回、已驳回） */
+/** 方案/预算：可上传（未上传、已撤回、已驳回、已退回） */
 export function canUploadReviewItem(status?: SporadicUploadApproveStatus): boolean {
-  return !status || status === 'none' || status === 'withdrawn' || status === 'rejected';
+  return !status || status === 'none' || status === 'withdrawn' || status === 'rejected' || status === 'returned';
 }
 
 /** 方案/预算：审批中可撤回 */
@@ -848,4 +1044,37 @@ export function canWithdrawReviewItem(status?: SporadicUploadApproveStatus): boo
 /** 审查页修改协议单：非审批中可改 */
 export function canEditOnReview(status?: SporadicUploadApproveStatus): boolean {
   return status !== 'pending' && status !== 'reviewing';
+}
+
+/** 审查页可退回/驳回（已上传且处于审批相关状态） */
+export function canReturnRejectReviewItem(status?: SporadicUploadApproveStatus): boolean {
+  return status === 'pending' || status === 'reviewing' || status === 'approved';
+}
+
+/** 签发页可退回/驳回（待签发、已签发均可） */
+export function canReturnRejectIssueItem(issueStatus?: SporadicIssueStatus): boolean {
+  return issueStatus === 'pending' || issueStatus === 'issued';
+}
+
+function nowOpLogTime() {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+}
+
+/** 追加协议单操作记录（演示） */
+export function appendAgreementOpLog(payload: {
+  bizId: string;
+  operation: string;
+  remark: string;
+  operator?: string;
+}) {
+  sporadicAgreementOpLogs.unshift({
+    id: `sal-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    bizId: payload.bizId,
+    operateTime: nowOpLogTime(),
+    operator: payload.operator || '樊聪',
+    operation: payload.operation,
+    remark: payload.remark,
+  });
 }

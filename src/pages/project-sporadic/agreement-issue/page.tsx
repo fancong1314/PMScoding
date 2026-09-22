@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import {
   AGREEMENT_DECLARE_STORAGE_KEY,
+  appendAgreementOpLog,
+  canReturnRejectIssueItem,
   sortAgreementsByDeclareTime,
   sporadicAgreementRecords as initial,
   sporadicAgreementStatusOptions,
@@ -13,9 +15,12 @@ import {
   type SporadicAgreementStatus,
 } from '@/mocks/sporadicProjectMocks';
 import AgreementTable from '../components/AgreementTable';
+import AgreementOpLogModal from '../components/AgreementOpLogModal';
 import ListPagination from '../components/ListPagination';
+import ReasonDialog from '../components/ReasonDialog';
 
 type IssueTab = 'pending' | 'issued';
+type ReasonAction = 'return' | 'reject';
 
 const TABS: { key: IssueTab; label: string; icon: string }[] = [
   { key: 'pending', label: '待签发', icon: 'ri-time-line' },
@@ -26,6 +31,8 @@ function getStored(): SporadicAgreementRecord[] {
   try {
     const s = localStorage.getItem(AGREEMENT_DECLARE_STORAGE_KEY);
     if (s) return (JSON.parse(s) as SporadicAgreementRecord[]).map(withAgreementFormFields);
+    localStorage.removeItem('ng_sporadic_agreement_v7');
+    localStorage.removeItem('ng_sporadic_agreement_v6');
     localStorage.removeItem('ng_sporadic_agreement_v5');
     localStorage.removeItem('ng_sporadic_agreement_v4');
     localStorage.removeItem('ng_sporadic_agreement_v3');
@@ -48,6 +55,10 @@ export default function AgreementIssuePage() {
   const [filterSupplier, setFilterSupplier] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [logTarget, setLogTarget] = useState<SporadicAgreementRecord | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [reasonAction, setReasonAction] = useState<ReasonAction | null>(null);
+  const [reasonTargets, setReasonTargets] = useState<SporadicAgreementRecord[]>([]);
 
   useEffect(() => {
     localStorage.setItem(AGREEMENT_DECLARE_STORAGE_KEY, JSON.stringify(records));
@@ -58,12 +69,16 @@ export default function AgreementIssuePage() {
     setCurrentPage(1);
   }, [activeTab]);
 
-  // 刷新时从 storage 同步（签发页返回后）
   useEffect(() => {
     const onFocus = () => setRecords(getStored());
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
   }, []);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2800);
+  };
 
   const tabSeed = useMemo(
     () => sortAgreementsByDeclareTime(
@@ -105,6 +120,59 @@ export default function AgreementIssuePage() {
     setCurrentPage(1);
   };
 
+  const openReason = (action: ReasonAction, targets: SporadicAgreementRecord[]) => {
+    const eligible = targets.filter((r) => canReturnRejectIssueItem(r.issueStatus));
+    if (eligible.length === 0) {
+      showToast(action === 'return' ? '请选择可退回的记录' : '请选择可驳回的记录');
+      return;
+    }
+    setReasonTargets(eligible);
+    setReasonAction(action);
+  };
+
+  const handleReasonConfirm = (reason: string) => {
+    if (!reasonAction || reasonTargets.length === 0) return;
+    const opLabel = reasonAction === 'return' ? '退回' : '驳回';
+    const ids = new Set(reasonTargets.map((r) => r.id));
+
+    setRecords((prev) => prev.map((r) => {
+      if (!ids.has(r.id)) return r;
+      if (reasonAction === 'return') {
+        // 待签发退回审查；已签发退回待签发
+        const nextIssue = r.issueStatus === 'issued' ? 'pending' : 'none';
+        return withAgreementFormFields({
+          ...r,
+          issueStatus: nextIssue,
+          issuer: nextIssue === 'pending' ? '' : r.issuer,
+          issueTime: nextIssue === 'pending' ? '' : r.issueTime,
+          lastReturnRejectReason: reason,
+        });
+      }
+      // 驳回：申报状态驳回，退出签发池
+      return withAgreementFormFields({
+        ...r,
+        status: 'rejected',
+        issueStatus: 'none',
+        issuer: '',
+        issueTime: '',
+        lastReturnRejectReason: reason,
+      });
+    }));
+
+    reasonTargets.forEach((r) => {
+      appendAgreementOpLog({
+        bizId: r.id,
+        operation: opLabel,
+        remark: `签发${opLabel}：${reason}`,
+      });
+    });
+
+    showToast(`已${opLabel} ${reasonTargets.length} 条记录`);
+    setSelectedIds((prev) => prev.filter((id) => !ids.has(id)));
+    setReasonAction(null);
+    setReasonTargets([]);
+  };
+
   const inputCls =
     'w-full px-3 py-2 text-sm border border-steel-200 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 bg-slate-50';
 
@@ -113,7 +181,7 @@ export default function AgreementIssuePage() {
       <div className="space-y-3">
         <div>
           <h1 className="text-lg font-semibold text-steel-900">零星协议单签发</h1>
-          <p className="text-xs text-steel-400 mt-0.5">待签发协议单可查看详情并办理签发</p>
+          <p className="text-xs text-steel-400 mt-0.5">待签发协议单可查看详情并办理签发，支持退回与驳回</p>
         </div>
 
         <div className="bg-white rounded-lg border border-steel-200 px-1 py-1 inline-flex flex-wrap gap-0.5">
@@ -210,6 +278,35 @@ export default function AgreementIssuePage() {
         )}
 
         <div className="bg-white rounded-lg border border-steel-200 overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-steel-100 bg-slate-50/60">
+            <span className="text-xs text-steel-500">
+              已选 <span className="text-sky-600 font-medium">{selectedIds.length}</span> 条
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const rows = records.filter((r) => selectedIds.includes(r.id));
+                  openReason('return', rows);
+                }}
+                disabled={selectedIds.length === 0}
+                className="px-3 py-1.5 text-xs text-orange-600 border border-orange-200 rounded-md hover:bg-orange-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <i className="ri-arrow-go-back-line mr-1" />退回
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const rows = records.filter((r) => selectedIds.includes(r.id));
+                  openReason('reject', rows);
+                }}
+                disabled={selectedIds.length === 0}
+                className="px-3 py-1.5 text-xs text-red-600 border border-red-200 rounded-md hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <i className="ri-close-circle-line mr-1" />驳回
+              </button>
+            </div>
+          </div>
           <AgreementTable
             rows={paginated}
             selectedIds={selectedIds}
@@ -222,8 +319,10 @@ export default function AgreementIssuePage() {
               setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
             }}
             mode={activeTab === 'pending' ? 'issue-pending' : 'issue-issued'}
+            nameClickable
             onDetail={(row) => navigate(`/project-sporadic/agreement-issue/form?mode=view&id=${row.id}`)}
             onIssue={(row) => navigate(`/project-sporadic/agreement-issue/form?mode=issue&id=${row.id}`)}
+            onLog={(row) => setLogTarget(row)}
           />
           <ListPagination
             total={filtered.length}
@@ -234,6 +333,38 @@ export default function AgreementIssuePage() {
           />
         </div>
       </div>
+
+      <AgreementOpLogModal
+        open={!!logTarget}
+        bizId={logTarget?.id || ''}
+        title={logTarget?.declareName || ''}
+        onClose={() => setLogTarget(null)}
+      />
+
+      <ReasonDialog
+        open={!!reasonAction}
+        title={reasonAction === 'return' ? '退回确认' : '驳回确认'}
+        message={
+          reasonAction === 'return'
+            ? (activeTab === 'issued'
+              ? '确认退回所选已签发协议单？退回后将回到待签发。'
+              : '确认退回所选待签发协议单？退回后将退出签发池。')
+            : '确认驳回所选协议单？驳回后申报状态变为已驳回。'
+        }
+        confirmText={reasonAction === 'return' ? '确认退回' : '确认驳回'}
+        danger={reasonAction === 'reject'}
+        count={reasonTargets.length}
+        reasonLabel={reasonAction === 'return' ? '退回原因' : '驳回原因'}
+        reasonPlaceholder={reasonAction === 'return' ? '请填写退回原因' : '请填写驳回原因'}
+        onCancel={() => { setReasonAction(null); setReasonTargets([]); }}
+        onConfirm={handleReasonConfirm}
+      />
+
+      {toast && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-lg bg-steel-800 text-white text-sm shadow-lg">
+          {toast}
+        </div>
+      )}
     </Layout>
   );
 }

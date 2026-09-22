@@ -3,7 +3,7 @@ import { employees, type Employee, type ProjectMember } from '@/mocks/projectPre
 
 // 需要发起变更申请的成员类型
 const CHANGE_TYPES_MAP: Record<string, string> = {
-  '项目经理': '项目经理变更',
+  '项目负责人': '项目负责人变更',
   '合同经办人': '合同经办人变更',
   '论证经办人': '论证经办人变更',
   '工程需求资料经办人': '工程需求资料经办人变更',

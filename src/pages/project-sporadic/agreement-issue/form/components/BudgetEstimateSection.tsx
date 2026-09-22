@@ -37,6 +37,10 @@ interface Props {
   onChange: (next: SporadicBudgetEstimate) => void;
   sectionRef?: (el: HTMLDivElement | null) => void;
   readonly?: boolean;
+  /** 预算上传备注（审查页填写，详情只读展示） */
+  budgetRemark?: string;
+  /** 是否展示上传备注行（预算详情 TAB 已单独展示时可关闭） */
+  showUploadRemark?: boolean;
 }
 
 /** 签发页 · 项目预算栏目 */
@@ -46,6 +50,8 @@ export default function BudgetEstimateSection({
   onChange,
   sectionRef,
   readonly = false,
+  budgetRemark = '',
+  showUploadRemark = true,
 }: Props) {
   const total = calcBudgetEstimateTotal(data);
 
@@ -78,6 +84,14 @@ export default function BudgetEstimateSection({
         </h3>
       </div>
 
+      {showUploadRemark && (
+        <div className="px-5 pt-4">
+          <div className="grid grid-cols-[130px_1fr] gap-3 items-start">
+            <span className="text-sm text-steel-600 text-right whitespace-nowrap pt-0.5">备注</span>
+            <span className="text-sm text-steel-700 whitespace-pre-wrap leading-relaxed">{budgetRemark || '—'}</span>
+          </div>
+        </div>
+      )}
       <div className="p-5 space-y-3">
         <div className="rounded-md border border-steel-200 overflow-hidden">
           <table className="w-full table-fixed">

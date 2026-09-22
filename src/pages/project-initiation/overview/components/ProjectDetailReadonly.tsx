@@ -24,7 +24,7 @@ import AttachmentUploadSection, {
 } from '@/pages/project-initiation/declaration/form/components/AttachmentUploadSection';
 import { getInitiationDeclarationAttachmentConfigs } from '@/mocks/archiveConfigMocks';
 
-const STORAGE_KEY = 'ng_init_decl_plans_v9';
+const STORAGE_KEY = 'ng_init_decl_plans_v10';
 
 function normalizePlan(p: ProjectPlan): ProjectPlan {
   return withInvestmentEstimateFields(withPaymentPlans(withInitiationDetailFields({

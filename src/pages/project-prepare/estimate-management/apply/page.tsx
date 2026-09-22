@@ -51,6 +51,9 @@ export default function EstimateApplyPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get('projectId') ?? '';
+  const mode = searchParams.get('mode');
+  const pageTitle =
+    mode === 'supplement' ? '费用增补申请' : mode === 'transfer' ? '费用调拨申请' : '概算修正申请';
   const project = useMemo(() => getProjectById(projectId), [projectId]);
   const [estimates] = useState<EstimateItem[]>(() => getProjectEstimates(projectId));
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => {
@@ -185,7 +188,7 @@ export default function EstimateApplyPage() {
       {/* Project Info */}
       <div className="bg-white rounded-lg border border-slate-200 p-4">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-slate-800">概算修正申请</h2>
+          <h2 className="text-base font-semibold text-slate-800">{pageTitle}</h2>
           <span className="text-sm text-slate-500">立项号：{project.approvalNo}</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 text-sm">

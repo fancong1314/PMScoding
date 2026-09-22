@@ -6,6 +6,8 @@ import {
   projectManagers,
 } from '@/mocks/projectPlans';
 import AnnualPlanSelectModal from './AnnualPlanSelectModal';
+import InvolvedStagesField from './InvolvedStagesField';
+import type { InvolvedStage } from '@/mocks/projectPlans';
 
 interface Props {
   data: Partial<ProjectPlan>;
@@ -230,6 +232,15 @@ export default function OverhaulFormSection({ data, errors, onChange, onPatch, s
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-steel-400">由费用概算合计</span>
             </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-[130px_1fr] gap-3 items-center">
+          <label className={labelCls}>涉及阶段</label>
+          <InvolvedStagesField
+            bare
+            value={data.involvedStages as InvolvedStage[] | undefined}
+            onChange={(next) => patch({ involvedStages: next })}
+          />
         </div>
 
         <div className="grid grid-cols-[130px_1fr] gap-3 items-start">

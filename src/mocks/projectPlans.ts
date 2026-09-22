@@ -1,4 +1,22 @@
-﻿export interface PaymentPlanRow {
+﻿/** 立项申请 · 涉及阶段（可多选） */
+export type InvolvedStage = '单体调试' | '冷态大联调' | '热试';
+
+export const INVOLVED_STAGE_OPTIONS: InvolvedStage[] = ['单体调试', '冷态大联调', '热试'];
+
+const INVOLVED_STAGE_DEMO: InvolvedStage[][] = [
+  ['单体调试'],
+  ['冷态大联调'],
+  ['热试'],
+  ['单体调试', '冷态大联调'],
+  ['冷态大联调', '热试'],
+  ['单体调试', '冷态大联调', '热试'],
+];
+
+export function demoInvolvedStages(seed: number): InvolvedStage[] {
+  return [...INVOLVED_STAGE_DEMO[Math.abs(seed) % INVOLVED_STAGE_DEMO.length]];
+}
+
+export interface PaymentPlanRow {
   id: string;
   paymentType: string;
   paymentMonth: string; // YYYY-MM
@@ -236,6 +254,8 @@ export interface ProjectPlan {
   /** 是否涉及岗位增减：无 / 增加 / 减少 */
   hasJobChange: string;
   jobChangeCount: number;
+  /** 涉及阶段（可多选）：单体调试 / 冷态大联调 / 热试 */
+  involvedStages?: InvolvedStage[];
   /** 实施主管单位 */
   implementUnit?: string;
   /** 专业主管单位 */
@@ -333,6 +353,12 @@ export function withPaymentPlans(plan: ProjectPlan): ProjectPlan {
 /** 立项申请·新建/技改：补齐详细信息与研究报告人员演示字段 */
 export function withInitiationDetailFields(plan: ProjectPlan): ProjectPlan {
   const major = plan.projectMajorType || '技改';
+  const ensureStages = (p: ProjectPlan, seed: number): ProjectPlan => ({
+    ...p,
+    involvedStages: Array.isArray(p.involvedStages)
+      ? p.involvedStages
+      : demoInvolvedStages(seed),
+  });
   if (major === '营缮') {
     const seed = Number(plan.id) || 0;
     const jobChangeRaw = plan.hasJobChange || '无';
@@ -340,7 +366,7 @@ export function withInitiationDetailFields(plan: ProjectPlan): ProjectPlan {
       jobChangeRaw === '是' ? '增加' :
       jobChangeRaw === '否' ? '无' :
       jobChangeRaw;
-    return {
+    return ensureStages({
       ...plan,
       isInPlanProject: plan.isInPlanProject || (plan.annualPlanNo ? '是' : (seed % 2 === 0 ? '是' : '否')),
       annualPlanNo: plan.annualPlanNo || (seed % 2 === 0 ? `NDJH-2026-D${String(100 + seed).slice(-3)}` : ''),
@@ -357,12 +383,12 @@ export function withInitiationDetailFields(plan: ProjectPlan): ProjectPlan {
           ? plan.overhaulContentRows
           : defaultOverhaulContentRows.map((r) => ({ ...r, id: `${plan.id}_${r.id}` })),
       hasJobChange,
-    };
+    }, seed);
   }
   if (major === '零固') {
     const seed = Number(plan.id) || 0;
     const inPlan = plan.isInPlanProject || (plan.annualPlanNo ? '是' : (seed % 2 === 0 ? '是' : '否'));
-    return {
+    return ensureStages({
       ...plan,
       isInPlanProject: inPlan,
       annualPlanNo: plan.annualPlanNo || (inPlan === '是' ? `NDJH-2026-L${String(100 + seed).slice(-3)}` : ''),
@@ -385,15 +411,16 @@ export function withInitiationDetailFields(plan: ProjectPlan): ProjectPlan {
               qty: 30 + (seed % 5),
               otherFee: Math.round((plan.budgetAmount || 100) * 0.05 * 100) / 100,
             })),
-    };
+    }, seed);
   }
   if (major !== '新建' && major !== '技改') {
-    return {
+    const seed = Number(plan.id) || 0;
+    return ensureStages({
       ...plan,
       isInPlanProject: plan.isInPlanProject || (plan.annualPlanNo ? '是' : '否'),
       annualPlanNo: plan.annualPlanNo || '',
       annualPlanId: plan.annualPlanId || '',
-    };
+    }, seed);
   }
 
   const seed = Number(plan.id) || 0;
@@ -406,7 +433,7 @@ export function withInitiationDetailFields(plan: ProjectPlan): ProjectPlan {
     jobChangeRaw === '否' ? '无' :
     jobChangeRaw;
 
-  return {
+  return ensureStages({
     ...plan,
     startDate,
     endDate,
@@ -454,7 +481,7 @@ export function withInitiationDetailFields(plan: ProjectPlan): ProjectPlan {
       plan.riskAssessRows && plan.riskAssessRows.length > 0
         ? plan.riskAssessRows
         : defaultRiskAssessRows.map((r) => ({ ...r, id: `${plan.id}_${r.id}` })),
-  };
+  }, seed);
 }
 
 export const projectMajorTypes: ProjectMajorType[] = ['新建', '技改', '营缮', '零固'];

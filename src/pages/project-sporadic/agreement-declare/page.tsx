@@ -24,6 +24,8 @@ function getStored(): SporadicAgreementRecord[] {
   try {
     const s = localStorage.getItem(AGREEMENT_DECLARE_STORAGE_KEY);
     if (s) return (JSON.parse(s) as SporadicAgreementRecord[]).map(withAgreementFormFields);
+    localStorage.removeItem('ng_sporadic_agreement_v7');
+    localStorage.removeItem('ng_sporadic_agreement_v6');
     localStorage.removeItem('ng_sporadic_agreement_v5');
     localStorage.removeItem('ng_sporadic_agreement_v4');
     localStorage.removeItem('ng_sporadic_agreement_v3');

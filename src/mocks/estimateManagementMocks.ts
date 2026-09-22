@@ -22,22 +22,135 @@ export interface EstimateProject {
   planNo: string;
   name: string;
   description: string;
+  /** 项目大类：新建/技改/营缮/零固 */
+  majorType: string;
   projectType: string;
+  /** 立项申报金额（元） */
   budgetAmount: number;
+  /** 立项批复金额（元） */
   preBudgetAmount: number;
+  /** 实际立项金额（元） */
   actualBudgetAmount: number;
+  /** 合同签订总额（元） */
   originalContractAmount: number;
+  /** 修正合同总额（元） */
   revisedContractAmount: number;
+  /** 项目完工金额（元） */
   completedAmount: number;
+  /** 项目已支付总额（元） */
+  paidAmount: number;
+  /** 项目结算总额（元） */
   settledAmount: number;
+  /** 项目已入账总额（元） */
   accountedAmount: number;
+  /** 项目已转固总额（元） */
   fixedAmount: number;
+  /** 已占用金额（元） */
+  occupiedAmount: number;
+  /** 可用金额（元） */
+  availableAmount: number;
   approvalDate: string;
   ownerUnit: string;
   implementUnit: string;
   projectManager: string;
   isEnvAssessment: boolean;
+  /** 列表审批状态 */
+  approvalStatus: EstimateApprovalStatus;
+  /** 列表审批状态 · 可视化流程节点 */
+  approvalFlow: EstimateApprovalFlowNode[];
   estimates: EstimateItem[];
+}
+
+export type EstimateApprovalStatus = '草稿' | '待审批' | '审批中' | '已通过' | '已驳回';
+
+export type EstimateFlowNodeStatus = 'passed' | 'current' | 'pending' | 'rejected';
+
+export interface EstimateApprovalFlowNode {
+  name: string;
+  role: string;
+  status: EstimateFlowNodeStatus;
+  time?: string;
+  opinion?: string;
+}
+
+/** 列表金额类字段表头说明（悬浮提示） */
+export const ESTIMATE_FIELD_TIPS: Record<string, string> = {
+  budgetAmount: '项目在年度计划 / 立项申报时填报的计划投资额',
+  preBudgetAmount: '可研批复的投资估算额，是项目投资决策的源头基线，立项通过时的金额',
+  actualBudgetAmount: '项目通过增补、调拨、减少后的最终金额',
+  originalContractAmount: '项目下全部合同签约金额合计',
+  revisedContractAmount: '全部合同变更、签证、补充协议、索赔累计增减额合计',
+  completedAmount: '项目完工确认金额合计',
+  paidAmount: '全部合同累计成功支付金额',
+  settledAmount: '全部合同审定结算金额合计',
+  accountedAmount: '财务已入账金额合计（含在建工程转固前入账）',
+  fixedAmount: '已完成转固的资产价值合计',
+  occupy: '已占用金额占实际立项金额的比例，以及当前可用金额',
+  overrunRate: '（结算金额 − 立项批复金额）÷ 立项批复金额 × 100%',
+};
+
+/** 超概偏差率 = (结算金额 - 立项批复金额) ÷ 立项批复金额 × 100% */
+export function calcOverrunRate(settledAmount: number, approvedAmount: number): number | null {
+  if (!approvedAmount || approvedAmount <= 0) return null;
+  return ((settledAmount - approvedAmount) / approvedAmount) * 100;
+}
+
+export const estimateApprovalStatusMap: Record<EstimateApprovalStatus, { cls: string }> = {
+  草稿: { cls: 'bg-slate-100 text-steel-600' },
+  待审批: { cls: 'bg-amber-100 text-amber-700' },
+  审批中: { cls: 'bg-sky-100 text-sky-700' },
+  已通过: { cls: 'bg-emerald-100 text-emerald-700' },
+  已驳回: { cls: 'bg-red-100 text-red-600' },
+};
+
+export const estimateMajorTypes = ['新建', '技改', '营缮', '零固'] as const;
+
+function buildProjectApprovalFlow(
+  status: EstimateApprovalStatus,
+  manager: string,
+  index: number,
+  month: string,
+  day: string,
+): EstimateApprovalFlowNode[] {
+  const deptApprover = ['李建国', '王志强', '赵卫东', '陈建华'][index % 4];
+  const financeApprover = ['孙伟', '周丽', '吴敏', '郑涛'][index % 4];
+  const submitDay = String(Math.min(28, Number(day) + 2)).padStart(2, '0');
+  const approveDay = String(Math.min(28, Number(day) + 4)).padStart(2, '0');
+  const financeDay = String(Math.min(28, Number(day) + 6)).padStart(2, '0');
+
+  if (status === '草稿') {
+    return [
+      { name: '项目负责人提交', role: manager, status: 'current', opinion: '草稿编制中，待提交审批' },
+      { name: '工程管理部审核', role: deptApprover, status: 'pending' },
+      { name: '财务部审核', role: financeApprover, status: 'pending' },
+    ];
+  }
+  if (status === '待审批') {
+    return [
+      { name: '项目负责人提交', role: manager, status: 'passed', time: `2026-${month}-${submitDay} 09:20:00`, opinion: '已提交概算审批' },
+      { name: '工程管理部审核', role: deptApprover, status: 'current' },
+      { name: '财务部审核', role: financeApprover, status: 'pending' },
+    ];
+  }
+  if (status === '审批中') {
+    return [
+      { name: '项目负责人提交', role: manager, status: 'passed', time: `2026-${month}-${submitDay} 09:20:00`, opinion: '已提交概算审批' },
+      { name: '工程管理部审核', role: deptApprover, status: 'passed', time: `2026-${month}-${approveDay} 10:15:00`, opinion: '费用结构合理，同意' },
+      { name: '财务部审核', role: financeApprover, status: 'current' },
+    ];
+  }
+  if (status === '已驳回') {
+    return [
+      { name: '项目负责人提交', role: manager, status: 'passed', time: `2026-${month}-${submitDay} 09:20:00`, opinion: '已提交概算审批' },
+      { name: '工程管理部审核', role: deptApprover, status: 'rejected', time: `2026-${month}-${approveDay} 11:00:00`, opinion: '部分费用说明不足，请补充后重报' },
+      { name: '财务部审核', role: financeApprover, status: 'pending' },
+    ];
+  }
+  return [
+    { name: '项目负责人提交', role: manager, status: 'passed', time: `2026-${month}-${submitDay} 09:20:00`, opinion: '已提交概算审批' },
+    { name: '工程管理部审核', role: deptApprover, status: 'passed', time: `2026-${month}-${approveDay} 10:15:00`, opinion: '费用结构合理，同意' },
+    { name: '财务部审核', role: financeApprover, status: 'passed', time: `2026-${month}-${financeDay} 14:30:00`, opinion: '预算可控，审批通过' },
+  ];
 }
 
 export interface EstimateRevisionLog {
@@ -74,6 +187,8 @@ export interface EstimateRevisionLog {
 }
 
 const projectTypes = ['A质量品种', 'B安全环保', 'C节能降耗', 'D工艺装备', 'E智能制造', 'F信息化'];
+const majorTypes = ['新建', '技改', '营缮', '零固'];
+const approvalStatuses: EstimateApprovalStatus[] = ['草稿', '待审批', '审批中', '已通过', '已驳回'];
 const ownerUnits = ['炼铁事业部', '炼钢事业部', '轧钢事业部', '能源环保部', '设备部', '安全能环部', '技术中心'];
 const implementUnits = ['工程管理部', '基建部', '设备管理部', '安全环保部'];
 const managers = ['张明远', '李建国', '王志强', '赵卫东', '陈建华', '刘伟'];
@@ -191,19 +306,29 @@ export const estimateProjects: EstimateProject[] = Array.from({ length: 15 }, (_
   const seq = String(i + 1).padStart(3, '0');
   const budget = [2600000, 1850000, 3200000, 1500000, 4200000, 2800000, 1900000, 3500000, 1200000, 2100000, 1600000, 2900000, 3800000, 1400000, 2500000][i];
   const preBudget = Math.floor(budget * 0.95);
-  const actualBudget = budget;
+  const actualBudget = Math.floor(budget * (i % 4 === 0 ? 1.08 : i % 3 === 0 ? 0.97 : 1));
   const originalContract = Math.floor(budget * 0.88);
-  const revisedContract = Math.floor(budget * 0.9);
+  const revisedContract = Math.floor(budget * (0.02 + (i % 5) * 0.01) * (i % 2 === 0 ? 1 : -1)) + originalContract;
   const completed = Math.floor(budget * 0.65);
-  const settled = Math.floor(budget * 0.55);
-  const accounted = Math.floor(budget * 0.52);
-  const fixed = Math.floor(budget * 0.48);
+  const settled = Math.floor(preBudget * ([0.52, 0.88, 1.05, 0.71, 1.12, 0.63, 0.95, 1.08, 0.48, 0.82, 0.91, 1.15, 0.76, 0.58, 1.02][i]));
+  const paid = Math.floor(settled * 0.72);
+  const accounted = Math.floor(settled * 0.85);
+  const fixed = Math.floor(settled * 0.55);
+  // 占用率约 45%~92%，保证进度条演示差异可见
+  const occupyRatio = [0.72, 0.45, 0.88, 0.55, 0.92, 0.68, 0.38, 0.81, 0.5, 0.76, 0.42, 0.85, 0.95, 0.48, 0.65][i];
+  const occupiedAmount = Math.floor(actualBudget * occupyRatio);
+  const availableAmount = Math.max(0, actualBudget - occupiedAmount);
+  const approvalStatus = approvalStatuses[i % approvalStatuses.length];
+  const month = String(1 + (i % 5)).padStart(2, '0');
+  const day = String(5 + (i % 25)).padStart(2, '0');
+  const projectManager = managers[i % managers.length];
   return {
     id: `est_${seq}`,
     approvalNo: `LX-2026-${seq}`,
     planNo: `JH-2026-${seq}`,
     name: projectNames[i],
     description: `${projectNames[i]}概算管理，涉及${['环保升级', '设备更新', '自动化改造', '智能化建设', '环保设施'][i % 5]}等内容`,
+    majorType: majorTypes[i % majorTypes.length],
     projectType: projectTypes[i % projectTypes.length],
     budgetAmount: budget,
     preBudgetAmount: preBudget,
@@ -211,14 +336,19 @@ export const estimateProjects: EstimateProject[] = Array.from({ length: 15 }, (_
     originalContractAmount: originalContract,
     revisedContractAmount: revisedContract,
     completedAmount: completed,
+    paidAmount: paid,
     settledAmount: settled,
     accountedAmount: accounted,
     fixedAmount: fixed,
-    approvalDate: `2026-0${1 + (i % 5)}-${String(5 + (i % 25)).padStart(2, '0')}`,
+    occupiedAmount,
+    availableAmount,
+    approvalDate: `2026-${month}-${day}`,
     ownerUnit: ownerUnits[i % ownerUnits.length],
     implementUnit: implementUnits[i % implementUnits.length],
-    projectManager: managers[i % managers.length],
+    projectManager,
     isEnvAssessment: i % 3 === 0,
+    approvalStatus,
+    approvalFlow: buildProjectApprovalFlow(approvalStatus, projectManager, i, month, day),
     estimates: generateEstimates(),
   };
 });
@@ -344,6 +474,468 @@ export function getProjectRevisionLogs(projectId: string): EstimateRevisionLog[]
   return estimateRevisionLogs.filter((l) => l.projectId === projectId).sort((a, b) => b.createDate.localeCompare(a.createDate));
 }
 
+/** 占用金额明细行（合同 / 需求） */
+export interface EstimateOccupyDetailRow {
+  id: string;
+  /** 合同\需求名称，如「土建施工合同 (HT-2026-001)」 */
+  name: string;
+  designFee: number;
+  jianAnFee: number;
+  equipmentFee: number;
+  otherFee: number;
+  total: number;
+}
+
+const contractNamePool = [
+  '土建施工合同',
+  '设备采购合同',
+  '安装工程合同',
+  '监理服务合同',
+  '设计咨询合同',
+];
+const demandNamePool = [
+  '主体工程需求',
+  '电气安装需求',
+  '环保设施需求',
+  '备件材料需求',
+];
+
+/** 按项目生成占用金额明细（演示数据，合计接近占用金额） */
+export function getProjectOccupyDetails(projectId: string): EstimateOccupyDetailRow[] {
+  const project = getProjectById(projectId);
+  if (!project) return [];
+  const idx = Number(projectId.replace(/\D/g, '')) || 1;
+  const target = project.occupiedAmount;
+  const rowCount = 3 + (idx % 2);
+  const rows: EstimateOccupyDetailRow[] = [];
+  let remain = target;
+
+  for (let i = 0; i < rowCount; i++) {
+    const isLast = i === rowCount - 1;
+    const isContract = i % 2 === 0;
+    const share = isLast ? remain : Math.floor(target * ([0.42, 0.28, 0.18, 0.12][i] || 0.1));
+    remain = Math.max(0, remain - share);
+    const designFee = Math.round(share * 0.12 * 100) / 100;
+    const jianAnFee = Math.round(share * 0.38 * 100) / 100;
+    const equipmentFee = Math.round(share * 0.35 * 100) / 100;
+    const otherFee = Math.round((share - designFee - jianAnFee - equipmentFee) * 100) / 100;
+    const total = Math.round((designFee + jianAnFee + equipmentFee + otherFee) * 100) / 100;
+    const label = isContract
+      ? `${contractNamePool[i % contractNamePool.length]} (HT-2026-${String(1000 + idx * 10 + i).slice(-4)})`
+      : `${demandNamePool[i % demandNamePool.length]} (XQ-2026-${String(2000 + idx * 10 + i).slice(-4)})`;
+    rows.push({
+      id: `${projectId}-occ-${i + 1}`,
+      name: label,
+      designFee,
+      jianAnFee,
+      equipmentFee,
+      otherFee,
+      total,
+    });
+  }
+  return rows;
+}
+
 export function formatCurrency(amount: number): string {
   return amount.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+
+export function formatCurrencyFixed(amount: number): string {
+  return amount.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+export const ESTIMATE_FEE_TYPES = ['设计费', '建安费', '设备费', '其他费'] as const;
+export type EstimateFeeType = (typeof ESTIMATE_FEE_TYPES)[number];
+
+/** 费用明细行 */
+export interface EstimateFeeLine {
+  type: EstimateFeeType;
+  /** 立项批复金额（元） */
+  approvedAmount: number;
+  /** 实际立项金额（元） */
+  actualAmount: number;
+  /** 项目占用金额（元）= 合同占用 + 需求占用 */
+  occupiedAmount: number;
+  /** 合同占用金额（元） */
+  contractOccupied: number;
+  /** 需求占用金额（元） */
+  demandOccupied: number;
+  /** 项目可用金额（元） */
+  availableAmount: number;
+  /** 费用说明 */
+  remark: string;
+}
+
+export interface EstimateTransferSnapshot {
+  设计费: number;
+  建安费: number;
+  设备费: number;
+  其他费: number;
+}
+
+/** 费用调拨记录 */
+export interface EstimateTransferRecord {
+  id: string;
+  projectId: string;
+  operator: string;
+  time: string;
+  remark: string;
+  before: EstimateTransferSnapshot;
+  after: EstimateTransferSnapshot;
+}
+
+const FEE_SPLIT = [0.12, 0.38, 0.35, 0.15] as const;
+
+function splitAmount(total: number, index: number): number {
+  if (index < 3) return Math.round(total * FEE_SPLIT[index] * 100) / 100;
+  const used = [0, 1, 2].reduce((s, i) => s + Math.round(total * FEE_SPLIT[i] * 100) / 100, 0);
+  return Math.round((total - used) * 100) / 100;
+}
+
+function buildFeeLines(project: EstimateProject): EstimateFeeLine[] {
+  return ESTIMATE_FEE_TYPES.map((type, i) => {
+    const approvedAmount = splitAmount(project.preBudgetAmount, i);
+    const actualAmount = splitAmount(project.actualBudgetAmount, i);
+    const contractOccupied = splitAmount(Math.round(project.occupiedAmount * 0.62), i);
+    const demandOccupied = splitAmount(Math.round(project.occupiedAmount * 0.38), i);
+    const occupiedAmount = Math.round((contractOccupied + demandOccupied) * 100) / 100;
+    const availableAmount = Math.max(0, Math.round((actualAmount - occupiedAmount) * 100) / 100);
+    const remarks = ['初步设计及施工图设计', '土建与安装工程', '主机及配套设备', '监理、检测及其他'];
+    return {
+      type,
+      approvedAmount,
+      actualAmount,
+      occupiedAmount,
+      contractOccupied,
+      demandOccupied,
+      availableAmount,
+      remark: remarks[i],
+    };
+  });
+}
+
+function snapshotOf(lines: EstimateFeeLine[]): EstimateTransferSnapshot {
+  const snap = { 设计费: 0, 建安费: 0, 设备费: 0, 其他费: 0 };
+  lines.forEach((line) => { snap[line.type] = line.availableAmount; });
+  return snap;
+}
+
+const feeLineStore = new Map<string, EstimateFeeLine[]>();
+const transferStore = new Map<string, EstimateTransferRecord[]>();
+
+function ensureFeeStore(projectId: string) {
+  if (feeLineStore.has(projectId)) return;
+  const project = getProjectById(projectId);
+  if (!project) return;
+  const current = buildFeeLines(project);
+  feeLineStore.set(projectId, current);
+
+  const operators = ['张明远', '李建国', '王志强', '赵卫东', '陈建华', '刘伟'];
+  const remarks = [
+    '将部分建安费可用额度调至设备费，满足进口备件采购',
+    '设计范围扩大，自其他费调入设计费',
+    '安装工程暂缓，建安费调回其他费备用',
+    '设备到货提前，自设计费结余调入设备费',
+    '按现场签证调整建安费与其他费可用额度',
+    '监理周期延长，自设备费调入其他费',
+  ];
+  const records: EstimateTransferRecord[] = [];
+  let cursor = current.map((l) => ({ ...l }));
+  for (let n = 5; n >= 0; n--) {
+    const after = snapshotOf(cursor);
+    const beforeLines = cursor.map((l) => ({ ...l }));
+    const from = n % 4;
+    const to = (n + 1) % 4;
+    const move = Math.round(Math.min(beforeLines[from].availableAmount * 0.08, 80000) * 100) / 100;
+    if (move > 0) {
+      beforeLines[from].availableAmount = Math.round((beforeLines[from].availableAmount + move) * 100) / 100;
+      beforeLines[to].availableAmount = Math.max(0, Math.round((beforeLines[to].availableAmount - move) * 100) / 100);
+    }
+    const month = String(1 + (n % 5)).padStart(2, '0');
+    const day = String(8 + n * 3).padStart(2, '0');
+    records.push({
+      id: `${projectId}-tf-${n + 1}`,
+      projectId,
+      operator: operators[n % operators.length],
+      time: `2026-${month}-${day} ${String(9 + n).padStart(2, '0')}:${String(10 + n * 7).padStart(2, '0')}`,
+      remark: remarks[n % remarks.length],
+      before: snapshotOf(beforeLines),
+      after,
+    });
+    cursor = beforeLines;
+  }
+  transferStore.set(projectId, records.sort((a, b) => b.time.localeCompare(a.time)));
+}
+
+export function getProjectFeeLines(projectId: string): EstimateFeeLine[] {
+  ensureFeeStore(projectId);
+  return (feeLineStore.get(projectId) || []).map((l) => ({ ...l }));
+}
+
+export function getProjectTransferRecords(projectId: string): EstimateTransferRecord[] {
+  ensureFeeStore(projectId);
+  return [...(transferStore.get(projectId) || [])];
+}
+
+export interface FeeTransferInput {
+  type: EstimateFeeType;
+  direction: '加' | '减';
+  /** 万元 */
+  amountWan: number;
+}
+
+/** 确认费用调拨：可用金额总和必须不变，单项调拨后不得为负 */
+export function applyFeeTransfer(
+  projectId: string,
+  inputs: FeeTransferInput[],
+  remark: string,
+  operator = '当前用户',
+): { ok: boolean; message: string } {
+  if (isFeeChangeLocked(projectId)) {
+    return { ok: false, message: '费用增补审批期间无法执行费用调拨' };
+  }
+  ensureFeeStore(projectId);
+  const lines = feeLineStore.get(projectId);
+  if (!lines) return { ok: false, message: '未找到项目费用明细' };
+
+  const deltas = new Map<EstimateFeeType, number>();
+  ESTIMATE_FEE_TYPES.forEach((t) => deltas.set(t, 0));
+  for (const input of inputs) {
+    if (!input.amountWan || input.amountWan <= 0) continue;
+    const yuan = Math.round(input.amountWan * 10000 * 100) / 100;
+    const signed = input.direction === '加' ? yuan : -yuan;
+    deltas.set(input.type, (deltas.get(input.type) || 0) + signed);
+  }
+  const net = [...deltas.values()].reduce((s, v) => s + v, 0);
+  if (Math.abs(net) > 0.01) {
+    return { ok: false, message: '调拨后可用金额总和必须等于原可用金额总和，请调整增减项使合计为 0' };
+  }
+  const changed = [...deltas.values()].some((v) => Math.abs(v) > 0.01);
+  if (!changed) return { ok: false, message: '请填写至少一项费用调拨金额' };
+
+  for (const line of lines) {
+    const next = Math.round((line.availableAmount + (deltas.get(line.type) || 0)) * 100) / 100;
+    if (next < -0.01) {
+      return { ok: false, message: `${line.type}调拨后可用金额不能为负` };
+    }
+  }
+
+  const before = snapshotOf(lines);
+  lines.forEach((line) => {
+    line.availableAmount = Math.max(0, Math.round((line.availableAmount + (deltas.get(line.type) || 0)) * 100) / 100);
+  });
+  const after = snapshotOf(lines);
+  const now = new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  const time = `${now.getFullYear()}-${p(now.getMonth() + 1)}-${p(now.getDate())} ${p(now.getHours())}:${p(now.getMinutes())}`;
+  const records = transferStore.get(projectId) || [];
+  records.unshift({
+    id: `${projectId}-tf-${Date.now()}`,
+    projectId,
+    operator,
+    time,
+    remark: remark.trim(),
+    before,
+    after,
+  });
+  transferStore.set(projectId, records);
+  return { ok: true, message: '费用调拨已保存' };
+}
+
+export interface EstimatePlanControl {
+  planName: string;
+  planNo: string;
+  /** 计划管控金额（元） */
+  controlAmount: number;
+  /** 计划占用金额（元） */
+  occupiedAmount: number;
+  /** 计划可用金额（元） */
+  availableAmount: number;
+}
+
+export interface EstimateSupplementItem {
+  type: EstimateFeeType;
+  direction: '加' | '减';
+  /** 元 */
+  amountYuan: number;
+}
+
+export interface EstimateSupplementApplication {
+  id: string;
+  projectId: string;
+  reason: string;
+  items: EstimateSupplementItem[];
+  status: '审批中' | '已通过' | '已驳回';
+  createdAt: string;
+}
+
+const supplementStore = new Map<string, EstimateSupplementApplication>();
+
+export function getPlanControl(project: EstimateProject): EstimatePlanControl {
+  const controlAmount = Math.round(Math.max(project.preBudgetAmount, project.actualBudgetAmount) * 1.2);
+  const occupiedAmount = Math.min(project.occupiedAmount, controlAmount);
+  return {
+    planName: `${(project.planNo.match(/\d{4}/) || ['2026'])[0]}年度投资计划`,
+    planNo: project.planNo,
+    controlAmount,
+    occupiedAmount,
+    availableAmount: Math.max(0, controlAmount - occupiedAmount),
+  };
+}
+
+export function yuanToWan(yuan: number): string {
+  return (yuan / 10000).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function nowStamp() {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function startSupplementFlow(project: EstimateProject) {
+  project.approvalStatus = '审批中';
+  project.approvalFlow = [
+    { name: '项目负责人提交', role: project.projectManager || '当前用户', status: 'passed', time: nowStamp(), opinion: '已提交费用增补申请' },
+    { name: '工程管理部审核', role: '李建国', status: 'current' },
+    { name: '财务部审核', role: '孙伟', status: 'pending' },
+  ];
+}
+
+/** 审批中 / 待审批时锁定费用增减与调拨 */
+export function isFeeChangeLocked(projectId: string): boolean {
+  ensureSupplementSeed(projectId);
+  const project = getProjectById(projectId);
+  if (!project) return false;
+  return project.approvalStatus === '审批中' || project.approvalStatus === '待审批';
+}
+
+function ensureSupplementSeed(projectId: string) {
+  if (supplementStore.has(projectId)) return;
+  const project = getProjectById(projectId);
+  if (!project) return;
+  if (project.approvalStatus !== '审批中' && project.approvalStatus !== '待审批') return;
+  const room = getPlanControl(project).availableAmount;
+  const amountYuan = Math.max(10000, Math.min(80000, Math.floor(room * 0.05) || 10000));
+  supplementStore.set(projectId, {
+    id: `${projectId}-sup-seed`,
+    projectId,
+    reason: '现场工程量增加，申请增补建安费，待审批通过后更新实际立项金额',
+    items: [{ type: '建安费', direction: '加', amountYuan }],
+    status: '审批中',
+    createdAt: '2026-03-18 10:20',
+  });
+}
+
+export function getPendingSupplement(projectId: string): EstimateSupplementApplication | undefined {
+  ensureSupplementSeed(projectId);
+  const app = supplementStore.get(projectId);
+  if (app && app.status === '审批中') return app;
+  return undefined;
+}
+
+export function submitFeeSupplement(
+  projectId: string,
+  inputs: { type: EstimateFeeType; direction: '加' | '减'; amountWan: number }[],
+  reason: string,
+): { ok: boolean; message: string } {
+  const project = getProjectById(projectId);
+  if (!project) return { ok: false, message: '未找到项目' };
+  if (isFeeChangeLocked(projectId)) {
+    return { ok: false, message: '审批期间无法执行费用增减，请待当前增补审批结束后再申请' };
+  }
+  ensureFeeStore(projectId);
+  const lines = feeLineStore.get(projectId) || [];
+  const items: EstimateSupplementItem[] = [];
+  for (const input of inputs) {
+    if (!input.amountWan || input.amountWan <= 0) continue;
+    const amountYuan = Math.round(input.amountWan * 10000 * 100) / 100;
+    const line = lines.find((l) => l.type === input.type);
+    if (input.direction === '减' && line && amountYuan - line.availableAmount > 0.01) {
+      return { ok: false, message: `${input.type}减少金额不能超过当前可用金额` };
+    }
+    items.push({ type: input.type, direction: input.direction, amountYuan });
+  }
+  if (items.length === 0) return { ok: false, message: '请填写至少一项增补费用' };
+  if (!reason.trim()) return { ok: false, message: '请填写增补原因' };
+
+  const net = items.reduce((s, it) => s + (it.direction === '加' ? it.amountYuan : -it.amountYuan), 0);
+  const plan = getPlanControl(project);
+  if (net > plan.availableAmount + 0.01) {
+    return { ok: false, message: '增补费用不能超过计划可用金额' };
+  }
+  const nextActual = project.actualBudgetAmount + net;
+  if (nextActual - plan.controlAmount > 0.01) {
+    return { ok: false, message: '项目费用不能超过计划管控金额' };
+  }
+  for (const line of lines) {
+    const item = items.find((it) => it.type === line.type);
+    if (!item) continue;
+    const signed = item.direction === '加' ? item.amountYuan : -item.amountYuan;
+    if (line.actualAmount + signed + 0.01 < line.occupiedAmount) {
+      return { ok: false, message: `${line.type}调整后不能低于已占用金额` };
+    }
+  }
+
+  const app: EstimateSupplementApplication = {
+    id: `${projectId}-sup-${Date.now()}`,
+    projectId,
+    reason: reason.trim().slice(0, 100),
+    items,
+    status: '审批中',
+    createdAt: nowStamp(),
+  };
+  supplementStore.set(projectId, app);
+  startSupplementFlow(project);
+  return { ok: true, message: '费用增补申请已提交，审批通过后将更新费用' };
+}
+
+/** 推进当前增补审批节点；全部通过后写入费用 */
+export function advanceSupplementApproval(
+  projectId: string,
+  pass: boolean,
+  opinion = '',
+): { ok: boolean; message: string } {
+  const project = getProjectById(projectId);
+  const app = supplementStore.get(projectId);
+  if (!project || !app || app.status !== '审批中') {
+    return { ok: false, message: '当前没有待审批的费用增补' };
+  }
+  const flow = project.approvalFlow || [];
+  const idx = flow.findIndex((n) => n.status === 'current');
+  if (idx < 0) return { ok: false, message: '未找到当前审批节点' };
+  const node = flow[idx];
+  if (!pass) {
+    node.status = 'rejected';
+    node.time = nowStamp();
+    node.opinion = opinion.trim() || '不同意本次费用增补';
+    app.status = '已驳回';
+    project.approvalStatus = '已驳回';
+    return { ok: true, message: '已驳回，费用未变更' };
+  }
+  node.status = 'passed';
+  node.time = nowStamp();
+  node.opinion = opinion.trim() || '同意';
+  const next = flow[idx + 1];
+  if (next) {
+    next.status = 'current';
+    project.approvalStatus = '审批中';
+    return { ok: true, message: `已通过，待${next.name}` };
+  }
+  ensureFeeStore(projectId);
+  const lines = feeLineStore.get(projectId) || [];
+  let net = 0;
+  app.items.forEach((item) => {
+    const line = lines.find((l) => l.type === item.type);
+    if (!line) return;
+    const signed = item.direction === '加' ? item.amountYuan : -item.amountYuan;
+    line.actualAmount = Math.round((line.actualAmount + signed) * 100) / 100;
+    line.availableAmount = Math.max(0, Math.round((line.actualAmount - line.occupiedAmount) * 100) / 100);
+    net += signed;
+  });
+  project.actualBudgetAmount = Math.round((project.actualBudgetAmount + net) * 100) / 100;
+  project.availableAmount = Math.max(0, Math.round((project.actualBudgetAmount - project.occupiedAmount) * 100) / 100);
+  app.status = '已通过';
+  project.approvalStatus = '已通过';
+  return { ok: true, message: '审批通过，费用已更新' };
 }

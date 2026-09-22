@@ -24,6 +24,9 @@ import AttachmentUploadSection, {
 } from './components/AttachmentUploadSection';
 import ContractSelectModal from './components/ContractSelectModal';
 import PersonSelectModal from './components/PersonSelectModal';
+import AgreementViewTabBar, { type AgreementViewTabKey } from '@/pages/project-sporadic/components/AgreementViewTabBar';
+import AgreementPlanDetailTab from '@/pages/project-sporadic/components/AgreementPlanDetailTab';
+import AgreementBudgetDetailTab from '@/pages/project-sporadic/components/AgreementBudgetDetailTab';
 
 const SECTIONS = [
   { id: 'basic', title: '基本信息', icon: 'ri-file-info-line' },
@@ -40,6 +43,8 @@ function loadAgreements(): SporadicAgreementRecord[] {
     if (s) {
       return (JSON.parse(s) as SporadicAgreementRecord[]).map(withAgreementFormFields);
     }
+    localStorage.removeItem('ng_sporadic_agreement_v7');
+    localStorage.removeItem('ng_sporadic_agreement_v6');
     localStorage.removeItem('ng_sporadic_agreement_v5');
     localStorage.removeItem('ng_sporadic_agreement_v4');
     localStorage.removeItem('ng_sporadic_agreement_v3');
@@ -73,6 +78,7 @@ export default function AgreementFormPage() {
   const [contractOpen, setContractOpen] = useState(false);
   const [personOpen, setPersonOpen] = useState<'manager' | 'leader' | null>(null);
   const [activeSection, setActiveSection] = useState('basic');
+  const [viewTab, setViewTab] = useState<AgreementViewTabKey>('agreement');
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const contentRef = useRef<HTMLDivElement>(null);
@@ -136,11 +142,7 @@ export default function AgreementFormPage() {
     if (!form.projectManager.trim()) e.projectManager = '请选择项目负责人';
     if (!form.projectManagerPhone.trim()) e.projectManagerPhone = '请填写负责人电话';
     if (!form.implementYear.trim()) e.implementYear = '请填写实施年度';
-    if (!form.startDate) e.startDate = '请选择计划开工时间';
-    if (!form.endDate) e.endDate = '请选择计划完工时间';
-    if (form.startDate && form.endDate && form.startDate > form.endDate) {
-      e.endDate = '计划完工时间不能早于开工时间';
-    }
+    // 计划开/完工时间由基建科派发工单时明确，申报阶段不校验
     const budget = Number(form.budgetAmount ?? form.amount ?? 0);
     if (!budget || budget <= 0) e.budgetAmount = '请填写概算金额';
     else if (!form.isUrgent && budget > BUDGET_LIMIT) {
@@ -210,6 +212,7 @@ export default function AgreementFormPage() {
   return (
     <Layout>
       <div className="relative flex h-[calc(100vh-56px)] -mx-6 -mt-4 -mb-6">
+        {(!isView || viewTab === 'agreement') && (
         <div className="absolute left-0 top-0 bottom-0 w-[196px] border-r border-steel-200 bg-white pt-5 flex flex-col z-10">
           <div className="px-4 mb-4">
             <p className="text-xs font-semibold text-steel-400 uppercase tracking-wider">表单导航</p>
@@ -238,8 +241,13 @@ export default function AgreementFormPage() {
             ))}
           </nav>
         </div>
+        )}
 
-        <div ref={contentRef} className="flex-1 overflow-y-auto pb-24 px-6 pt-6" style={{ marginLeft: 196 }}>
+        <div
+          ref={contentRef}
+          className="flex-1 overflow-y-auto pb-24 px-6 pt-6"
+          style={{ marginLeft: (!isView || viewTab === 'agreement') ? 196 : 0 }}
+        >
           <div className="mb-5 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-steel-900">{pageTitle}</h2>
@@ -259,6 +267,14 @@ export default function AgreementFormPage() {
             )}
           </div>
 
+          {isView && (
+            <AgreementViewTabBar active={viewTab} onChange={setViewTab} />
+          )}
+
+          {isView && viewTab === 'plan' && <AgreementPlanDetailTab form={form} />}
+          {isView && viewTab === 'budget' && <AgreementBudgetDetailTab form={form} />}
+
+          {(!isView || viewTab === 'agreement') && (
           <div className={`space-y-4 ${isView ? 'pointer-events-none' : ''}`}>
             <FormSection
               id="basic"
@@ -409,23 +425,29 @@ export default function AgreementFormPage() {
                     {years.map((y) => <option key={y} value={y}>{y}年</option>)}
                   </select>
                 </FormField>
-                <FormField label="计划开工时间" required error={errors.startDate}>
-                  <input
-                    type="date"
-                    value={form.startDate}
-                    disabled={isView}
-                    onChange={(e) => patch({ startDate: e.target.value })}
-                    className={formInputCls(errors.startDate)}
-                  />
+                <FormField label="计划开工时间">
+                  <div>
+                    <input
+                      type="date"
+                      value={form.startDate}
+                      disabled
+                      readOnly
+                      className={formInputCls() + ' bg-slate-100 text-steel-400 cursor-not-allowed'}
+                    />
+                    <p className="mt-1 text-[11px] text-amber-600">在基建科派发工单时明确</p>
+                  </div>
                 </FormField>
-                <FormField label="计划完工时间" required error={errors.endDate}>
-                  <input
-                    type="date"
-                    value={form.endDate}
-                    disabled={isView}
-                    onChange={(e) => patch({ endDate: e.target.value })}
-                    className={formInputCls(errors.endDate)}
-                  />
+                <FormField label="计划完工时间">
+                  <div>
+                    <input
+                      type="date"
+                      value={form.endDate}
+                      disabled
+                      readOnly
+                      className={formInputCls() + ' bg-slate-100 text-steel-400 cursor-not-allowed'}
+                    />
+                    <p className="mt-1 text-[11px] text-amber-600">在基建科派发工单时明确</p>
+                  </div>
                 </FormField>
                 <FormField label="概算(万元)" required error={errors.budgetAmount}>
                   <div>
@@ -528,17 +550,19 @@ export default function AgreementFormPage() {
               readonly={isView}
             />
           </div>
+          )}
         </div>
 
         <div
-          className="absolute left-[196px] right-0 bottom-0 z-20 border-t border-steel-200 bg-white/95 backdrop-blur px-6 py-3 flex items-center justify-end gap-2"
+          className="absolute right-0 bottom-0 z-20 border-t border-steel-200 bg-white/95 backdrop-blur px-6 py-3 flex items-center justify-end gap-2"
+          style={{ left: (!isView || viewTab === 'agreement') ? 196 : 0 }}
         >
           <button
             type="button"
             onClick={() => navigate('/project-sporadic/agreement-declare')}
             className="px-4 py-2 text-sm border border-steel-200 rounded-md text-steel-600 hover:bg-slate-50 cursor-pointer"
           >
-            取消
+            {isView ? '返回' : '取消'}
           </button>
           {!isView && (
             <>

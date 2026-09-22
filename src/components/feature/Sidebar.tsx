@@ -61,7 +61,7 @@ const menuItems: MenuItem[] = [
     children: [
       { key: 'project-management', label: '项目成员管理', icon: 'ri-team-line', path: '/project-prepare/project-management' },
       { key: 'approval-management', label: '项目报批报建管理', icon: 'ri-building-2-line', path: '/project-prepare/approval' },
-      { key: 'estimate-management', label: '概算管理', icon: 'ri-calculator-line', path: '/project-prepare/estimate-management' },
+      { key: 'estimate-management', label: '项目概算管理', icon: 'ri-calculator-line', path: '/project-prepare/estimate-management' },
     ],
   },
   {
@@ -69,6 +69,7 @@ const menuItems: MenuItem[] = [
     label: '零星工程项目管理',
     icon: 'ri-flashlight-line',
     children: [
+      { key: 'sporadic-requirement-plan', label: '需求计划管理', icon: 'ri-calendar-todo-line', path: '/project-sporadic/requirement-plan' },
       { key: 'sporadic-framework', label: '框架合同管理', icon: 'ri-file-paper-2-line', path: '/project-sporadic/framework-contract' },
       { key: 'sporadic-agreement-declare', label: '零星协议单申报', icon: 'ri-file-list-3-line', path: '/project-sporadic/agreement-declare' },
       { key: 'sporadic-agreement-review', label: '零星协议单审查', icon: 'ri-file-search-line', path: '/project-sporadic/agreement-review' },
@@ -101,12 +102,8 @@ const menuItems: MenuItem[] = [
         icon: 'ri-briefcase-line',
         grandchildren: [
           { key: 'contract-signboard', label: '合同举牌验收', icon: 'ri-check-double-line', path: '/project-contract/signboard' },
-          { key: 'contract-subcontract', label: '合同施工分包审核', icon: 'ri-user-search-line', path: '/project-contract/subcontract' },
-          { key: 'contract-epc-equipment', label: 'EPC合同设备验收', icon: 'ri-tools-line', path: '/project-contract/epc-equipment' },
           { key: 'contract-deferral', label: '合同超期申请', icon: 'ri-time-line', path: '/project-contract/deferral' },
           { key: 'contract-change-pricing', label: '合同变更核价管理', icon: 'ri-price-tag-3-line', path: '/project-contract/change-pricing' },
-          { key: 'contract-exam-exemption', label: '合同超期免考申请', icon: 'ri-shield-check-line', path: '/project-contract/exam-exemption' },
-          { key: 'contract-quality-dispute', label: '合同质量异议', icon: 'ri-error-warning-line', path: '/project-contract/quality-dispute' },
         ],
       },
       { key: 'contract-payment-declaration', label: '工程款申报', icon: 'ri-bank-card-line', path: '/project-contract/payment-declaration' },
@@ -131,10 +128,7 @@ const menuItems: MenuItem[] = [
     children: [
       { key: 'execute-progress', label: '项目进度管理', icon: 'ri-bar-chart-grouped-line', path: '/project-execute/progress' },
       { key: 'execute-quality-safety', label: '质量安全管理', icon: 'ri-shield-check-line', path: '/project-execute/quality-safety' },
-      { key: 'execute-dangerous-work', label: '危险作业管理', icon: 'ri-alarm-warning-line', path: '/project-execute/dangerous-work' },
-      { key: 'execute-it-launch', label: '信息化项目上线申请', icon: 'ri-rocket-line', path: '/project-execute/it-launch' },
       { key: 'execute-completion', label: '项目交竣工申请', icon: 'ri-building-4-line', path: '/project-execute/completion' },
-      { key: 'execute-it-acceptance', label: '信息化项目验收申请', icon: 'ri-check-double-line', path: '/project-execute/it-acceptance' },
     ],
   },
   {
@@ -275,7 +269,7 @@ export default function Sidebar() {
         </div>
         {!collapsed && (
           <span className="ml-2 text-sm font-semibold whitespace-nowrap overflow-hidden text-slate-100">
-            南钢工程一体化
+            贵钢工程项目管理
           </span>
         )}
       </div>

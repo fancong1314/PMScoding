@@ -28,6 +28,8 @@ interface Props {
   canEdit?: (row: SporadicAgreementRecord) => boolean;
   canWithdraw?: (row: SporadicAgreementRecord) => boolean;
   canUpload?: (row: SporadicAgreementRecord) => boolean;
+  /** 申报名称可点击跳转详情 */
+  nameClickable?: boolean;
 }
 
 function HoverTip({ text, children }: { text: string; children: ReactNode }) {
@@ -95,6 +97,17 @@ function UrgentMark() {
   );
 }
 
+function formatPlanDates(start: string, end: string) {
+  if (!start && !end) return '待基建科明确';
+  return (
+    <>
+      {start || '—'}
+      <span className="text-steel-300 mx-1">至</span>
+      {end || '—'}
+    </>
+  );
+}
+
 export default function AgreementTable({
   rows,
   selectedIds,
@@ -114,6 +127,7 @@ export default function AgreementTable({
   canEdit,
   canWithdraw,
   canUpload,
+  nameClickable = false,
 }: Props) {
   const allChecked = rows.length > 0 && rows.every((r) => selectedIds.includes(r.id));
   const thCls = 'px-3 py-2.5 text-xs font-semibold text-steel-500 text-left whitespace-nowrap';
@@ -213,7 +227,18 @@ export default function AgreementTable({
                   <td className={`${tdCls} font-medium max-w-[260px]`}>
                     <div className="flex items-center gap-2 min-w-0">
                       {!hideUrgentColumn && r.isUrgent && <UrgentMark />}
-                      <span className="truncate text-steel-800" title={r.declareName}>{r.declareName}</span>
+                      {nameClickable && onDetail ? (
+                        <button
+                          type="button"
+                          onClick={() => onDetail(r)}
+                          className="truncate text-sky-600 hover:text-sky-700 hover:underline cursor-pointer text-left"
+                          title={r.declareName}
+                        >
+                          {r.declareName}
+                        </button>
+                      ) : (
+                        <span className="truncate text-steel-800" title={r.declareName}>{r.declareName}</span>
+                      )}
                     </div>
                   </td>
                   {!hideUrgentColumn && (
@@ -235,7 +260,7 @@ export default function AgreementTable({
                     <div className="text-xs text-steel-400 mt-0.5">{r.projectManagerPhone}</div>
                   </td>
                   <td className={`${tdCls} whitespace-nowrap text-xs text-steel-600`}>
-                    {r.startDate}<span className="text-steel-300 mx-1">至</span>{r.endDate}
+                    {formatPlanDates(r.startDate, r.endDate)}
                   </td>
                   <td className={`${tdCls} whitespace-nowrap text-xs text-steel-500`}>{r.declareTime}</td>
                   <td className={`${tdCls} max-w-[160px]`}>
@@ -328,6 +353,13 @@ export default function AgreementTable({
                       <div className="inline-flex items-center gap-0.5">
                         <button
                           type="button"
+                          onClick={() => onDetail?.(r)}
+                          className="px-1.5 py-1 text-xs text-steel-600 hover:bg-slate-100 rounded cursor-pointer"
+                        >
+                          查看
+                        </button>
+                        <button
+                          type="button"
                           disabled={!canUpload?.(r)}
                           onClick={() => onUpload?.(r)}
                           className="px-1.5 py-1 text-xs text-emerald-600 hover:bg-emerald-50 rounded disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
@@ -373,6 +405,15 @@ export default function AgreementTable({
                             className="px-1.5 py-1 text-xs text-emerald-600 hover:bg-emerald-50 rounded cursor-pointer"
                           >
                             签发
+                          </button>
+                        )}
+                        {mode === 'issue-issued' && (
+                          <button
+                            type="button"
+                            onClick={() => onLog?.(r)}
+                            className="px-1.5 py-1 text-xs text-steel-500 hover:bg-slate-100 rounded cursor-pointer"
+                          >
+                            操作记录
                           </button>
                         )}
                       </div>

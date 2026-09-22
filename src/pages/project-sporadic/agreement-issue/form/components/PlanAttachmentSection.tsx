@@ -8,6 +8,10 @@ interface Props {
   errors?: Record<string, string>;
   sectionRef?: (el: HTMLDivElement | null) => void;
   readonly?: boolean;
+  needPlan?: boolean;
+  planRemark?: string;
+  /** 是否展示是否需要方案/备注（详情 TAB 已单独展示时可关闭） */
+  showMeta?: boolean;
 }
 
 function formatSize(bytes: number) {
@@ -171,6 +175,9 @@ export default function PlanAttachmentSection({
   errors = {},
   sectionRef,
   readonly = false,
+  needPlan = true,
+  planRemark = '',
+  showMeta = true,
 }: Props) {
   const configs = useMemo(() => getSporadicPlanUploadAttachmentConfigs(), []);
 
@@ -210,14 +217,32 @@ export default function PlanAttachmentSection({
         <div className="w-5 h-5 flex items-center justify-center">
           <i className="ri-attachment-2 text-emerald-500" />
         </div>
-        <h3 className="text-sm font-semibold text-steel-800">方案上传</h3>
+        <h3 className="text-sm font-semibold text-steel-800">附件上传</h3>
         <span className="text-xs text-steel-400 ml-1">
-          依据项目档案配置 · 零星协议单签发 · 方案上传
+          依据项目档案配置 · 零星协议单审查 · 方案上传
         </span>
       </div>
 
-      <div className="p-5 space-y-3">
-        {configs.length === 0 ? (
+      <div className="p-5 space-y-4">
+        {showMeta && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+            <div className="grid grid-cols-[130px_1fr] gap-3 items-center">
+              <span className="text-sm text-steel-600 text-right whitespace-nowrap">是否需要方案</span>
+              <span className="text-sm text-steel-800">{needPlan ? '是' : '否'}</span>
+            </div>
+            <div className="grid grid-cols-[130px_1fr] gap-3 items-start md:col-span-2">
+              <span className="text-sm text-steel-600 text-right whitespace-nowrap pt-0.5">备注</span>
+              <span className="text-sm text-steel-700 whitespace-pre-wrap leading-relaxed">{planRemark || '—'}</span>
+            </div>
+          </div>
+        )}
+
+        {!needPlan ? (
+          <div className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
+            <i className="ri-information-line mr-1" />
+            本单确认不需要方案，无需上传方案附件
+          </div>
+        ) : configs.length === 0 ? (
           <div className="py-10 text-center text-sm text-steel-400">
             当前暂无附件配置，请先在「项目档案配置」中维护方案上传节点
           </div>

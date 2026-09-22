@@ -34,12 +34,12 @@ import ParticipantListPage from "../pages/participant/negative-score/participant
 import DeductionListPage from "../pages/participant/negative-score/deduction-list/page";
 import AttendancePage from "../pages/participant/attendance/page";
 import VideoSurveillancePage from "../pages/participant/video-surveillance/page";
-import DangerousWorkListPage from "../pages/project-execute/dangerous-work/list/page";
 import ProjectPrepareListPage from "../pages/project-prepare/project-management/list/page";
 import MemberListPage from "../pages/project-prepare/project-management/members/page";
 import EstimateListPage from "../pages/project-prepare/estimate-management/list/page";
 import EstimateDetailPage from "../pages/project-prepare/estimate-management/detail/page";
 import EstimateApplyPage from "../pages/project-prepare/estimate-management/apply/page";
+import EstimateCostDetailPage from "../pages/project-prepare/estimate-management/cost-detail/page";
 import ContractProgressListPage from "../pages/project-contract/progress/list/page";
 import ReportListPage from "../pages/project-contract/progress/reports/page";
 import ReportDetailPage from "../pages/project-contract/progress/report-detail/page";
@@ -71,6 +71,7 @@ import CompletionDetailPage from "../pages/project-contract/execution/completion
 import ProjectApprovalListPage from "../pages/project-prepare/approval/list/page";
 import ProjectApprovalStagePage from "../pages/project-prepare/approval/stage/page";
 import FrameworkContractPage from "../pages/project-sporadic/framework-contract/page";
+import SporadicRequirementPlanPage from "../pages/project-sporadic/requirement-plan/page";
 import AgreementDeclarePage from "../pages/project-sporadic/agreement-declare/page";
 import AgreementFormPage from "../pages/project-sporadic/agreement-declare/form/page";
 import AgreementReviewPage from "../pages/project-sporadic/agreement-review/page";
@@ -90,27 +91,11 @@ import OverdueApplicationListPage from "../pages/project-contract/deferral/appli
 import OverdueProjectFormPage from "../pages/project-contract/deferral/project-form/page";
 import OverdueDepartmentReviewPage from "../pages/project-contract/deferral/department-review/page";
 import OverdueDetailPage from "../pages/project-contract/deferral/detail/page";
-import SubcontractListPage from "../pages/project-contract/subcontract/list/page";
-import SubcontractReviewPage from "../pages/project-contract/subcontract/review/page";
-import SubcontractDetailPage from "../pages/project-contract/subcontract/detail/page";
-import EpcEquipmentListPage from "../pages/project-contract/epc-equipment/list/page";
-import EpcEquipmentReviewPage from "../pages/project-contract/epc-equipment/review/page";
-import EpcEquipmentDetailPage from "../pages/project-contract/epc-equipment/detail/page";
 import ChangePricingProjectListPage from "../pages/project-contract/change-pricing/list/page";
 import ChangePricingDemandListPage from "../pages/project-contract/change-pricing/demand-list/page";
 import ChangePricingDemandFormPage from "../pages/project-contract/change-pricing/demand-form/page";
 import ChangePricingDemandDetailPage from "../pages/project-contract/change-pricing/demand-detail/page";
 import ChangePricingSubmitPage from "../pages/project-contract/change-pricing/submit/page";
-import ExamExemptionContractListPage from "../pages/project-contract/exam-exemption/list/page";
-import ExamExemptionListPage from "../pages/project-contract/exam-exemption/exemption-list/page";
-import ExamExemptionProjectFormPage from "../pages/project-contract/exam-exemption/project-form/page";
-import ExamExemptionDepartmentConfirmPage from "../pages/project-contract/exam-exemption/department-confirm/page";
-import ExamExemptionDetailPage from "../pages/project-contract/exam-exemption/detail/page";
-import QualityDisputeListPage from "../pages/project-contract/quality-dispute/list/page";
-import QualityDisputeFormPage from "../pages/project-contract/quality-dispute/form/page";
-import QualityDisputeProjectReviewPage from "../pages/project-contract/quality-dispute/project-review/page";
-import QualityDisputeManufacturingReviewPage from "../pages/project-contract/quality-dispute/manufacturing-review/page";
-import QualityDisputeDetailPage from "../pages/project-contract/quality-dispute/detail/page";
 import PaymentDeclarationListPage from "../pages/project-contract/payment-declaration/list/page";
 import PaymentDeclarationAppListPage from "../pages/project-contract/payment-declaration/declaration-list/page";
 import PaymentProjectReviewPage from "../pages/project-contract/payment-declaration/project-review/page";
@@ -138,18 +123,12 @@ import ReportDetailPage2 from "../pages/project-execute/progress/weekly-monthly/
 import ProgressReportPage from "../pages/project-execute/progress/report/page";
 import ProjectGanttPage from "../pages/project-execute/progress/gantt/page";
 import ArchiveManagementPreviewPage from "../pages/project-archive/management/preview/page";
-import ItLaunchListPage from "../pages/project-execute/it-launch/page";
-import ItLaunchFormPage from "../pages/project-execute/it-launch/form/page";
 import MonitorConfigListPage from "../pages/system-config/monitor-config/page";
 import MonitorDeviceConfigPage from "../pages/system-config/monitor-config/config/page";
 import CompletionProjectListPage from "../pages/project-execute/completion/project-list/page";
 import TechRenovationListPage from "../pages/project-execute/completion/tech-renovation/page";
 import CompletionApplicationListPage from "../pages/project-execute/completion/application-list/page";
 import CompletionApplicationFormPage from "../pages/project-execute/completion/application-form/page";
-import ItAcceptanceListPage from "../pages/project-execute/it-acceptance/list/page";
-import ItAcceptanceFormPage from "../pages/project-execute/it-acceptance/form/page";
-import ResearchConfirmListPage from "../pages/project-execute/it-acceptance/research-confirm/page";
-import ItAcceptanceConfirmPage from "../pages/project-execute/it-acceptance/confirm-form/page";
 import ConstructionMemberListPage from "../pages/participant/construction-member/list/page";
 import ConstructionMemberDetailPage from "../pages/participant/construction-member/detail/page";
 const routes: RouteObject[] = [
@@ -326,10 +305,6 @@ const routes: RouteObject[] = [
     element: <VideoSurveillancePage />,
   },
   {
-    path: "/project-execute/dangerous-work",
-    element: <DangerousWorkListPage />,
-  },
-  {
     path: "/project-prepare/project-management",
     element: <ProjectPrepareListPage />,
   },
@@ -348,6 +323,10 @@ const routes: RouteObject[] = [
   {
     path: "/project-prepare/estimate-management/apply",
     element: <EstimateApplyPage />,
+  },
+  {
+    path: "/project-prepare/estimate-management/cost-detail",
+    element: <EstimateCostDetailPage />,
   },
   {
     path: "/project-contract/progress",
@@ -470,6 +449,10 @@ const routes: RouteObject[] = [
     element: <ProjectApprovalStagePage />,
   },
   {
+    path: "/project-sporadic/requirement-plan",
+    element: <SporadicRequirementPlanPage />,
+  },
+  {
     path: "/project-sporadic/framework-contract",
     element: <FrameworkContractPage />,
   },
@@ -550,30 +533,6 @@ const routes: RouteObject[] = [
     element: <OverdueDetailPage />,
   },
   {
-    path: "/project-contract/subcontract",
-    element: <SubcontractListPage />,
-  },
-  {
-    path: "/project-contract/subcontract/review",
-    element: <SubcontractReviewPage />,
-  },
-  {
-    path: "/project-contract/subcontract/detail",
-    element: <SubcontractDetailPage />,
-  },
-  {
-    path: "/project-contract/epc-equipment",
-    element: <EpcEquipmentListPage />,
-  },
-  {
-    path: "/project-contract/epc-equipment/review",
-    element: <EpcEquipmentReviewPage />,
-  },
-  {
-    path: "/project-contract/epc-equipment/detail",
-    element: <EpcEquipmentDetailPage />,
-  },
-  {
     path: "/project-contract/change-pricing",
     element: <ChangePricingProjectListPage />,
   },
@@ -592,46 +551,6 @@ const routes: RouteObject[] = [
   {
     path: "/project-contract/change-pricing/submit",
     element: <ChangePricingSubmitPage />,
-  },
-  {
-    path: "/project-contract/exam-exemption",
-    element: <ExamExemptionContractListPage />,
-  },
-  {
-    path: "/project-contract/exam-exemption/exemption-list",
-    element: <ExamExemptionListPage />,
-  },
-  {
-    path: "/project-contract/exam-exemption/project-form",
-    element: <ExamExemptionProjectFormPage />,
-  },
-  {
-    path: "/project-contract/exam-exemption/department-confirm",
-    element: <ExamExemptionDepartmentConfirmPage />,
-  },
-  {
-    path: "/project-contract/exam-exemption/detail",
-    element: <ExamExemptionDetailPage />,
-  },
-  {
-    path: "/project-contract/quality-dispute",
-    element: <QualityDisputeListPage />,
-  },
-  {
-    path: "/project-contract/quality-dispute/form",
-    element: <QualityDisputeFormPage />,
-  },
-  {
-    path: "/project-contract/quality-dispute/project-review",
-    element: <QualityDisputeProjectReviewPage />,
-  },
-  {
-    path: "/project-contract/quality-dispute/manufacturing-review",
-    element: <QualityDisputeManufacturingReviewPage />,
-  },
-  {
-    path: "/project-contract/quality-dispute/detail",
-    element: <QualityDisputeDetailPage />,
   },
   {
     path: "/project-contract/payment-declaration",
@@ -742,14 +661,6 @@ const routes: RouteObject[] = [
     element: <ProjectGanttPage />,
   },
   {
-    path: "/project-execute/it-launch",
-    element: <ItLaunchListPage />,
-  },
-  {
-    path: "/project-execute/it-launch/form",
-    element: <ItLaunchFormPage />,
-  },
-  {
     path: "/project-execute/completion",
     element: <CompletionProjectListPage />,
   },
@@ -764,22 +675,6 @@ const routes: RouteObject[] = [
   {
     path: "/project-execute/completion/application-form",
     element: <CompletionApplicationFormPage />,
-  },
-  {
-    path: "/project-execute/it-acceptance",
-    element: <ItAcceptanceListPage />,
-  },
-  {
-    path: "/project-execute/it-acceptance/form",
-    element: <ItAcceptanceFormPage />,
-  },
-  {
-    path: "/project-execute/it-acceptance/research-confirm",
-    element: <ResearchConfirmListPage />,
-  },
-  {
-    path: "/project-execute/it-acceptance/confirm-form",
-    element: <ItAcceptanceConfirmPage />,
   },
   {
     path: "/system-config/monitor-config",

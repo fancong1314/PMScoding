@@ -240,8 +240,16 @@ interface ModalProps {
   initialUploader?: string;
   initialUploadTime?: string;
   initialUploads?: PlanAttachmentMap;
+  initialNeedPlan?: boolean;
+  initialRemark?: string;
   onClose: () => void;
-  onSubmit: (payload: { uploads: PlanAttachmentMap; uploader: string; uploadTime: string }) => void;
+  onSubmit: (payload: {
+    uploads: PlanAttachmentMap;
+    uploader: string;
+    uploadTime: string;
+    needPlan: boolean;
+    planRemark: string;
+  }) => void;
 }
 
 function nowStr() {
@@ -256,12 +264,16 @@ export default function PlanUploadModal({
   initialUploader = '',
   initialUploadTime = '',
   initialUploads = {},
+  initialNeedPlan = true,
+  initialRemark = '',
   onClose,
   onSubmit,
 }: ModalProps) {
   const [uploads, setUploads] = useState<PlanAttachmentMap>(initialUploads);
   const [uploader, setUploader] = useState(initialUploader || '樊聪');
   const [uploadTime, setUploadTime] = useState(initialUploadTime || nowStr());
+  const [needPlan, setNeedPlan] = useState(initialNeedPlan);
+  const [planRemark, setPlanRemark] = useState(initialRemark);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -269,19 +281,30 @@ export default function PlanUploadModal({
       setUploads(initialUploads);
       setUploader(initialUploader || '樊聪');
       setUploadTime(initialUploadTime || nowStr());
+      setNeedPlan(initialNeedPlan);
+      setPlanRemark(initialRemark);
       setErrors({});
     }
-  }, [open, initialUploads, initialUploader, initialUploadTime]);
+  }, [open, initialUploads, initialUploader, initialUploadTime, initialNeedPlan, initialRemark]);
 
   if (!open) return null;
 
   const handleSubmit = () => {
-    const e = validatePlanAttachments(uploads);
+    const e: Record<string, string> = {};
     if (!uploader.trim()) e.uploader = '请填写方案上传人';
     if (!uploadTime.trim()) e.uploadTime = '请填写上传时间';
+    if (needPlan) {
+      Object.assign(e, validatePlanAttachments(uploads));
+    }
     setErrors(e);
     if (Object.keys(e).length > 0) return;
-    onSubmit({ uploads, uploader: uploader.trim(), uploadTime: uploadTime.trim() });
+    onSubmit({
+      uploads: needPlan ? uploads : {},
+      uploader: uploader.trim(),
+      uploadTime: uploadTime.trim(),
+      needPlan,
+      planRemark: planRemark.trim(),
+    });
   };
 
   const inputCls = (err?: string) =>
@@ -314,6 +337,49 @@ export default function PlanUploadModal({
               <h3 className="text-sm font-semibold text-steel-800">上传信息</h3>
             </div>
             <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+              <div className="grid grid-cols-[130px_1fr] gap-3 items-start">
+                <label className="flex justify-end items-center text-sm text-steel-600 pt-2 whitespace-nowrap">
+                  <span className="text-red-500 mr-0.5">*</span>是否需要方案
+                </label>
+                <div className="flex items-center gap-5 pt-2">
+                  <label className="inline-flex items-center gap-1.5 text-sm text-steel-700 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="needPlan"
+                      checked={needPlan}
+                      onChange={() => setNeedPlan(true)}
+                      className="accent-emerald-600 cursor-pointer"
+                    />
+                    是
+                  </label>
+                  <label className="inline-flex items-center gap-1.5 text-sm text-steel-700 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="needPlan"
+                      checked={!needPlan}
+                      onChange={() => setNeedPlan(false)}
+                      className="accent-emerald-600 cursor-pointer"
+                    />
+                    否
+                  </label>
+                </div>
+              </div>
+              <div className="grid grid-cols-[130px_1fr] gap-3 items-start md:col-span-2">
+                <label className="flex justify-end items-start text-sm text-steel-600 pt-2 whitespace-nowrap">
+                  备注
+                </label>
+                <div>
+                  <textarea
+                    value={planRemark}
+                    maxLength={100}
+                    rows={3}
+                    onChange={(e) => setPlanRemark(e.target.value.slice(0, 100))}
+                    placeholder="请输入备注，100字以内"
+                    className="w-full px-3 py-2 text-sm border border-steel-200 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                  />
+                  <p className="text-[11px] text-steel-300 text-right mt-0.5">{planRemark.length}/100</p>
+                </div>
+              </div>
               <div className="grid grid-cols-[130px_1fr] gap-3 items-start">
                 <label className="flex justify-end items-center text-sm text-steel-600 pt-2 whitespace-nowrap">
                   <span className="text-red-500 mr-0.5">*</span>方案上传人
@@ -352,18 +418,26 @@ export default function PlanUploadModal({
             </div>
           </div>
 
-          <PlanAttachmentSection
-            uploads={uploads}
-            onChange={(next) => {
-              setUploads(next);
-              setErrors((prev) => {
-                const nextErr = { ...prev };
-                Object.keys(nextErr).forEach((k) => { if (k.startsWith('attach_')) delete nextErr[k]; });
-                return nextErr;
-              });
-            }}
-            errors={errors}
-          />
+          {needPlan && (
+            <PlanAttachmentSection
+              uploads={uploads}
+              onChange={(next) => {
+                setUploads(next);
+                setErrors((prev) => {
+                  const nextErr = { ...prev };
+                  Object.keys(nextErr).forEach((k) => { if (k.startsWith('attach_')) delete nextErr[k]; });
+                  return nextErr;
+                });
+              }}
+              errors={errors}
+            />
+          )}
+          {!needPlan && (
+            <div className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
+              <i className="ri-information-line mr-1" />
+              已选择「不需要方案」，提交后无需上传方案附件
+            </div>
+          )}
         </div>
         <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-steel-100 bg-slate-50/80">
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm border border-steel-200 rounded-md text-steel-600 hover:bg-white cursor-pointer">

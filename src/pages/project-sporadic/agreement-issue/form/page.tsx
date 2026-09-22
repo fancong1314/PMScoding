@@ -27,15 +27,24 @@ import AttachmentUploadSection, {
 import ContractSelectModal from '@/pages/project-sporadic/agreement-declare/form/components/ContractSelectModal';
 import PersonSelectModal from '@/pages/project-sporadic/agreement-declare/form/components/PersonSelectModal';
 import BudgetEstimateSection, { validateBudgetEstimate } from './components/BudgetEstimateSection';
+import BudgetDetailAttachmentSection from './components/BudgetDetailAttachmentSection';
 import PlanAttachmentSection, { validatePlanAttachments } from './components/PlanAttachmentSection';
+import AgreementViewTabBar, { type AgreementViewTabKey } from '@/pages/project-sporadic/components/AgreementViewTabBar';
+import AgreementPlanDetailTab from '@/pages/project-sporadic/components/AgreementPlanDetailTab';
+import AgreementBudgetDetailTab from '@/pages/project-sporadic/components/AgreementBudgetDetailTab';
 
-const SECTIONS = [
+const AGREEMENT_SECTIONS = [
   { id: 'basic', title: '基本信息', icon: 'ri-file-info-line' },
   { id: 'detail', title: '详细信息', icon: 'ri-file-text-line' },
   { id: 'research-person', title: '研究报告人员', icon: 'ri-team-line' },
   { id: 'attachment-upload', title: '附件上传', icon: 'ri-attachment-2' },
+];
+
+const ISSUE_SECTIONS = [
+  ...AGREEMENT_SECTIONS,
   { id: 'project-budget', title: '项目预算', icon: 'ri-funds-line' },
-  { id: 'plan-attachment', title: '方案上传', icon: 'ri-file-upload-line' },
+  { id: 'budget-attachment', title: '预算明细表', icon: 'ri-file-excel-2-line' },
+  { id: 'plan-attachment', title: '附件上传', icon: 'ri-attachment-2' },
 ];
 
 const BUDGET_LIMIT = 5;
@@ -46,6 +55,8 @@ function loadAgreements(): SporadicAgreementRecord[] {
     if (s) {
       return (JSON.parse(s) as SporadicAgreementRecord[]).map(withAgreementFormFields);
     }
+    localStorage.removeItem('ng_sporadic_agreement_v7');
+    localStorage.removeItem('ng_sporadic_agreement_v6');
     localStorage.removeItem('ng_sporadic_agreement_v5');
     localStorage.removeItem('ng_sporadic_agreement_v4');
     localStorage.removeItem('ng_sporadic_agreement_v3');
@@ -70,8 +81,10 @@ export default function AgreementIssueFormPage() {
   const [searchParams] = useSearchParams();
   const mode = (searchParams.get('mode') || 'issue') as 'issue' | 'view';
   const planId = searchParams.get('id') || '';
+  const fromReview = searchParams.get('from') === 'review';
   const isView = mode === 'view';
   const isIssue = mode === 'issue';
+  const listPath = fromReview ? '/project-sporadic/agreement-review' : '/project-sporadic/agreement-issue';
 
   const [form, setForm] = useState<SporadicAgreementRecord>(() => emptyAgreementForm());
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -79,9 +92,13 @@ export default function AgreementIssueFormPage() {
   const [contractOpen, setContractOpen] = useState(false);
   const [personOpen, setPersonOpen] = useState<'manager' | 'leader' | null>(null);
   const [activeSection, setActiveSection] = useState('basic');
+  const [viewTab, setViewTab] = useState<AgreementViewTabKey>('agreement');
 
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const contentRef = useRef<HTMLDivElement>(null);
+  const SECTIONS = isView ? AGREEMENT_SECTIONS : ISSUE_SECTIONS;
+  const showAgreementSidebar = !isView || viewTab === 'agreement';
+  const showAgreementContent = !isView || viewTab === 'agreement';
 
   useEffect(() => {
     const list = loadAgreements();
@@ -89,9 +106,9 @@ export default function AgreementIssueFormPage() {
     if (found) setForm(withAgreementFormFields(found));
     else {
       setToast('未找到该协议单，已返回列表');
-      setTimeout(() => navigate('/project-sporadic/agreement-issue'), 1200);
+      setTimeout(() => navigate(listPath), 1200);
     }
-  }, [mode, planId, navigate]);
+  }, [mode, planId, navigate, listPath]);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -138,9 +155,9 @@ export default function AgreementIssueFormPage() {
     if (!form.projectManager.trim()) e.projectManager = '请选择项目负责人';
     if (!form.projectManagerPhone.trim()) e.projectManagerPhone = '请填写负责人电话';
     if (!form.implementYear.trim()) e.implementYear = '请填写实施年度';
-    if (!form.startDate) e.startDate = '请选择计划开工时间';
-    if (!form.endDate) e.endDate = '请选择计划完工时间';
-    if (form.startDate && form.endDate && form.startDate > form.endDate) {
+    if (!form.startDate?.trim()) e.startDate = '请选择计划开工时间';
+    if (!form.endDate?.trim()) e.endDate = '请选择计划完工时间';
+    if (form.startDate && form.endDate && form.endDate < form.startDate) {
       e.endDate = '计划完工时间不能早于开工时间';
     }
     const budget = Number(form.budgetAmount ?? form.amount ?? 0);
@@ -153,7 +170,9 @@ export default function AgreementIssueFormPage() {
     if (!form.supplierPhone?.trim()) e.supplierPhone = '请填写负责人联系方式';
     Object.assign(e, validateRequiredAttachments(form.attachments || {}));
     Object.assign(e, validateBudgetEstimate(form.budgetEstimate || emptyBudgetEstimate()));
-    Object.assign(e, validatePlanAttachments(form.planAttachments || {}));
+    if (form.needPlan !== false) {
+      Object.assign(e, validatePlanAttachments(form.planAttachments || {}));
+    }
     setErrors(e);
     if (Object.keys(e).length > 0) {
       const first = Object.keys(e)[0];
@@ -192,7 +211,7 @@ export default function AgreementIssueFormPage() {
     const next = list.map((r) => (r.id === planId ? { ...payload, id: planId } : r));
     saveAgreements(next);
     showToast('协议单已签发');
-    setTimeout(() => navigate('/project-sporadic/agreement-issue'), 600);
+    setTimeout(() => navigate(listPath), 600);
   };
 
   const pageTitle = isView ? '查看零星协议单' : '签发零星协议单';
@@ -204,6 +223,7 @@ export default function AgreementIssueFormPage() {
   return (
     <Layout>
       <div className="relative flex h-[calc(100vh-56px)] -mx-6 -mt-4 -mb-6">
+        {showAgreementSidebar && (
         <div className="absolute left-0 top-0 bottom-0 w-[196px] border-r border-steel-200 bg-white pt-5 flex flex-col z-10">
           <div className="px-4 mb-4">
             <p className="text-xs font-semibold text-steel-400 uppercase tracking-wider">表单导航</p>
@@ -232,8 +252,13 @@ export default function AgreementIssueFormPage() {
             ))}
           </nav>
         </div>
+        )}
 
-        <div ref={contentRef} className="flex-1 overflow-y-auto pb-24 px-6 pt-6" style={{ marginLeft: 196 }}>
+        <div
+          ref={contentRef}
+          className="flex-1 overflow-y-auto pb-24 px-6 pt-6"
+          style={{ marginLeft: showAgreementSidebar ? 196 : 0 }}
+        >
           <div className="mb-5 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-steel-900">{pageTitle}</h2>
@@ -251,6 +276,14 @@ export default function AgreementIssueFormPage() {
             )}
           </div>
 
+          {isView && (
+            <AgreementViewTabBar active={viewTab} onChange={setViewTab} />
+          )}
+
+          {isView && viewTab === 'plan' && <AgreementPlanDetailTab form={form} />}
+          {isView && viewTab === 'budget' && <AgreementBudgetDetailTab form={form} />}
+
+          {showAgreementContent && (
           <div className={`space-y-4 ${isView ? 'pointer-events-none' : ''}`}>
             <FormSection
               id="basic"
@@ -404,19 +437,35 @@ export default function AgreementIssueFormPage() {
                 <FormField label="计划开工时间" required error={errors.startDate}>
                   <input
                     type="date"
-                    value={form.startDate}
+                    value={form.startDate || ''}
                     disabled={isView}
-                    onChange={(e) => patch({ startDate: e.target.value })}
-                    className={formInputCls(errors.startDate)}
+                    onChange={(e) => {
+                      patch({ startDate: e.target.value });
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.startDate;
+                        if (next.endDate === '计划完工时间不能早于开工时间') delete next.endDate;
+                        return next;
+                      });
+                    }}
+                    className={formInputCls(errors.startDate) + (isView ? ' bg-slate-50 cursor-not-allowed' : ' cursor-pointer')}
                   />
                 </FormField>
                 <FormField label="计划完工时间" required error={errors.endDate}>
                   <input
                     type="date"
-                    value={form.endDate}
+                    value={form.endDate || ''}
                     disabled={isView}
-                    onChange={(e) => patch({ endDate: e.target.value })}
-                    className={formInputCls(errors.endDate)}
+                    min={form.startDate || undefined}
+                    onChange={(e) => {
+                      patch({ endDate: e.target.value });
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.endDate;
+                        return next;
+                      });
+                    }}
+                    className={formInputCls(errors.endDate) + (isView ? ' bg-slate-50 cursor-not-allowed' : ' cursor-pointer')}
                   />
                 </FormField>
                 <FormField label="概算(万元)" required error={errors.budgetAmount}>
@@ -520,8 +569,11 @@ export default function AgreementIssueFormPage() {
               readonly={isView}
             />
 
+            {!isView && (
+              <>
             <BudgetEstimateSection
               data={form.budgetEstimate || emptyBudgetEstimate()}
+              budgetRemark={form.budgetRemark || ''}
               errors={errors}
               onChange={(next) => {
                 if (isView) return;
@@ -544,8 +596,15 @@ export default function AgreementIssueFormPage() {
               readonly={isView}
             />
 
+            <BudgetDetailAttachmentSection
+              uploads={form.budgetAttachments || {}}
+              sectionRef={(el) => { sectionRefs.current['budget-attachment'] = el; }}
+            />
+
             <PlanAttachmentSection
               uploads={form.planAttachments || {}}
+              needPlan={form.needPlan !== false}
+              planRemark={form.planRemark || ''}
               onChange={(next) => {
                 if (isView) return;
                 setForm((prev) => ({ ...prev, planAttachments: next }));
@@ -561,15 +620,19 @@ export default function AgreementIssueFormPage() {
               sectionRef={(el) => { sectionRefs.current['plan-attachment'] = el; }}
               readonly={isView}
             />
+              </>
+            )}
           </div>
+          )}
         </div>
 
         <div
-          className="absolute left-[196px] right-0 bottom-0 z-20 border-t border-steel-200 bg-white/95 backdrop-blur px-6 py-3 flex items-center justify-end gap-2"
+          className="absolute right-0 bottom-0 z-20 border-t border-steel-200 bg-white/95 backdrop-blur px-6 py-3 flex items-center justify-end gap-2"
+          style={{ left: showAgreementSidebar ? 196 : 0 }}
         >
           <button
             type="button"
-            onClick={() => navigate('/project-sporadic/agreement-issue')}
+            onClick={() => navigate(listPath)}
             className="px-4 py-2 text-sm border border-steel-200 rounded-md text-steel-600 hover:bg-slate-50 cursor-pointer"
           >
             {isView ? '返回' : '取消'}

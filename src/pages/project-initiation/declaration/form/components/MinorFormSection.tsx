@@ -11,6 +11,8 @@ import {
 } from '@/components/feature/FormLayout';
 import SubmitOrgFields from './SubmitOrgFields';
 import AnnualPlanSelectModal from './AnnualPlanSelectModal';
+import InvolvedStagesField from './InvolvedStagesField';
+import type { InvolvedStage } from '@/mocks/projectPlans';
 
 interface Props {
   data: Partial<ProjectPlan>;
@@ -329,6 +331,11 @@ export default function MinorFormSection({ data, errors, onChange, onPatch, sect
           />
         </FormField>
       </div>
+
+      <InvolvedStagesField
+        value={data.involvedStages as InvolvedStage[] | undefined}
+        onChange={(next) => patch({ involvedStages: next })}
+      />
 
       <FormField label="更新理由" required error={errors.updateReason} topAlign>
         <textarea

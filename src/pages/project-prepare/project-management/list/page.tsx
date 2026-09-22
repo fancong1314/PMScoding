@@ -128,7 +128,7 @@ export default function ProjectListPage() {
                   <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap">立项号</th>
                   <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap">建设单位</th>
                   <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap">项目类型</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap">项目经理</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap">项目负责人</th>
                   <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap sticky right-0 bg-slate-50 text-center" style={{ minWidth: '140px', borderLeft: '1px solid #e8edf3' }}>操作</th>
                 </tr>
               </thead>

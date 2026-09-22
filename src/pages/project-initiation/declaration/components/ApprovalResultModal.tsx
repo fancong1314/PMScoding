@@ -218,6 +218,14 @@ export default function ApprovalResultModal({ open, plan: planRaw, approvalRecor
                 <span className="text-sm text-slate-500">负责人电话</span>
                 <span className="text-sm font-medium text-slate-800">{plan.projectManagerPhone || '—'}</span>
               </div>
+              <div className="col-span-2 flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                <span className="text-sm text-slate-500">涉及阶段</span>
+                <span className="text-sm font-medium text-slate-800">
+                  {(plan.involvedStages && plan.involvedStages.length > 0)
+                    ? plan.involvedStages.join('、')
+                    : '—'}
+                </span>
+              </div>
               {(plan.projectMajorType === '新建' || plan.projectMajorType === '技改') ? (
                 <>
                   <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">

@@ -16,9 +16,24 @@ export interface ProjectMember {
   employeeNo: string;
   department: string;
   phone: string;
-  memberType: '项目经理' | '合同经办人' | '项目创建人' | '项目成员' | '招标经理' | '采购经理' | '论证经办人' | '工程需求资料经办人' | '合同预付款申请资料经办人' | '合同预结算报支资料经办人' | '合同质保金报支资料经办人';
+  memberType: '项目负责人' | '合同经办人' | '项目创建人' | '项目成员' | '招标经理' | '采购经理' | '论证经办人' | '工程需求资料经办人' | '合同预付款申请资料经办人' | '合同预结算报支资料经办人' | '合同质保金报支资料经办人';
   relatedContract: string;
   status: '正常' | '审批中' | '已移除';
+  createDate: string;
+  /** 所属小组 */
+  groupId: string;
+  groupName: string;
+  /** 工作职责（≤100字） */
+  workDuty: string;
+}
+
+/** 项目小组 */
+export interface ProjectGroup {
+  id: string;
+  projectId: string;
+  name: string;
+  /** 小组工作职责 */
+  workDuty: string;
   createDate: string;
 }
 
@@ -87,7 +102,7 @@ export const projects: ProjectItem[] = Array.from({ length: 15 }, (_, i) => {
 });
 
 const departments = ['工程管理部', '质量安全部', '设备管理部', '生产运营部', '技术部', '财务部', '人力资源部', '基建部', '安全环保部', '采购部'];
-const memberTypes: ProjectMember['memberType'][] = ['项目经理', '合同经办人', '项目创建人', '项目成员', '招标经理', '采购经理'];
+const memberTypes: ProjectMember['memberType'][] = ['项目负责人', '合同经办人', '项目创建人', '项目成员', '招标经理', '采购经理'];
 const contractNames = [
   '土建工程施工合同', '钢结构安装合同', '设备安装调试合同', '电气自动化施工合同',
   '管道工程施工合同', '防腐保温工程合同', '土方开挖工程合同', '装饰装修工程合同',
@@ -95,6 +110,21 @@ const contractNames = [
 const employeeNames = [
   '王建国', '李志强', '张伟明', '刘卫东', '陈建华', '赵鹏', '孙伟', '周明', '吴昊', '郑强',
   '钱程', '冯亮', '黄磊', '马超', '董洋', '袁磊', '卢斌', '蒋文', '蔡明', '贾涛',
+];
+const groupSeedDefs = [
+  { name: '领导小组', workDuty: '负责现场施工组织、进度协调及质量安全管控' },
+  { name: '项目办', workDuty: '负责合同经办、招标采购及资料报支' },
+  { name: '土建小组', workDuty: '负责技术方案论证、设计对接与变更审核' },
+];
+const dutySeedPool = [
+  '统筹项目整体推进与内外协调',
+  '负责合同签订、变更及履约跟踪',
+  '对接设计联络与施工图审核',
+  '跟进现场施工与进度反馈',
+  '组织招标文件编制与开评标',
+  '负责设备材料采购与供货对接',
+  '配合论证材料整理与报送',
+  '收集工程需求资料并归档',
 ];
 
 export const employees: Employee[] = Array.from({ length: 20 }, (_, i) => ({
@@ -106,24 +136,111 @@ export const employees: Employee[] = Array.from({ length: 20 }, (_, i) => ({
   email: `${employeeNames[i]}@ngsteel.com`,
 }));
 
-export function getProjectMembers(projectId: string): ProjectMember[] {
-  const count = 5 + (parseInt(projectId.split('_')[1], 10) % 8);
-  return Array.from({ length: count }, (_, i) => {
-    const emp = employees[i % employees.length];
-    const type = i === 0 ? '项目经理' : i === 1 ? '合同经办人' : i === 2 ? '项目创建人' : memberTypes[3 + (i % 3)];
-    return {
-      id: `pm_${projectId}_${String(i + 1).padStart(3, '0')}`,
+const groupStore = new Map<string, ProjectGroup[]>();
+const memberStore = new Map<string, ProjectMember[]>();
+
+function ensureGroups(projectId: string): ProjectGroup[] {
+  if (!groupStore.has(projectId)) {
+    groupStore.set(
       projectId,
-      name: emp.name,
-      employeeNo: emp.employeeNo,
-      department: emp.department,
-      phone: emp.phone,
-      memberType: type,
-      relatedContract: i < 3 ? contractNames[i % contractNames.length] : '-',
-      status: i === 3 ? '审批中' : '正常',
-      createDate: `2026-0${1 + (i % 5)}-${String(10 + (i % 20)).padStart(2, '0')}`,
-    };
-  });
+      groupSeedDefs.map((g, i) => ({
+        id: `grp_${projectId}_${i + 1}`,
+        projectId,
+        name: g.name,
+        workDuty: g.workDuty,
+        createDate: `2026-01-${String(5 + i).padStart(2, '0')}`,
+      })),
+    );
+  }
+  return groupStore.get(projectId)!;
+}
+
+export function getProjectGroups(projectId: string): ProjectGroup[] {
+  return [...ensureGroups(projectId)];
+}
+
+export function addProjectGroup(
+  projectId: string,
+  data: { name: string; workDuty: string },
+): ProjectGroup {
+  const list = ensureGroups(projectId);
+  const group: ProjectGroup = {
+    id: `grp_${projectId}_${Date.now()}`,
+    projectId,
+    name: data.name.trim(),
+    workDuty: data.workDuty.trim().slice(0, 100),
+    createDate: new Date().toISOString().split('T')[0],
+  };
+  list.push(group);
+  return group;
+}
+
+export function getProjectMembers(projectId: string): ProjectMember[] {
+  if (!memberStore.has(projectId)) {
+    const groups = ensureGroups(projectId);
+    const count = 5 + (parseInt(projectId.split('_')[1], 10) % 8);
+    memberStore.set(
+      projectId,
+      Array.from({ length: count }, (_, i) => {
+        const emp = employees[i % employees.length];
+        const type: ProjectMember['memberType'] =
+          i === 0 ? '项目负责人' : i === 1 ? '合同经办人' : i === 2 ? '项目创建人' : memberTypes[3 + (i % 3)];
+        const group = groups[i % groups.length];
+        return {
+          id: `pm_${projectId}_${String(i + 1).padStart(3, '0')}`,
+          projectId,
+          name: emp.name,
+          employeeNo: emp.employeeNo,
+          department: emp.department,
+          phone: emp.phone,
+          memberType: type,
+          relatedContract: i < 3 ? contractNames[i % contractNames.length] : '-',
+          status: (i === 3 ? '审批中' : '正常') as ProjectMember['status'],
+          createDate: `2026-0${1 + (i % 5)}-${String(10 + (i % 20)).padStart(2, '0')}`,
+          groupId: group.id,
+          groupName: group.name,
+          workDuty: dutySeedPool[i % dutySeedPool.length],
+        };
+      }),
+    );
+  }
+  return [...memberStore.get(projectId)!];
+}
+
+export function setProjectMembers(projectId: string, members: ProjectMember[]) {
+  memberStore.set(projectId, members);
+}
+
+/** 成员变更/新增审批可视化节点 */
+export function getMemberChangeApproval(member: ProjectMember): {
+  processName: string;
+  status: string;
+  nodes: { id: string; seq: number; name: string; approver: string; status: string; action: string; operateTime: string; opinion: string }[];
+  logs: { time: string; operator: string; action: string; opinion: string }[];
+} {
+  const isPending = member.status === '审批中';
+  const isRemoved = member.status === '已移除';
+  const processName = isPending
+    ? `${member.memberType}变更审批 · ${member.name}`
+    : isRemoved
+      ? `${member.memberType}移除审批 · ${member.name}`
+      : `${member.memberType}任职确认 · ${member.name}`;
+  const overall = isPending ? '进行中' : isRemoved ? '已通过' : '已完成';
+  const nodes = isPending
+    ? [
+        { id: 'n1', seq: 1, name: '项目负责人提交', approver: member.name, status: '已通过', action: '提交变更', operateTime: `${member.createDate} 09:20:00`, opinion: '申请调整成员职责/人选' },
+        { id: 'n2', seq: 2, name: '工程管理部审核', approver: '李建国', status: '审核中', action: '待审核', operateTime: '', opinion: '' },
+        { id: 'n3', seq: 3, name: '分管领导核准', approver: '赵卫东', status: '待处理', action: '待处理', operateTime: '', opinion: '' },
+      ]
+    : [
+        { id: 'n1', seq: 1, name: '项目负责人提交', approver: member.name, status: '已通过', action: '提交', operateTime: `${member.createDate} 09:20:00`, opinion: '确认任职信息' },
+        { id: 'n2', seq: 2, name: '工程管理部审核', approver: '李建国', status: '已通过', action: '通过', operateTime: `${member.createDate} 11:05:00`, opinion: '人员配置合理' },
+        { id: 'n3', seq: 3, name: '分管领导核准', approver: '赵卫东', status: '已通过', action: '核准', operateTime: `${member.createDate} 15:40:00`, opinion: '同意' },
+      ];
+  const logs = nodes
+    .filter((n) => n.operateTime)
+    .map((n) => ({ time: n.operateTime, operator: n.approver, action: n.action, opinion: n.opinion || '—' }));
+  return { processName, status: overall, nodes, logs };
 }
 
 export const materialCategories: MaterialCategory[] = [
@@ -240,7 +357,7 @@ export const statusConfig: Record<string, { label: string; color: string; icon: 
 };
 
 export const memberTypeConfig: Record<string, { color: string; icon: string }> = {
-  '项目经理': { color: 'bg-violet-50 text-violet-700 border border-violet-200', icon: 'ri-user-star-line' },
+  '项目负责人': { color: 'bg-violet-50 text-violet-700 border border-violet-200', icon: 'ri-user-star-line' },
   '合同经办人': { color: 'bg-blue-50 text-blue-700 border border-blue-200', icon: 'ri-file-text-line' },
   '项目创建人': { color: 'bg-teal-50 text-teal-700 border border-teal-200', icon: 'ri-user-add-line' },
   '项目成员': { color: 'bg-slate-100 text-slate-600 border border-slate-200', icon: 'ri-user-line' },

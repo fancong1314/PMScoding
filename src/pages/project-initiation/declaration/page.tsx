@@ -42,7 +42,7 @@ const DEFAULT_COLUMNS: ColumnDef[] = [
   { id: 'applicant',        label: '申报人',              visible: true,  width: 90  },
 ];
 
-const STORAGE_KEY = 'ng_init_decl_plans_v9';
+const STORAGE_KEY = 'ng_init_decl_plans_v10';
 
 function normalizePlans(list: ProjectPlan[]): ProjectPlan[] {
   return list.map((p) => withInvestmentEstimateFields(withPaymentPlans(withInitiationDetailFields({
@@ -56,6 +56,7 @@ function getStoredPlans(): ProjectPlan[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return normalizePlans(JSON.parse(stored));
+    localStorage.removeItem('ng_init_decl_plans_v9');
     localStorage.removeItem('ng_init_decl_plans_v8');
     localStorage.removeItem('ng_init_decl_plans_v7');
     localStorage.removeItem('ng_init_decl_plans_v6');
