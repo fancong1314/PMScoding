@@ -25,6 +25,8 @@ export interface EstimateProject {
   /** 项目大类：新建/技改/营缮/零固 */
   majorType: string;
   projectType: string;
+  /** 是否报批报建（与立项申请同步） */
+  needApprovalPermit: '是' | '否';
   /** 立项申报金额（元） */
   budgetAmount: number;
   /** 立项批复金额（元） */
@@ -77,19 +79,19 @@ export interface EstimateApprovalFlowNode {
 export const ESTIMATE_FIELD_TIPS: Record<string, string> = {
   budgetAmount: '项目在年度计划 / 立项申报时填报的计划投资额',
   preBudgetAmount: '可研批复的投资估算额，是项目投资决策的源头基线，立项通过时的金额',
-  actualBudgetAmount: '项目通过增补、调拨、减少后的最终金额',
+  actualBudgetAmount: '项目通过增补、调拨、减少后的最终金额（项目实际金额）',
   originalContractAmount: '项目下全部合同签约金额合计',
   revisedContractAmount: '全部合同变更、签证、补充协议、索赔累计增减额合计',
-  completedAmount: '项目完工确认金额合计',
+  completedAmount: '竣工合同总额，即项目完工确认金额合计',
   paidAmount: '全部合同累计成功支付金额',
   settledAmount: '全部合同审定结算金额合计',
   accountedAmount: '财务已入账金额合计（含在建工程转固前入账）',
   fixedAmount: '已完成转固的资产价值合计',
-  occupy: '已占用金额占实际立项金额的比例，以及当前可用金额',
-  overrunRate: '（结算金额 − 立项批复金额）÷ 立项批复金额 × 100%',
+  occupy: '已占用金额占项目实际金额的比例，以及当前可用金额',
+  overrunRate: '合同偏差率 =（结算金额 − 立项批复金额）÷ 立项批复金额 × 100%',
 };
 
-/** 超概偏差率 = (结算金额 - 立项批复金额) ÷ 立项批复金额 × 100% */
+/** 合同偏差率 = (结算金额 - 立项批复金额) ÷ 立项批复金额 × 100% */
 export function calcOverrunRate(settledAmount: number, approvedAmount: number): number | null {
   if (!approvedAmount || approvedAmount <= 0) return null;
   return ((settledAmount - approvedAmount) / approvedAmount) * 100;
@@ -330,6 +332,7 @@ export const estimateProjects: EstimateProject[] = Array.from({ length: 15 }, (_
     description: `${projectNames[i]}概算管理，涉及${['环保升级', '设备更新', '自动化改造', '智能化建设', '环保设施'][i % 5]}等内容`,
     majorType: majorTypes[i % majorTypes.length],
     projectType: projectTypes[i % projectTypes.length],
+    needApprovalPermit: majorTypes[i % majorTypes.length] === '零固' && i % 3 !== 0 ? '否' : (i % 5 === 0 ? '否' : '是'),
     budgetAmount: budget,
     preBudgetAmount: preBudget,
     actualBudgetAmount: actualBudget,
@@ -767,9 +770,172 @@ export interface EstimateSupplementApplication {
   items: EstimateSupplementItem[];
   status: '审批中' | '已通过' | '已驳回';
   createdAt: string;
+  operator?: string;
+  processId?: string;
+  attachments?: string[];
+  before?: EstimateTransferSnapshot;
+  after?: EstimateTransferSnapshot;
+}
+
+/** 费用增补历史记录（含审批通过/驳回） */
+export interface EstimateSupplementRecord {
+  id: string;
+  projectId: string;
+  operator: string;
+  time: string;
+  reason: string;
+  before: EstimateTransferSnapshot;
+  after: EstimateTransferSnapshot;
+  attachments: string[];
+  processId: string;
+  /** 审批流程节点快照（点击流程 ID 可视化） */
+  flowNodes: EstimateApprovalFlowNode[];
+  status: '审批中' | '已通过' | '已驳回';
 }
 
 const supplementStore = new Map<string, EstimateSupplementApplication>();
+const supplementRecordStore = new Map<string, EstimateSupplementRecord[]>();
+let supplementProcessSeq = 100;
+
+function nextSupplementProcessId() {
+  supplementProcessSeq += 1;
+  return `SP-EST-SUP-${String(supplementProcessSeq).padStart(3, '0')}`;
+}
+
+function actualSnapshotOf(lines: EstimateFeeLine[]): EstimateTransferSnapshot {
+  const snap = { 设计费: 0, 建安费: 0, 设备费: 0, 其他费: 0 };
+  lines.forEach((line) => { snap[line.type] = line.actualAmount; });
+  return snap;
+}
+
+function defaultSupplementFlow(operator: string, status: EstimateSupplementRecord['status']): EstimateApprovalFlowNode[] {
+  if (status === '已通过') {
+    return [
+      { name: '项目负责人提交', role: operator, status: 'passed', time: '2026-02-10 09:20', opinion: '已提交费用增补申请' },
+      { name: '工程管理部审核', role: '李建国', status: 'passed', time: '2026-02-11 14:30', opinion: '同意' },
+      { name: '财务部审核', role: '孙伟', status: 'passed', time: '2026-02-12 10:15', opinion: '同意增补' },
+    ];
+  }
+  if (status === '已驳回') {
+    return [
+      { name: '项目负责人提交', role: operator, status: 'passed', time: '2026-01-20 11:00', opinion: '已提交费用增补申请' },
+      { name: '工程管理部审核', role: '李建国', status: 'rejected', time: '2026-01-21 16:40', opinion: '测算依据不充分，请补充后重报' },
+      { name: '财务部审核', role: '孙伟', status: 'pending' },
+    ];
+  }
+  return [
+    { name: '项目负责人提交', role: operator, status: 'passed', time: nowStamp(), opinion: '已提交费用增补申请' },
+    { name: '工程管理部审核', role: '李建国', status: 'current' },
+    { name: '财务部审核', role: '孙伟', status: 'pending' },
+  ];
+}
+
+function ensureSupplementRecordSeed(projectId: string) {
+  if (supplementRecordStore.has(projectId)) return;
+  const project = getProjectById(projectId);
+  if (!project) return;
+  ensureFeeStore(projectId);
+  const lines = (feeLineStore.get(projectId) || []).map((l) => ({ ...l }));
+  const operators = ['张明远', '李建国', '王志强', '赵卫东', '陈建华', '刘伟'];
+  const reasons = [
+    '现场工程量增加，增补建安费',
+    '设备规格升级，增补设备费',
+    '设计深化导致设计费上调',
+    '监理周期延长，增补其他费',
+    '签证变更引起建安费与其他费调整',
+    '进口设备关税差额增补',
+  ];
+  const attachSamples = [
+    ['费用增补申请表.pdf', '增补测算明细.xlsx'],
+    ['费用增补申请表.docx', '现场签证单.pdf', '报价对比表.xlsx'],
+    ['费用增补申请表.pdf'],
+    ['费用增补申请表.pdf', '会议纪要.pdf'],
+    ['费用增补申请表.docx', '增补测算明细.xlsx', '现场照片.zip'],
+    ['费用增补申请表.pdf', '业主确认函.pdf'],
+  ];
+  const records: EstimateSupplementRecord[] = [];
+  let cursor = lines.map((l) => ({ ...l }));
+  for (let n = 0; n < 6; n++) {
+    const before = actualSnapshotOf(cursor);
+    const type = ESTIMATE_FEE_TYPES[n % 4];
+    const addYuan = Math.round((30000 + n * 12000) * 100) / 100;
+    const next = cursor.map((l) => ({ ...l }));
+    const line = next.find((l) => l.type === type)!;
+    line.actualAmount = Math.round((line.actualAmount + addYuan) * 100) / 100;
+    line.availableAmount = Math.max(0, Math.round((line.actualAmount - line.occupiedAmount) * 100) / 100);
+    const after = actualSnapshotOf(next);
+    const status: EstimateSupplementRecord['status'] = n === 5 ? '已驳回' : '已通过';
+    const operator = operators[n % operators.length];
+    const month = String(1 + (n % 5)).padStart(2, '0');
+    const day = String(6 + n * 4).padStart(2, '0');
+    records.push({
+      id: `${projectId}-sup-rec-${n + 1}`,
+      projectId,
+      operator,
+      time: `2026-${month}-${day} ${String(9 + n).padStart(2, '0')}:${String(12 + n * 5).padStart(2, '0')}`,
+      reason: reasons[n % reasons.length],
+      before,
+      after: status === '已驳回' ? before : after,
+      attachments: attachSamples[n % attachSamples.length],
+      processId: nextSupplementProcessId(),
+      flowNodes: defaultSupplementFlow(operator, status),
+      status,
+    });
+    if (status === '已通过') cursor = next;
+  }
+  supplementRecordStore.set(projectId, records.reverse());
+}
+
+export function getProjectSupplementRecords(projectId: string): EstimateSupplementRecord[] {
+  ensureSupplementRecordSeed(projectId);
+  const pending = getPendingSupplement(projectId);
+  const list = [...(supplementRecordStore.get(projectId) || [])];
+  if (pending && pending.before && pending.processId) {
+    const exists = list.some((r) => r.id === pending.id);
+    if (!exists) {
+      list.unshift({
+        id: pending.id,
+        projectId,
+        operator: pending.operator || '当前用户',
+        time: pending.createdAt,
+        reason: pending.reason,
+        before: pending.before,
+        after: pending.after || pending.before,
+        attachments: pending.attachments || [],
+        processId: pending.processId,
+        flowNodes: getProjectById(projectId)?.approvalFlow || defaultSupplementFlow(pending.operator || '当前用户', '审批中'),
+        status: '审批中',
+      });
+    }
+  }
+  return list;
+}
+
+export function getSupplementRecordByProcessId(processId: string): EstimateSupplementRecord | undefined {
+  for (const records of supplementRecordStore.values()) {
+    const hit = records.find((r) => r.processId === processId);
+    if (hit) return hit;
+  }
+  for (const p of estimateProjects) {
+    const pending = supplementStore.get(p.id);
+    if (pending?.processId === processId && pending.before) {
+      return {
+        id: pending.id,
+        projectId: p.id,
+        operator: pending.operator || '当前用户',
+        time: pending.createdAt,
+        reason: pending.reason,
+        before: pending.before,
+        after: pending.after || pending.before,
+        attachments: pending.attachments || [],
+        processId: pending.processId,
+        flowNodes: p.approvalFlow || defaultSupplementFlow(pending.operator || '当前用户', '审批中'),
+        status: pending.status,
+      };
+    }
+  }
+  return undefined;
+}
 
 export function getPlanControl(project: EstimateProject): EstimatePlanControl {
   const controlAmount = Math.round(Math.max(project.preBudgetAmount, project.actualBudgetAmount) * 1.2);
@@ -815,8 +981,14 @@ function ensureSupplementSeed(projectId: string) {
   const project = getProjectById(projectId);
   if (!project) return;
   if (project.approvalStatus !== '审批中' && project.approvalStatus !== '待审批') return;
+  ensureFeeStore(projectId);
+  const lines = feeLineStore.get(projectId) || [];
+  const before = actualSnapshotOf(lines);
   const room = getPlanControl(project).availableAmount;
   const amountYuan = Math.max(10000, Math.min(80000, Math.floor(room * 0.05) || 10000));
+  const after = { ...before, 建安费: Math.round((before.建安费 + amountYuan) * 100) / 100 };
+  const processId = nextSupplementProcessId();
+  const operator = project.projectManager || '当前用户';
   supplementStore.set(projectId, {
     id: `${projectId}-sup-seed`,
     projectId,
@@ -824,7 +996,13 @@ function ensureSupplementSeed(projectId: string) {
     items: [{ type: '建安费', direction: '加', amountYuan }],
     status: '审批中',
     createdAt: '2026-03-18 10:20',
+    operator,
+    processId,
+    attachments: ['费用增补申请表.pdf', '增补测算明细.xlsx'],
+    before,
+    after,
   });
+  if (!project.approvalFlow?.length) startSupplementFlow(project);
 }
 
 export function getPendingSupplement(projectId: string): EstimateSupplementApplication | undefined {
@@ -838,6 +1016,7 @@ export function submitFeeSupplement(
   projectId: string,
   inputs: { type: EstimateFeeType; direction: '加' | '减'; amountWan: number }[],
   reason: string,
+  attachments: string[] = [],
 ): { ok: boolean; message: string } {
   const project = getProjectById(projectId);
   if (!project) return { ok: false, message: '未找到项目' };
@@ -877,6 +1056,14 @@ export function submitFeeSupplement(
     }
   }
 
+  const before = actualSnapshotOf(lines);
+  const previewAfter = { ...before };
+  items.forEach((it) => {
+    const signed = it.direction === '加' ? it.amountYuan : -it.amountYuan;
+    previewAfter[it.type] = Math.round((previewAfter[it.type] + signed) * 100) / 100;
+  });
+  const processId = nextSupplementProcessId();
+  const operator = project.projectManager || '当前用户';
   const app: EstimateSupplementApplication = {
     id: `${projectId}-sup-${Date.now()}`,
     projectId,
@@ -884,9 +1071,30 @@ export function submitFeeSupplement(
     items,
     status: '审批中',
     createdAt: nowStamp(),
+    operator,
+    processId,
+    attachments: [...attachments],
+    before,
+    after: previewAfter,
   };
   supplementStore.set(projectId, app);
   startSupplementFlow(project);
+  ensureSupplementRecordSeed(projectId);
+  const hist = supplementRecordStore.get(projectId) || [];
+  hist.unshift({
+    id: app.id,
+    projectId,
+    operator,
+    time: app.createdAt,
+    reason: app.reason,
+    before,
+    after: previewAfter,
+    attachments: [...attachments],
+    processId,
+    flowNodes: project.approvalFlow || defaultSupplementFlow(operator, '审批中'),
+    status: '审批中',
+  });
+  supplementRecordStore.set(projectId, hist);
   return { ok: true, message: '费用增补申请已提交，审批通过后将更新费用' };
 }
 
@@ -905,12 +1113,35 @@ export function advanceSupplementApproval(
   const idx = flow.findIndex((n) => n.status === 'current');
   if (idx < 0) return { ok: false, message: '未找到当前审批节点' };
   const node = flow[idx];
+  const syncRecord = (status: EstimateSupplementRecord['status'], afterSnap?: EstimateTransferSnapshot) => {
+    ensureSupplementRecordSeed(projectId);
+    const hist = supplementRecordStore.get(projectId) || [];
+    const idxRec = hist.findIndex((r) => r.id === app.id || r.processId === app.processId);
+    const payload: EstimateSupplementRecord = {
+      id: app.id,
+      projectId,
+      operator: app.operator || project.projectManager || '当前用户',
+      time: app.createdAt,
+      reason: app.reason,
+      before: app.before || actualSnapshotOf(feeLineStore.get(projectId) || []),
+      after: afterSnap || app.after || app.before || actualSnapshotOf(feeLineStore.get(projectId) || []),
+      attachments: app.attachments || [],
+      processId: app.processId || nextSupplementProcessId(),
+      flowNodes: [...(project.approvalFlow || [])],
+      status,
+    };
+    if (idxRec >= 0) hist[idxRec] = payload;
+    else hist.unshift(payload);
+    supplementRecordStore.set(projectId, hist);
+  };
+
   if (!pass) {
     node.status = 'rejected';
     node.time = nowStamp();
     node.opinion = opinion.trim() || '不同意本次费用增补';
     app.status = '已驳回';
     project.approvalStatus = '已驳回';
+    syncRecord('已驳回', app.before);
     return { ok: true, message: '已驳回，费用未变更' };
   }
   node.status = 'passed';
@@ -920,6 +1151,7 @@ export function advanceSupplementApproval(
   if (next) {
     next.status = 'current';
     project.approvalStatus = '审批中';
+    syncRecord('审批中');
     return { ok: true, message: `已通过，待${next.name}` };
   }
   ensureFeeStore(projectId);
@@ -935,7 +1167,10 @@ export function advanceSupplementApproval(
   });
   project.actualBudgetAmount = Math.round((project.actualBudgetAmount + net) * 100) / 100;
   project.availableAmount = Math.max(0, Math.round((project.actualBudgetAmount - project.occupiedAmount) * 100) / 100);
+  const after = actualSnapshotOf(lines);
+  app.after = after;
   app.status = '已通过';
   project.approvalStatus = '已通过';
+  syncRecord('已通过', after);
   return { ok: true, message: '审批通过，费用已更新' };
 }

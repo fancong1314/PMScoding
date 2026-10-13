@@ -43,6 +43,7 @@ function loadAgreements(): SporadicAgreementRecord[] {
     if (s) {
       return (JSON.parse(s) as SporadicAgreementRecord[]).map(withAgreementFormFields);
     }
+    localStorage.removeItem('ng_sporadic_agreement_v8');
     localStorage.removeItem('ng_sporadic_agreement_v7');
     localStorage.removeItem('ng_sporadic_agreement_v6');
     localStorage.removeItem('ng_sporadic_agreement_v5');
@@ -437,6 +438,32 @@ export default function AgreementFormPage() {
                     <p className="mt-1 text-[11px] text-amber-600">在基建科派发工单时明确</p>
                   </div>
                 </FormField>
+                <FormField label="计划施工天数">
+                  <div>
+                    <input
+                      type="number"
+                      min={1}
+                      value={form.planDurationDays ?? ''}
+                      disabled
+                      readOnly
+                      className={formInputCls() + ' bg-slate-100 text-steel-400 cursor-not-allowed'}
+                      placeholder="签发时填写"
+                    />
+                    <p className="mt-1 text-[11px] text-amber-600">在零星协议单签发时明确</p>
+                  </div>
+                </FormField>
+                <FormField label="项目跟踪人">
+                  <div>
+                    <input
+                      readOnly
+                      disabled
+                      value={form.trackerName || ''}
+                      className={formInputCls() + ' bg-slate-100 text-steel-400 cursor-not-allowed'}
+                      placeholder="签发时指定"
+                    />
+                    <p className="mt-1 text-[11px] text-amber-600">在零星协议单签发时明确</p>
+                  </div>
+                </FormField>
                 <FormField label="计划完工时间">
                   <div>
                     <input
@@ -446,7 +473,7 @@ export default function AgreementFormPage() {
                       readOnly
                       className={formInputCls() + ' bg-slate-100 text-steel-400 cursor-not-allowed'}
                     />
-                    <p className="mt-1 text-[11px] text-amber-600">在基建科派发工单时明确</p>
+                    <p className="mt-1 text-[11px] text-amber-600">由计划开工时间 + 计划施工天数自动计算</p>
                   </div>
                 </FormField>
                 <FormField label="概算(万元)" required error={errors.budgetAmount}>

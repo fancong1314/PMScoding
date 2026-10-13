@@ -16,6 +16,8 @@ interface Props {
   errors?: Record<string, string>;
   sectionRef: (el: HTMLDivElement | null) => void;
   readonly?: boolean;
+  configs?: AttachmentConfig[];
+  sourceLabel?: string;
 }
 
 function formatSize(bytes: number) {
@@ -169,8 +171,13 @@ export default function AttachmentUploadSection({
   errors = {},
   sectionRef,
   readonly = false,
+  configs: configsProp,
+  sourceLabel,
 }: Props) {
-  const configs = useMemo(() => getInitiationDeclarationAttachmentConfigs(majorType), [majorType]);
+  const configs = useMemo(
+    () => configsProp ?? getInitiationDeclarationAttachmentConfigs(majorType),
+    [configsProp, majorType],
+  );
 
   const handleAdd = (config: AttachmentConfig, fileList: FileList | null) => {
     if (readonly || !fileList || fileList.length === 0) return;
@@ -211,14 +218,14 @@ export default function AttachmentUploadSection({
         </div>
         <h3 className="text-sm font-semibold text-steel-800">附件上传</h3>
         <span className="text-xs text-steel-400 ml-1">
-          依据项目档案配置 · 项目立项申请 · {majorType}类
+          {sourceLabel || `依据项目档案配置 · 项目立项申请 · ${majorType}类`}
         </span>
       </div>
 
       <div className="p-5 space-y-3">
         {configs.length === 0 ? (
           <div className="py-10 text-center text-sm text-steel-400">
-            当前项目大类暂无附件配置，请先在「项目档案配置」中维护项目立项申请节点
+            暂无附件配置，请先在「项目档案配置」中维护对应业务节点
           </div>
         ) : (
           configs.map((cfg) => (

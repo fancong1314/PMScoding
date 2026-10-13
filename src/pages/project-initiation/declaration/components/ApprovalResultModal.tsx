@@ -133,6 +133,10 @@ export default function ApprovalResultModal({ open, plan: planRaw, approvalRecor
                       {plan.isInPlanProject || (plan.annualPlanNo ? '是' : '否')}
                     </span>
                   </div>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">是否报批报建</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.needApprovalPermit || '—'}</span>
+                  </div>
                   {(plan.isInPlanProject === '是' || !!plan.annualPlanNo) && (
                     <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
                       <span className="text-sm text-slate-500">年度计划号</span>
@@ -148,6 +152,10 @@ export default function ApprovalResultModal({ open, plan: planRaw, approvalRecor
                     <span className="text-sm font-medium text-slate-800">
                       {plan.isInPlanProject || (plan.annualPlanNo ? '是' : '否')}
                     </span>
+                  </div>
+                  <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">
+                    <span className="text-sm text-slate-500">是否报批报建</span>
+                    <span className="text-sm font-medium text-slate-800">{plan.needApprovalPermit || '—'}</span>
                   </div>
                   {(plan.isInPlanProject === '是' || !!plan.annualPlanNo) && (
                     <div className="flex items-center justify-between py-1.5 px-3 rounded bg-white">

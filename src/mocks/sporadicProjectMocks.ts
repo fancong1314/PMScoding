@@ -336,6 +336,11 @@ export interface SporadicAgreementRecord {
   leaderId?: string;
   startDate: string;
   endDate: string;
+  /** 计划施工天数（签发时填写；开工+天数→完工） */
+  planDurationDays?: number | '';
+  /** 项目跟踪人 */
+  trackerName?: string;
+  trackerId?: string;
   /** 实施年度 */
   implementYear?: string;
   declareTime: string;
@@ -386,7 +391,7 @@ export interface SporadicAgreementRecord {
   lastReturnRejectReason?: string;
 }
 
-export const AGREEMENT_DECLARE_STORAGE_KEY = 'ng_sporadic_agreement_v8';
+export const AGREEMENT_DECLARE_STORAGE_KEY = 'ng_sporadic_agreement_v9';
 
 const SITE_IMAGE_CONFIG_ID = 'ac-sporadic-1';
 const PLAN_DOC_CONFIG_ID = 'ac-sporadic-plan-1';
@@ -481,9 +486,15 @@ export interface SporadicStaffPerson {
   position: string;
   /** 分管领导可选 */
   isLeader?: boolean;
+  /** 投资部成员（项目跟踪人选择时置顶） */
+  isInvestment?: boolean;
 }
 
 export const sporadicStaffDirectory: SporadicStaffPerson[] = [
+  { id: 'st-inv-1', empNo: 'T3001', name: '樊聪', phone: '13911110001', unit: '投资部', position: '项目跟踪人', isInvestment: true },
+  { id: 'st-inv-2', empNo: 'T3002', name: '刘芳', phone: '13911110002', unit: '投资部', position: '项目跟踪人', isInvestment: true },
+  { id: 'st-inv-3', empNo: 'T3003', name: '黄志强', phone: '13911110003', unit: '投资部', position: '项目专员', isInvestment: true },
+  { id: 'st-inv-4', empNo: 'T3004', name: '郑晓琴', phone: '13911110004', unit: '投资部', position: '项目专员', isInvestment: true },
   { id: 'st-01', empNo: 'E1001', name: '王强', phone: '13700001111', unit: '炼铁厂', position: '项目负责人' },
   { id: 'st-02', empNo: 'E1002', name: '张伟', phone: '13800002222', unit: '炼钢厂', position: '项目负责人' },
   { id: 'st-03', empNo: 'E1003', name: '周涛', phone: '13600003333', unit: '热轧厂', position: '项目负责人' },
@@ -496,6 +507,26 @@ export const sporadicStaffDirectory: SporadicStaffPerson[] = [
   { id: 'st-l2', empNo: 'L2002', name: '王总工', phone: '13988880002', unit: '公司领导', position: '分管领导', isLeader: true },
   { id: 'st-l3', empNo: 'L2003', name: '赵书记', phone: '13988880003', unit: '公司领导', position: '分管领导', isLeader: true },
 ];
+
+/** 由计划开工时间 + 计划施工天数计算计划完工时间 */
+export function calcEndDateFromStartAndDays(startDate: string, days: number | string | undefined | null): string {
+  const n = Number(days);
+  if (!startDate?.trim() || !Number.isFinite(n) || n <= 0) return '';
+  const d = new Date(`${startDate.trim()}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return '';
+  d.setDate(d.getDate() + n);
+  const p = (x: number) => String(x).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/** 由开工/完工反推施工天数 */
+export function calcPlanDurationDays(startDate: string, endDate: string): number | undefined {
+  if (!startDate?.trim() || !endDate?.trim()) return undefined;
+  const a = new Date(`${startDate.trim()}T00:00:00`).getTime();
+  const b = new Date(`${endDate.trim()}T00:00:00`).getTime();
+  if (Number.isNaN(a) || Number.isNaN(b) || b < a) return undefined;
+  return Math.round((b - a) / 86_400_000);
+}
 
 export function emptyAgreementForm(): SporadicAgreementRecord {
   return {
@@ -510,6 +541,9 @@ export function emptyAgreementForm(): SporadicAgreementRecord {
     leaderId: '',
     startDate: '',
     endDate: '',
+    planDurationDays: '',
+    trackerName: '',
+    trackerId: '',
     implementYear: String(new Date().getFullYear()),
     declareTime: '',
     supplierName: '',
@@ -579,6 +613,11 @@ export function withAgreementFormFields(r: SporadicAgreementRecord): SporadicAgr
     leaderId: r.leaderId || 'st-l1',
     projectManagerId: r.projectManagerId || staff?.id || '',
     implementYear: r.implementYear || (r.startDate ? r.startDate.slice(0, 4) : String(new Date().getFullYear())),
+    planDurationDays: r.planDurationDays === 0 || r.planDurationDays
+      ? r.planDurationDays
+      : (calcPlanDurationDays(r.startDate, r.endDate) ?? ''),
+    trackerName: r.trackerName || (issueStatus === 'issued' || issueStatus === 'pending' ? '樊聪' : ''),
+    trackerId: r.trackerId || (issueStatus === 'issued' || issueStatus === 'pending' ? 'st-inv-1' : ''),
     budgetAmount: budget,
     amount: budget,
     declareDetail: r.declareDetail || `关于「${r.declareName}」的零星协议申报说明，请按现场情况组织施工。`,

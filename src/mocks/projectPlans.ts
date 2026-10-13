@@ -264,6 +264,8 @@ export interface ProjectPlan {
   projectDuration?: number;
   /** 是否计划内项目（立项申请·新建/技改） */
   isInPlanProject?: '是' | '否';
+  /** 是否报批报建（立项申请各类型必填） */
+  needApprovalPermit?: '是' | '否';
   /** 关联年度计划号（计划内项目时必填） */
   annualPlanNo?: string;
   /** 关联年度计划 ID */
@@ -358,6 +360,12 @@ export function withInitiationDetailFields(plan: ProjectPlan): ProjectPlan {
     involvedStages: Array.isArray(p.involvedStages)
       ? p.involvedStages
       : demoInvolvedStages(seed),
+    needApprovalPermit:
+      p.needApprovalPermit === '是' || p.needApprovalPermit === '否'
+        ? p.needApprovalPermit
+        : major === '零固'
+          ? (seed % 3 === 0 ? '是' : '否')
+          : (seed % 4 === 0 ? '否' : '是'),
   });
   if (major === '营缮') {
     const seed = Number(plan.id) || 0;

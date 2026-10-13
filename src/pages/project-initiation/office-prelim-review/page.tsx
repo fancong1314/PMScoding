@@ -22,6 +22,7 @@ import type { PrelimRowAction } from './components/PrelimReviewTable';
 
 const DEFAULT_COLUMNS: ColumnDef[] = [
   { id: 'isInPlanProject', label: '是否计划内项目', visible: true, width: 120 },
+  { id: 'needApprovalPermit', label: '是否报批报建', visible: true, width: 110 },
   { id: 'annualPlanNo', label: '年度计划号', visible: true, width: 140 },
   { id: 'planYear', label: '计划年度', visible: true, width: 90 },
   { id: 'projectMajorType', label: '项目大类', visible: true, width: 90 },
@@ -88,7 +89,7 @@ export default function OfficePrelimReviewPage() {
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   const { columns, resetColumns, toggleVisible, reorderColumns } =
-    useColumnConfig('init-office-prelim-cols-v2', DEFAULT_COLUMNS);
+    useColumnConfig('init-office-prelim-cols-v3', DEFAULT_COLUMNS);
 
   useEffect(() => {
     localStorage.setItem(PRELIM_STORAGE_KEY, JSON.stringify(records));

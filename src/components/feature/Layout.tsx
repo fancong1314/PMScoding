@@ -52,7 +52,6 @@ const pathMap: Record<string, { title: string; parent?: string; grandParent?: st
   '/project-prepare/project-management': { title: '项目成员管理', parent: '项目准备管理' },
   '/project-prepare/project-management/members': { title: '项目成员列表', parent: '项目成员管理', grandParent: '项目准备管理' },
   '/project-prepare/estimate-management': { title: '项目概算管理', parent: '项目准备管理' },
-  '/project-prepare/estimate-management/detail': { title: '概算清单', parent: '项目概算管理', grandParent: '项目准备管理' },
   '/project-prepare/estimate-management/apply': { title: '概算修正申请', parent: '项目概算管理', grandParent: '项目准备管理' },
   '/project-prepare/estimate-management/cost-detail': { title: '费用明细', parent: '项目概算管理', grandParent: '项目准备管理' },
   '/project-prepare/approval': { title: '项目报批报建管理', parent: '项目准备管理' },
@@ -125,11 +124,13 @@ const pathMap: Record<string, { title: string; parent?: string; grandParent?: st
   '/project-close/post-evaluation/self-eval': { title: '自评', parent: '项目后评价', grandParent: '项目收尾管理' },
   '/project-close/post-evaluation/prof-eval': { title: '专评', parent: '项目后评价', grandParent: '项目收尾管理' },
   '/project-close/post-evaluation/comp-eval': { title: '综评', parent: '项目后评价', grandParent: '项目收尾管理' },
+  '/engineering-think-tank/knowledge-base': { title: '知识库管理', parent: '工程智库' },
   '/project-archive/config': { title: '项目档案配置', parent: '项目档案管理' },
   '/project-archive/config/preview': { title: '配置预览', parent: '项目档案配置', grandParent: '项目档案管理' },
   '/project-archive/management': { title: '项目档案管理', parent: '项目档案管理' },
   '/project-archive/management/detail': { title: '档案详情', parent: '项目档案管理', grandParent: '项目档案管理' },
   '/project-archive/management/preview': { title: '附件预览', parent: '项目档案管理', grandParent: '项目档案管理' },
+  '/project-archive/history': { title: '历史归档', parent: '项目档案管理' },
   '/project-execute/progress': { title: '项目进度管理', parent: '项目执行管理' },
   '/project-execute/progress/weekly-monthly': { title: '周报月报', parent: '项目进度管理', grandParent: '项目执行管理' },
   '/project-execute/progress/weekly-monthly/detail': { title: '周报月报详情', parent: '周报月报', grandParent: '项目进度管理' },
@@ -144,6 +145,8 @@ const pathMap: Record<string, { title: string; parent?: string; grandParent?: st
   '/project-execute/completion/application-form': { title: '交竣工申请表单', parent: '项目交竣工申请', grandParent: '项目执行管理' },
   '/system-config/monitor-config': { title: '合同监控配置', parent: '系统配置管理' },
   '/system-config/monitor-config/config': { title: '监控设备配置', parent: '合同监控配置', grandParent: '系统配置管理' },
+  '/system-config/approval-permit-config': { title: '报批报建配置管理', parent: '系统配置管理' },
+  '/system-config/leadership-team-config': { title: '领导小组配置', parent: '系统配置管理' },
 };
 
 export default function Layout({ children, mainClassName }: LayoutProps) {

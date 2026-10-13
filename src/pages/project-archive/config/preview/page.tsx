@@ -1,81 +1,123 @@
-﻿import { useState } from 'react';
+﻿import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
-import { conditionConfigs, type AttachmentConfig } from '@/mocks/archiveConfigMocks';
+import {
+  ARCHIVE_BIZ_CODES,
+  formatRuleExpression,
+  getNodePath,
+  resolveAttachmentSchema,
+} from '@/mocks/archiveConfigMocks';
 
-// 模拟当前节点的通用配置
-const mockGeneralConfigs: AttachmentConfig[] = [
-  { id: 'p-ac-1', nodeId: '', docName: '验收申请表', type: '多选', versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)', '图片(jpg/png/bmp)'], fileSize: 50, fileSizeUnit: 'MB', fileCount: 5, archived: true, remark: '需经项目负责人签字确认后方可上传', templateFile: '验收申请表模板.docx', enabled: true },
-  { id: 'p-ac-2', nodeId: '', docName: '施工质量检查记录', type: '多选', versionManaged: false, required: true, fileFormats: ['PDF', 'Word(doc/docx)', '图片(jpg/png/bmp)'], fileSize: 30, fileSizeUnit: 'MB', fileCount: 10, archived: true, remark: '', templateFile: '', enabled: true },
-  { id: 'p-ac-3', nodeId: '', docName: '现场照片及影像资料', type: '多选', versionManaged: false, required: false, fileFormats: ['图片(jpg/png/bmp)', '视频(mp4/avi)', '压缩包(zip/rar/7z)'], fileSize: 100, fileSizeUnit: 'MB', fileCount: 20, archived: false, remark: '拍摄关键施工节点及隐蔽工程', templateFile: '', enabled: true },
-  { id: 'p-ac-4', nodeId: '', docName: '材料合格证及检测报告', type: '多选', versionManaged: false, required: true, fileFormats: ['PDF', '图片(jpg/png/bmp)'], fileSize: 50, fileSizeUnit: 'MB', fileCount: 15, archived: true, remark: '包括钢材、水泥等主要材料的合格证', templateFile: '', enabled: true },
-  { id: 'p-ac-5', nodeId: '', docName: '隐蔽工程验收记录', type: '技改', versionManaged: true, required: true, fileFormats: ['PDF', 'Word(doc/docx)'], fileSize: 20, fileSizeUnit: 'MB', fileCount: 3, archived: true, remark: '含地基验槽、钢筋隐蔽等', templateFile: '隐蔽工程验收记录模板.docx', enabled: true },
-  { id: 'p-ac-6', nodeId: '', docName: '设备开箱检验记录', type: '多选', versionManaged: false, required: false, fileFormats: ['PDF', '图片(jpg/png/bmp)'], fileSize: 20, fileSizeUnit: 'MB', fileCount: 10, archived: false, remark: '', templateFile: '设备开箱检验记录表.xlsx', enabled: true },
+const BIZ = ARCHIVE_BIZ_CODES.ACCEPTANCE_RECORD_CREATE;
+
+const contextPresets = [
+  {
+    key: 'general',
+    label: '通用配置（默认）',
+    context: {
+      contractType: '技术服务合同',
+      projectType: '信息化项目',
+      contractAmount: 80,
+      projectMajorType: '技改',
+    },
+  },
+  {
+    key: 'epc',
+    label: '总承包 + 技改（命中条件规则）',
+    context: {
+      contractType: '总承包合同',
+      projectType: '技改项目',
+      contractAmount: 1200,
+      projectMajorType: '技改',
+    },
+  },
+  {
+    key: 'equip',
+    label: '设备采购 + 基建（命中条件规则）',
+    context: {
+      contractType: '设备采购合同',
+      projectType: '基建项目',
+      contractAmount: 300,
+      projectMajorType: '新建',
+    },
+  },
 ];
-
-// 模拟条件配置选项
-const conditionOptions = [
-  { label: '通用配置（默认）', value: 'general' },
-  { label: '总承包合同-技改项目验收要求', value: 'cc-1' },
-  { label: '设备采购合同-设备验收要求', value: 'cc-2' },
-];
-
-const nodePath = '项目合同管理 > 合同业务执行管理 > 合同举牌验收 > 验收管理 > 新增验收记录';
 
 export default function ConfigPreviewPage() {
   const navigate = useNavigate();
-  const [selectedCondition, setSelectedCondition] = useState('general');
+  const [presetKey, setPresetKey] = useState('general');
 
-  const currentConfigs = selectedCondition === 'general' ? mockGeneralConfigs
-    : (conditionConfigs['n-1-5-1-2-1']?.find((cc) => cc.id === selectedCondition)?.attachments || mockGeneralConfigs);
+  const preset = contextPresets.find((p) => p.key === presetKey) || contextPresets[0];
+  const result = useMemo(
+    () => resolveAttachmentSchema(BIZ, preset.context),
+    [preset],
+  );
 
-  const enabledConfigs = currentConfigs.filter((ac) => ac.enabled);
+  const nodePath = result.node ? getNodePath(result.node.id) : '（未找到挂载节点）';
+  const enabledConfigs = result.attachments;
 
   return (
     <Layout>
       <div className="bg-white rounded-lg border border-slate-200">
-        {/* 顶部信息栏 */}
         <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 text-sm">
               <span className="text-slate-400">功能节点路径：</span>
               <span className="text-slate-700 font-medium">{nodePath}</span>
             </div>
+            <p className="text-xs text-slate-400 mt-1">bizCode：{BIZ} · 解析引擎 resolveAttachmentSchema</p>
           </div>
           <button
+            type="button"
             onClick={() => navigate('/project-archive/config')}
             className="px-4 py-1.5 text-sm border border-slate-300 rounded-md text-slate-600 hover:bg-slate-50 cursor-pointer flex items-center gap-1 whitespace-nowrap"
           >
-            <div className="w-4 h-4 flex items-center justify-center">
-              <i className="ri-arrow-left-line" />
-            </div>
+            <i className="ri-arrow-left-line" />
             返回配置页
           </button>
         </div>
 
-        {/* 条件切换 */}
-        <div className="px-5 py-3 bg-amber-50 border-b border-amber-100">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-amber-700 font-medium whitespace-nowrap">预览条件：</span>
+        <div className="px-5 py-3 bg-amber-50 border-b border-amber-100 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-amber-700 font-medium whitespace-nowrap">模拟上下文：</span>
             <select
-              value={selectedCondition}
-              onChange={(e) => setSelectedCondition(e.target.value)}
+              value={presetKey}
+              onChange={(e) => setPresetKey(e.target.value)}
               className="px-3 py-1.5 text-sm border border-amber-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
             >
-              {conditionOptions.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
+              {contextPresets.map((o) => (
+                <option key={o.key} value={o.key}>{o.label}</option>
               ))}
             </select>
-            <span className="text-xs text-amber-500 ml-2">（模拟业务人员视角，条件切换展示不同附件要求）</span>
+            <span className={`px-1.5 py-0.5 rounded text-xs ${
+              result.source === 'condition' ? 'bg-violet-100 text-violet-700' : 'bg-emerald-100 text-emerald-700'
+            }`}>
+              来源：{result.source === 'condition' ? '条件规则' : '通用配置'}
+            </span>
+            {result.matchedRule && (
+              <span className="text-xs text-violet-700">
+                命中：{result.matchedRule.conditionName}（优先级 {result.matchedRule.priority}）
+              </span>
+            )}
           </div>
+          {result.matchedRule && (
+            <p className="text-xs text-amber-700/80">
+              规则：{formatRuleExpression(result.matchedRule.expression)}
+            </p>
+          )}
+          <p className="text-xs text-amber-600">
+            上下文：合同类型={String(preset.context.contractType)}，项目类型={String(preset.context.projectType)}，金额={String(preset.context.contractAmount)}万元
+          </p>
         </div>
 
-        {/* 模拟业务操作界面 */}
         <div className="p-6 max-w-3xl">
           <h2 className="text-base font-semibold text-slate-800 mb-1">附件上传</h2>
-          <p className="text-xs text-slate-400 mb-6">请根据要求上传以下附件</p>
+          <p className="text-xs text-slate-400 mb-6">依据项目档案配置 · 新增验收记录 · 解析结果预览</p>
 
           <div className="space-y-5">
+            {enabledConfigs.length === 0 && (
+              <p className="text-sm text-slate-400 py-8 text-center">当前上下文下无启用附件配置</p>
+            )}
             {enabledConfigs.map((ac) => (
               <div key={ac.id} className="border border-slate-200 rounded-lg p-4 bg-slate-50/50">
                 <div className="flex items-center gap-2 mb-2">
@@ -90,40 +132,20 @@ export default function ConfigPreviewPage() {
                     <span className="px-1.5 py-0.5 text-xs rounded bg-emerald-50 text-emerald-600">归档</span>
                   )}
                 </div>
-
-                {/* 提示信息 */}
                 <div className="flex flex-wrap items-center gap-3 mb-3">
                   <span className="text-xs text-slate-400">
-                    <i className="ri-file-line mr-1" />
                     支持{ac.fileFormats.slice(0, 4).join('、')}{ac.fileFormats.length > 4 ? '等' : ''}格式
                   </span>
-                  <span className="text-xs text-slate-400">
-                    <i className="ri-hard-drive-line mr-1" />
-                    单文件不超过{ac.fileSize} {ac.fileSizeUnit}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    <i className="ri-stack-line mr-1" />
-                    最多上传{ac.fileCount}个文件
-                  </span>
+                  <span className="text-xs text-slate-400">单文件不超过{ac.fileSize} {ac.fileSizeUnit}</span>
+                  <span className="text-xs text-slate-400">最多上传{ac.fileCount}个文件</span>
                 </div>
-
-                {/* 补充说明 */}
                 {ac.remark && (
                   <p className="text-xs text-amber-600 mb-3 bg-amber-50 px-3 py-1.5 rounded">{ac.remark}</p>
                 )}
-
-                {/* 模板下载 */}
                 {ac.templateFile && (
-                  <p className="text-xs mb-3">
-                    <span className="text-sky-600 cursor-pointer hover:underline flex items-center gap-1">
-                      <i className="ri-download-line" />
-                      下载模板（{ac.templateFile}）
-                    </span>
-                  </p>
+                  <p className="text-xs mb-3 text-sky-600">下载模板（{ac.templateFile}）</p>
                 )}
-
-                {/* 上传区域 */}
-                <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-emerald-400 transition-colors cursor-pointer bg-white">
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center bg-white">
                   <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-slate-100 flex items-center justify-center">
                     <i className="ri-upload-cloud-2-line text-slate-400 text-lg" />
                   </div>

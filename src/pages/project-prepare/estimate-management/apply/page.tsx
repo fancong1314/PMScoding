@@ -149,7 +149,7 @@ export default function EstimateApplyPage() {
     setApprovalError('');
     setShowApproval(false);
     alert('概算修正申请已呈核，进入审批流程');
-    navigate(`/project-prepare/estimate-management/detail?projectId=${projectId}`);
+    navigate('/project-prepare/estimate-management');
   };
 
   const handleAddNode = () => {
@@ -199,6 +199,10 @@ export default function EstimateApplyPage() {
           <div>
             <label className="text-xs text-slate-500 mb-1 block">项目名称</label>
             <div className="px-3 py-2 bg-slate-100 rounded-md text-slate-700 border border-slate-200">{project.name}</div>
+          </div>
+          <div>
+            <label className="text-xs text-slate-500 mb-1 block">是否报批报建</label>
+            <div className="px-3 py-2 bg-slate-100 rounded-md text-slate-700 border border-slate-200">{project.needApprovalPermit}</div>
           </div>
           <div>
             <label className="text-xs text-slate-500 mb-1 block">审核状态</label>
@@ -492,7 +496,7 @@ export default function EstimateApplyPage() {
               <button onClick={() => setShowCancelConfirm(false)} className="px-4 py-2 text-sm rounded-md border border-slate-300 text-slate-700 hover:bg-slate-50 cursor-pointer">
                 否
               </button>
-              <button onClick={() => navigate(`/project-prepare/estimate-management/detail?projectId=${projectId}`)} className="px-4 py-2 text-sm rounded-md text-white cursor-pointer" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+              <button onClick={() => navigate('/project-prepare/estimate-management')} className="px-4 py-2 text-sm rounded-md text-white cursor-pointer" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
                 是，取消
               </button>
             </div>

@@ -1,16 +1,8 @@
 ﻿import { useState } from 'react';
 import { employees, type Employee, type ProjectMember } from '@/mocks/projectPrepareMocks';
 
-// 需要发起变更申请的成员类型
-const CHANGE_TYPES_MAP: Record<string, string> = {
-  '项目负责人': '项目负责人变更',
-  '合同经办人': '合同经办人变更',
-  '论证经办人': '论证经办人变更',
-  '工程需求资料经办人': '工程需求资料经办人变更',
-  '合同预付款申请资料经办人': '合同预付款申请资料经办人变更',
-  '合同预结算报支资料经办人': '合同预结算报支资料经办人变更',
-  '合同质保金报支资料经办人': '合同质保金报支资料经办人变更',
-};
+// 变更类型按当前成员类型回显
+const changeTypeLabelOf = (type: string) => `${type}变更`;
 
 interface ChangeModalProps {
   open: boolean;
@@ -35,8 +27,7 @@ export default function ChangeModal({ open, changeType, projectName, approvalNo,
 
   if (!open) return null;
 
-  // 变更类型标签
-  const changeTypeLabel = CHANGE_TYPES_MAP[changeType] || `${changeType}变更`;
+  const changeTypeLabel = changeTypeLabelOf(changeType);
 
   const getFilteredEmployees = () => {
     if (!searchText.trim()) return [];
@@ -123,17 +114,17 @@ export default function ChangeModal({ open, changeType, projectName, approvalNo,
                   <span className="text-sm text-steel-600">{currentMember.department}</span>
                 </div>
                 {/* 合同相关类型展示合同信息 */}
-                {showContractInfo && currentMember.relatedContract && currentMember.relatedContract !== '-' && (
+                {showContractInfo && (
                   <>
-                    <div>
-                      <label className="text-xs text-steel-400 block mb-0.5">关联合同名称</label>
-                      <span className="text-sm text-steel-700">{currentMember.relatedContract}</span>
-                    </div>
                     <div>
                       <label className="text-xs text-steel-400 block mb-0.5">关联合同编号</label>
                       <span className="text-sm text-steel-600 font-mono">
-                        {`CT-${approvalNo}-${String(Math.abs(currentMember.relatedContract.charCodeAt(0) % 100)).padStart(3, '0')}`}
+                        {currentMember.relatedContractNo || `HT-${approvalNo}-001`}
                       </span>
+                    </div>
+                    <div>
+                      <label className="text-xs text-steel-400 block mb-0.5">关联合同名称</label>
+                      <span className="text-sm text-steel-700">{currentMember.relatedContract === '-' ? '—' : (currentMember.relatedContract || '—')}</span>
                     </div>
                   </>
                 )}

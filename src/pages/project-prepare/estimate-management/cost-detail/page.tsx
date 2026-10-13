@@ -14,7 +14,7 @@ type SortKey = 'approvedAmount' | 'actualAmount' | 'occupiedAmount' | 'contractO
 
 const COLUMNS: { key: SortKey; label: string; accent?: 'sky' | 'amber' }[] = [
   { key: 'approvedAmount', label: '立项批复金额（元）' },
-  { key: 'actualAmount', label: '实际立项金额（元）' },
+  { key: 'actualAmount', label: '项目实际金额' },
   { key: 'occupiedAmount', label: '项目占用金额', accent: 'sky' },
   { key: 'contractOccupied', label: '合同占用金额', accent: 'sky' },
   { key: 'demandOccupied', label: '需求占用金额', accent: 'sky' },

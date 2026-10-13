@@ -37,7 +37,6 @@ import VideoSurveillancePage from "../pages/participant/video-surveillance/page"
 import ProjectPrepareListPage from "../pages/project-prepare/project-management/list/page";
 import MemberListPage from "../pages/project-prepare/project-management/members/page";
 import EstimateListPage from "../pages/project-prepare/estimate-management/list/page";
-import EstimateDetailPage from "../pages/project-prepare/estimate-management/detail/page";
 import EstimateApplyPage from "../pages/project-prepare/estimate-management/apply/page";
 import EstimateCostDetailPage from "../pages/project-prepare/estimate-management/cost-detail/page";
 import ContractProgressListPage from "../pages/project-contract/progress/list/page";
@@ -113,6 +112,7 @@ import PostEvalCatalogPage from "../pages/project-close/post-evaluation/catalog/
 import PostEvalSelfPage from "../pages/project-close/post-evaluation/self-eval/page";
 import PostEvalProfPage from "../pages/project-close/post-evaluation/prof-eval/page";
 import PostEvalCompPage from "../pages/project-close/post-evaluation/comp-eval/page";
+import KnowledgeBasePage from "../pages/engineering-think-tank/knowledge-base/page";
 import ArchiveConfigPage from "../pages/project-archive/config/page";
 import ArchiveConfigPreviewPage from "../pages/project-archive/config/preview/page";
 import ArchiveManagementListPage from "../pages/project-archive/management/list/page";
@@ -123,8 +123,11 @@ import ReportDetailPage2 from "../pages/project-execute/progress/weekly-monthly/
 import ProgressReportPage from "../pages/project-execute/progress/report/page";
 import ProjectGanttPage from "../pages/project-execute/progress/gantt/page";
 import ArchiveManagementPreviewPage from "../pages/project-archive/management/preview/page";
+import ArchiveHistoryPage from "../pages/project-archive/management/history/page";
 import MonitorConfigListPage from "../pages/system-config/monitor-config/page";
 import MonitorDeviceConfigPage from "../pages/system-config/monitor-config/config/page";
+import ApprovalPermitConfigPage from "../pages/system-config/approval-permit-config/page";
+import LeadershipTeamConfigPage from "../pages/system-config/leadership-team-config/page";
 import CompletionProjectListPage from "../pages/project-execute/completion/project-list/page";
 import TechRenovationListPage from "../pages/project-execute/completion/tech-renovation/page";
 import CompletionApplicationListPage from "../pages/project-execute/completion/application-list/page";
@@ -315,10 +318,6 @@ const routes: RouteObject[] = [
   {
     path: "/project-prepare/estimate-management",
     element: <EstimateListPage />,
-  },
-  {
-    path: "/project-prepare/estimate-management/detail",
-    element: <EstimateDetailPage />,
   },
   {
     path: "/project-prepare/estimate-management/apply",
@@ -621,6 +620,10 @@ const routes: RouteObject[] = [
     element: <PostEvalCompPage />,
   },
   {
+    path: "/engineering-think-tank/knowledge-base",
+    element: <KnowledgeBasePage />,
+  },
+  {
     path: "/project-archive/config",
     element: <ArchiveConfigPage />,
   },
@@ -639,6 +642,10 @@ const routes: RouteObject[] = [
   {
     path: "/project-archive/management/preview",
     element: <ArchiveManagementPreviewPage />,
+  },
+  {
+    path: "/project-archive/history",
+    element: <ArchiveHistoryPage />,
   },
   {
     path: "/project-execute/progress",
@@ -683,6 +690,14 @@ const routes: RouteObject[] = [
   {
     path: "/system-config/monitor-config/config",
     element: <MonitorDeviceConfigPage />,
+  },
+  {
+    path: "/system-config/approval-permit-config",
+    element: <ApprovalPermitConfigPage />,
+  },
+  {
+    path: "/system-config/leadership-team-config",
+    element: <LeadershipTeamConfigPage />,
   },
   {
     path: "*",

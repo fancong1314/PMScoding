@@ -2,6 +2,28 @@
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
 import { projects } from '@/mocks/projectPrepareMocks';
+import { getProjectStageProgress } from '@/mocks/projectApprovalMocks';
+
+function CompletionRatioCell({ projectId }: { projectId: string }) {
+  const { total, completed, ratio } = getProjectStageProgress(projectId);
+  const barColor =
+    ratio >= 100
+      ? 'linear-gradient(90deg, #10b981, #059669)'
+      : ratio >= 50
+        ? 'linear-gradient(90deg, #3b82f6, #1d4ed8)'
+        : 'linear-gradient(90deg, #f59e0b, #d97706)';
+  const textColor =
+    ratio >= 100 ? 'text-emerald-600' : ratio >= 50 ? 'text-primary-600' : 'text-amber-600';
+
+  return (
+    <div className="flex items-center gap-2 min-w-[160px]" title={`已完成 ${completed}/${total} 个阶段`}>
+      <div className="flex-1 h-2 rounded-full bg-slate-100 overflow-hidden min-w-[80px] max-w-[120px]">
+        <div className="h-full rounded-full transition-all" style={{ width: `${ratio}%`, background: barColor }} />
+      </div>
+      <span className={`text-sm font-semibold tabular-nums whitespace-nowrap ${textColor}`}>{ratio}%</span>
+    </div>
+  );
+}
 
 export default function ProjectApprovalListPage() {
   const navigate = useNavigate();
@@ -9,7 +31,7 @@ export default function ProjectApprovalListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  const filtered = useMemo(() => {
+  const matched = useMemo(() => {
     if (!searchKey.trim()) return [...projects];
     const kw = searchKey.toLowerCase();
     return projects.filter(
@@ -18,6 +40,9 @@ export default function ProjectApprovalListPage() {
         p.approvalNo.toLowerCase().includes(kw)
     );
   }, [searchKey]);
+
+  const noMatchHint = searchKey.trim().length > 0 && matched.length === 0;
+  const filtered = matched.length > 0 ? matched : [...projects];
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
@@ -103,9 +128,14 @@ export default function ProjectApprovalListPage() {
               <span className="text-xs text-steel-400">共 {filtered.length} 条</span>
             </div>
           </div>
+          {noMatchHint && (
+            <p className="mx-4 mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded px-3 py-2">
+              未匹配到筛选结果，已回退展示全部 {projects.length} 条
+            </p>
+          )}
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left" style={{ minWidth: '900px' }}>
+            <table className="w-full text-left" style={{ minWidth: '1040px' }}>
               <thead>
                 <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e8edf3' }}>
                   <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap w-16 sticky left-0 bg-slate-50 z-10" style={{ borderRight: '1px solid #e8edf3' }}>
@@ -118,6 +148,7 @@ export default function ProjectApprovalListPage() {
                   <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap">建设单位</th>
                   <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap">项目类型</th>
                   <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap">项目经理</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap" style={{ minWidth: '180px' }}>完成比例</th>
                   <th className="px-4 py-3 text-xs font-semibold text-steel-500 whitespace-nowrap sticky right-0 bg-slate-50 text-center z-10" style={{ minWidth: '120px', borderLeft: '1px solid #e8edf3' }}>
                     操作
                   </th>
@@ -126,7 +157,7 @@ export default function ProjectApprovalListPage() {
               <tbody>
                 {paginated.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-4 py-16 text-center">
+                    <td colSpan={8} className="px-4 py-16 text-center">
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-12 h-12 flex items-center justify-center rounded-full bg-slate-100">
                           <i className="ri-file-list-3-line text-2xl text-steel-300" />
@@ -152,6 +183,9 @@ export default function ProjectApprovalListPage() {
                       <td className="px-4 py-3 text-sm text-steel-600 whitespace-nowrap">{project.constructionUnit}</td>
                       <td className="px-4 py-3 text-sm text-steel-600 whitespace-nowrap">{project.projectType}</td>
                       <td className="px-4 py-3 text-sm text-steel-700 whitespace-nowrap">{project.manager}</td>
+                      <td className="px-4 py-3">
+                        <CompletionRatioCell projectId={project.id} />
+                      </td>
                       <td className="px-4 py-3 sticky right-0 bg-white z-10" style={{ borderLeft: '1px solid #e8edf3' }}>
                         <div className="flex items-center justify-center">
                           <button

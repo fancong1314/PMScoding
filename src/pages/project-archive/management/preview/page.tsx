@@ -1,23 +1,14 @@
 ﻿import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/feature/Layout';
-import { getArchiveAttachments, getVersionHistory, type ArchiveAttachment } from '@/mocks/archiveManagementMocks';
+import { findAttachmentById, getVersionHistory } from '@/mocks/archiveManagementMocks';
 
 export default function ArchivePreviewPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const attachmentId = searchParams.get('attachmentId') || 'aa-1';
 
-  // 查找附件
-  const allAttachments = Object.values(
-    Object.fromEntries(
-      Object.entries({
-        ap1: getArchiveAttachments('ap-1'),
-        ap2: getArchiveAttachments('ap-2'),
-      }).flatMap(([, atts]) => atts.map((a) => [a.id, a] as const))
-    )
-  );
-  const attachment = allAttachments.find((a) => a.id === attachmentId);
+  const attachment = findAttachmentById(attachmentId);
   const versionHistory = attachmentId ? getVersionHistory(attachmentId) : [];
   const [showVersionModal, setShowVersionModal] = useState(false);
 
@@ -31,7 +22,7 @@ export default function ArchivePreviewPage() {
     );
   }
 
-  const isPreviewable = ['PDF', 'JPG', 'PNG', 'BMP', 'DOCX', 'XLSX'].includes(attachment.format);
+  const isPreviewable = ['PDF', 'JPG', 'PNG', 'BMP', 'DOCX', 'XLSX', 'MP3', 'WAV', 'M4A', 'PPTX'].includes(attachment.format);
 
   return (
     <Layout>

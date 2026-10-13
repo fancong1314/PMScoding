@@ -97,6 +97,21 @@ export default function OverhaulFormSection({ data, errors, onChange, onPatch, s
               {errors.isInPlanProject && <p className="mt-1 text-xs text-red-500">{errors.isInPlanProject}</p>}
             </div>
           </div>
+          <div className={col}>
+            <label className={labelCls}>是否报批报建{requiredStar}</label>
+            <div>
+              <select
+                value={data.needApprovalPermit || ''}
+                onChange={(e) => patch({ needApprovalPermit: e.target.value as '是' | '否' })}
+                className={inputCls(errors.needApprovalPermit) + ' cursor-pointer'}
+              >
+                <option value="">请选择</option>
+                <option value="是">是</option>
+                <option value="否">否</option>
+              </select>
+              {errors.needApprovalPermit && <p className="mt-1 text-xs text-red-500">{errors.needApprovalPermit}</p>}
+            </div>
+          </div>
         </div>
 
         {isInPlan && (

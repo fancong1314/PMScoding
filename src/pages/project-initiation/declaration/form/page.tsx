@@ -54,7 +54,7 @@ const PATH_TYPE_MAP: Record<string, ProjectMajorType> = {
   '/project-initiation/declaration/form/minor': '零固',
 };
 
-const STORAGE_KEY = 'ng_init_decl_plans_v10';
+const STORAGE_KEY = 'ng_init_decl_plans_v11';
 const nextPlanYear = String(new Date().getFullYear() + 1);
 
 function normalizePlan(p: ProjectPlan): ProjectPlan {
@@ -132,6 +132,7 @@ const emptyForm: Partial<ProjectPlan> = {
   jobChangeCount: 0,
   involvedStages: [],
   isInPlanProject: '否',
+  needApprovalPermit: '否',
   annualPlanNo: '',
   annualPlanId: '',
   implementUnit: '',
@@ -293,6 +294,9 @@ export default function DeclarationFormPage() {
     }
     if (!overhaulMode && !form.projectCategory) e.projectCategory = '请选择项目类别';
     if (!form.planName?.trim()) e.planName = '请输入项目名称';
+    if (form.needApprovalPermit !== '是' && form.needApprovalPermit !== '否') {
+      e.needApprovalPermit = '请选择是否报批报建';
+    }
     Object.assign(e, validateCostEstimate(form));
     if (!form.projectManager) e.projectManager = '请选择项目负责人';
     if (!overhaulMode && !form.planYear) e.planYear = '请选择计划年度';

@@ -15,6 +15,7 @@ import Layout from '@/components/feature/Layout';
 
 const DEFAULT_COLUMNS: ColumnDef[] = [
   { id: 'isInPlanProject',  label: '是否计划内项目',      visible: true,  width: 120 },
+  { id: 'needApprovalPermit', label: '是否报批报建',      visible: true,  width: 110 },
   { id: 'annualPlanNo',     label: '年度计划号',          visible: true,  width: 140 },
   { id: 'planYear',         label: '计划年度',            visible: true,  width: 90  },
   { id: 'projectMajorType', label: '项目大类',            visible: true,  width: 90  },
@@ -42,7 +43,7 @@ const DEFAULT_COLUMNS: ColumnDef[] = [
   { id: 'applicant',        label: '申报人',              visible: true,  width: 90  },
 ];
 
-const STORAGE_KEY = 'ng_init_decl_plans_v10';
+const STORAGE_KEY = 'ng_init_decl_plans_v11';
 
 function normalizePlans(list: ProjectPlan[]): ProjectPlan[] {
   return list.map((p) => withInvestmentEstimateFields(withPaymentPlans(withInitiationDetailFields({
@@ -56,6 +57,7 @@ function getStoredPlans(): ProjectPlan[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) return normalizePlans(JSON.parse(stored));
+    localStorage.removeItem('ng_init_decl_plans_v10');
     localStorage.removeItem('ng_init_decl_plans_v9');
     localStorage.removeItem('ng_init_decl_plans_v8');
     localStorage.removeItem('ng_init_decl_plans_v7');
@@ -111,7 +113,7 @@ export default function ProjectPlanDeclaration() {
   const [approvalRecords, setApprovalRecords] = useState<ApprovalRecord[]>(getApprovalRecords());
 
   const { columns, resetColumns, toggleVisible, reorderColumns, updateWidth } =
-    useColumnConfig('init-decl-plans-v8', DEFAULT_COLUMNS);
+    useColumnConfig('init-decl-plans-v9', DEFAULT_COLUMNS);
 
   useEffect(() => {
     if (location.state?.success) {

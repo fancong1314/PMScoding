@@ -102,20 +102,31 @@ export default function BasicInfoSection({ data, errors, onChange, onPatch, sect
             <option value="是">是</option>
           </select>
         </FormField>
-        {isInPlan && (
-          <FormField label="年度计划号" required error={errors.annualPlanNo}>
-            <div
-              onClick={() => setShowPlanModal(true)}
-              className={`${formInputCls(errors.annualPlanNo)} cursor-pointer flex items-center justify-between`}
-            >
-              <span className={data.annualPlanNo ? 'text-steel-800 font-mono text-xs' : 'text-steel-400'}>
-                {data.annualPlanNo || '点击选择已通过的年度计划'}
-              </span>
-              <i className="ri-search-line text-primary-500 text-sm" />
-            </div>
-          </FormField>
-        )}
+        <FormField label="是否报批报建" required error={errors.needApprovalPermit}>
+          <select
+            value={data.needApprovalPermit || ''}
+            onChange={(e) => patch({ needApprovalPermit: e.target.value as '是' | '否' })}
+            className={formInputCls(errors.needApprovalPermit) + ' cursor-pointer'}
+          >
+            <option value="">请选择</option>
+            <option value="是">是</option>
+            <option value="否">否</option>
+          </select>
+        </FormField>
       </div>
+      {isInPlan && (
+        <FormField label="年度计划号" required error={errors.annualPlanNo} fullWidth>
+          <div
+            onClick={() => setShowPlanModal(true)}
+            className={`${formInputCls(errors.annualPlanNo)} cursor-pointer flex items-center justify-between`}
+          >
+            <span className={data.annualPlanNo ? 'text-steel-800 font-mono text-xs' : 'text-steel-400'}>
+              {data.annualPlanNo || '点击选择已通过的年度计划'}
+            </span>
+            <i className="ri-search-line text-primary-500 text-sm" />
+          </div>
+        </FormField>
+      )}
 
       <SubmitOrgFields data={data} errors={errors} onChange={onChange} onPatch={onPatch} />
 

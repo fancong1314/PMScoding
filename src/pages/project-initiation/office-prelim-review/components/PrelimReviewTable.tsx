@@ -49,6 +49,8 @@ function renderCell(col: ColumnDef, plan: InitPrelimRecord): React.ReactNode {
       );
     case 'isInPlanProject':
       return <span className="whitespace-nowrap text-steel-600">{plan.isInPlanProject || (plan.annualPlanNo ? '是' : '否')}</span>;
+    case 'needApprovalPermit':
+      return <span className="whitespace-nowrap text-steel-600">{plan.needApprovalPermit || '—'}</span>;
     case 'annualPlanNo':
       return plan.annualPlanNo ? (
         <span className="font-mono text-xs text-primary-700 whitespace-nowrap">{plan.annualPlanNo}</span>

@@ -19,7 +19,6 @@ export default function GroupModal({ open, projectName, onClose, onSubmit }: Pro
   const handleSubmit = () => {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = '请输入小组名称';
-    if (!workDuty.trim()) e.workDuty = '请输入工作职责';
     setErrors(e);
     if (Object.keys(e).length > 0) return;
     onSubmit({ name: name.trim(), workDuty: workDuty.trim().slice(0, 100) });
@@ -60,14 +59,14 @@ export default function GroupModal({ open, projectName, onClose, onSubmit }: Pro
               className={formInputCls(errors.name)}
             />
           </FormField>
-          <FormField label="工作职责" required error={errors.workDuty} topAlign>
+          <FormField label="工作职责" topAlign>
             <textarea
               rows={4}
               maxLength={100}
               value={workDuty}
-              onChange={(e) => { setWorkDuty(e.target.value.slice(0, 100)); setErrors((p) => ({ ...p, workDuty: '' })); }}
-              placeholder="请输入小组工作职责（100字以内）"
-              className={formInputCls(errors.workDuty) + ' resize-none'}
+              onChange={(e) => setWorkDuty(e.target.value.slice(0, 100))}
+              placeholder="请输入小组工作职责（选填，100字以内）"
+              className={formInputCls() + ' resize-none'}
             />
             <p className="text-xs text-steel-400 text-right mt-1">{workDuty.length}/100</p>
           </FormField>

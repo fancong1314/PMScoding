@@ -17,7 +17,7 @@ export const PRELIM_TABS: { key: PrelimStatus; label: string }[] = [
   { key: 'passed', label: '初审通过' },
 ];
 
-export const PRELIM_STORAGE_KEY = 'ng_init_office_prelim_v3';
+export const PRELIM_STORAGE_KEY = 'ng_init_office_prelim_v4';
 
 const SEED: Array<
   Partial<InitPrelimRecord> & {

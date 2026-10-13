@@ -12,6 +12,10 @@ interface Props {
   project: EstimateProject;
   onClose: () => void;
   onChanged?: () => void;
+  /** 历史记录只读流程节点 */
+  flowNodes?: EstimateApprovalFlowNode[];
+  processId?: string;
+  readonly?: boolean;
 }
 
 const nodeStatusStyle: Record<EstimateFlowNodeStatus, { bg: string; border: string; text: string; icon: string; badge: string }> = {
@@ -22,12 +26,19 @@ const nodeStatusStyle: Record<EstimateFlowNodeStatus, { bg: string; border: stri
 };
 
 /** 项目概算管理 · 审批状态可视化流程弹窗 */
-export default function EstimateApprovalFlowModal({ project, onClose, onChanged }: Props) {
+export default function EstimateApprovalFlowModal({
+  project,
+  onClose,
+  onChanged,
+  flowNodes,
+  processId,
+  readonly = false,
+}: Props) {
   const [tick, setTick] = useState(0);
   const [hint, setHint] = useState('');
   const current = useMemo(() => getProjectById(project.id) || project, [project, tick]);
-  const nodes: EstimateApprovalFlowNode[] = current.approvalFlow || [];
-  const pending = getPendingSupplement(current.id);
+  const nodes: EstimateApprovalFlowNode[] = flowNodes || current.approvalFlow || [];
+  const pending = !readonly ? getPendingSupplement(current.id) : undefined;
   const doneCount = nodes.filter((n) => n.status === 'passed').length;
   const progress = nodes.length > 0 ? Math.round((doneCount / nodes.length) * 100) : 0;
 
@@ -39,13 +50,13 @@ export default function EstimateApprovalFlowModal({ project, onClose, onChanged 
   };
 
   return (
-    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+    <div className={`fixed inset-0 ${readonly ? 'z-[120]' : 'z-[110]'} flex items-center justify-center p-4`}>
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-xl w-[540px] max-h-[85vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-steel-100">
           <div className="min-w-0">
             <h3 className="text-base font-semibold text-steel-800">审批记录</h3>
-            <p className="text-xs text-steel-400 mt-0.5 font-mono">{current.approvalNo}</p>
+            <p className="text-xs text-steel-400 mt-0.5 font-mono">{processId || current.approvalNo}</p>
             <p className="text-xs text-steel-500 mt-0.5 truncate">{current.name}</p>
           </div>
           <button

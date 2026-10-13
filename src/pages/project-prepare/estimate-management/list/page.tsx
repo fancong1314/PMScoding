@@ -14,6 +14,7 @@ import {
 import EstimateApprovalFlowModal from '../components/EstimateApprovalFlowModal';
 import OccupyAmountDetailModal from '../components/OccupyAmountDetailModal';
 import FeeSupplementModal from '../components/FeeSupplementModal';
+import SupplementRecordModal from '../components/SupplementRecordModal';
 
 const projectTypes = ['请选择...', 'A质量品种', 'B安全环保', 'C节能降耗', 'D工艺装备', 'E智能制造', 'F信息化'];
 const majorTypeOptions = ['请选择...', ...estimateMajorTypes];
@@ -130,7 +131,7 @@ function OccupyBar({ occupied, available, total }: { occupied: number; available
   );
 }
 
-/** 超概偏差率 · 紧凑饼图（结算相对批复的偏差比例） */
+/** 合同偏差率 · 紧凑饼图（结算相对批复的偏差比例） */
 function OverrunRatePie({ settled, approved }: { settled: number; approved: number }) {
   const rate = calcOverrunRate(settled, approved);
   if (rate === null) {
@@ -149,7 +150,7 @@ function OverrunRatePie({ settled, approved }: { settled: number; approved: numb
   const dash = (fillPct / 100) * c;
 
   return (
-    <div className="inline-flex items-center gap-2" title={`超概偏差率 ${label}`}>
+    <div className="inline-flex items-center gap-2" title={`合同偏差率 ${label}`}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="flex-shrink-0 -rotate-90">
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth="5" />
         <circle
@@ -185,6 +186,7 @@ export default function EstimateListPage() {
   const [flowProject, setFlowProject] = useState<EstimateProject | null>(null);
   const [occupyProject, setOccupyProject] = useState<EstimateProject | null>(null);
   const [supplementProject, setSupplementProject] = useState<EstimateProject | null>(null);
+  const [supplementRecordProject, setSupplementRecordProject] = useState<EstimateProject | null>(null);
   const [listTick, setListTick] = useState(0);
   const [toast, setToast] = useState('');
 
@@ -209,10 +211,6 @@ export default function EstimateListPage() {
 
   const handleSelectRow = (id: string, checked: boolean) => {
     setSelectedIds((prev) => (checked ? [...prev, id] : prev.filter((sid) => sid !== id)));
-  };
-
-  const handleRowClick = (id: string) => {
-    navigate(`/project-prepare/estimate-management/detail?projectId=${id}`);
   };
 
   const handleQuery = () => {
@@ -282,13 +280,13 @@ export default function EstimateListPage() {
                   <th className="sticky top-0 z-20 bg-slate-50 px-3 py-3 text-left font-medium text-slate-600 whitespace-nowrap">项目类型</th>
                   <TipHeader label="立项申报金额（元）" tipKey="budgetAmount" align="right" />
                   <TipHeader label="立项批复金额（元）" tipKey="preBudgetAmount" align="right" />
-                  <TipHeader label="实际立项金额（元）" tipKey="actualBudgetAmount" align="right" />
+                  <TipHeader label="项目实际金额" tipKey="actualBudgetAmount" align="right" />
                   <TipHeader label="合同签订总额（元）" tipKey="originalContractAmount" align="right" />
                   <TipHeader label="修正合同总额（元）" tipKey="revisedContractAmount" align="right" />
-                  <TipHeader label="项目完工金额（元）" tipKey="completedAmount" align="right" />
+                  <TipHeader label="竣工合同总额（元）" tipKey="completedAmount" align="right" />
                   <TipHeader label="项目已支付总额（元）" tipKey="paidAmount" align="right" />
                   <TipHeader label="项目结算总额（元）" tipKey="settledAmount" align="right" />
-                  <TipHeader label="超概偏差率" tipKey="overrunRate" />
+                  <TipHeader label="合同偏差率" tipKey="overrunRate" />
                   <TipHeader label="金额占用情况" tipKey="occupy" />
                   <th className="sticky top-0 z-20 bg-slate-50 px-3 py-3 text-left font-medium text-slate-600 whitespace-nowrap">增补审批状态</th>
                   <th className="sticky right-0 top-0 z-30 bg-slate-50 px-3 py-3 text-center font-medium text-slate-600 whitespace-nowrap border-l border-slate-200" style={{ minWidth: 200 }}>操作</th>
@@ -299,8 +297,8 @@ export default function EstimateListPage() {
                   const mt = majorTypeStyle[project.majorType] ?? { bg: '#f1f5f9', color: '#475569' };
                   const statusCls = estimateApprovalStatusMap[project.approvalStatus as EstimateApprovalStatus]?.cls ?? 'bg-slate-100 text-slate-600';
                   return (
-                    <tr key={project.id} className="group border-b border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => handleRowClick(project.id)}>
-                      <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 px-3 py-3 border-r border-slate-100" onClick={(e) => e.stopPropagation()}>
+                    <tr key={project.id} className="group border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                      <td className="sticky left-0 z-10 bg-white group-hover:bg-slate-50 px-3 py-3 border-r border-slate-100">
                         <input type="checkbox" checked={selectedIds.includes(project.id)} onChange={(e) => handleSelectRow(project.id, e.target.checked)} className="w-4 h-4 cursor-pointer" />
                       </td>
                       <td className="sticky left-10 z-10 bg-white group-hover:bg-slate-50 px-3 py-3 text-slate-700 font-medium border-r border-slate-100 whitespace-nowrap">
@@ -321,10 +319,10 @@ export default function EstimateListPage() {
                       <td className="px-3 py-3 text-right text-slate-600 font-mono whitespace-nowrap">{formatAmount(project.completedAmount)}</td>
                       <td className="px-3 py-3 text-right text-slate-600 font-mono whitespace-nowrap">{formatAmount(project.paidAmount)}</td>
                       <td className="px-3 py-3 text-right text-slate-600 font-mono whitespace-nowrap">{formatAmount(project.settledAmount)}</td>
-                      <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-3 py-3">
                         <OverrunRatePie settled={project.settledAmount} approved={project.preBudgetAmount} />
                       </td>
-                      <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-3 py-3">
                         <button
                           type="button"
                           onClick={() => setOccupyProject(project)}
@@ -338,7 +336,7 @@ export default function EstimateListPage() {
                           />
                         </button>
                       </td>
-                      <td className="px-3 py-3 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-3 py-3 whitespace-nowrap">
                         <button
                           type="button"
                           onClick={() => setFlowProject(project)}
@@ -348,14 +346,22 @@ export default function EstimateListPage() {
                           {project.approvalStatus}
                         </button>
                       </td>
-                      <td className="sticky right-0 z-10 bg-white group-hover:bg-slate-50 px-3 py-3 text-center border-l border-slate-100 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                        <div className="inline-flex items-center gap-2">
+                      <td className="sticky right-0 z-10 bg-white group-hover:bg-slate-50 px-3 py-3 text-center border-l border-slate-100 whitespace-nowrap">
+                        <div className="inline-flex items-center gap-2 flex-wrap justify-center">
                           <button
                             type="button"
                             onClick={() => setSupplementProject(project)}
                             className="text-sm text-primary-600 hover:text-primary-700 cursor-pointer"
                           >
                             费用增补申请
+                          </button>
+                          <span className="text-slate-300">|</span>
+                          <button
+                            type="button"
+                            onClick={() => setSupplementRecordProject(project)}
+                            className="text-sm text-violet-600 hover:text-violet-700 cursor-pointer"
+                          >
+                            增补记录
                           </button>
                           <span className="text-slate-300">|</span>
                           <button
@@ -419,6 +425,12 @@ export default function EstimateListPage() {
             setListTick((n) => n + 1);
             showToast(msg);
           }}
+        />
+      )}
+      {supplementRecordProject && (
+        <SupplementRecordModal
+          project={supplementRecordProject}
+          onClose={() => setSupplementRecordProject(null)}
         />
       )}
       {toast && (

@@ -152,12 +152,21 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
+    key: 'engineering-think-tank',
+    label: '工程智库',
+    icon: 'ri-brain-line',
+    children: [
+      { key: 'knowledge-base', label: '知识库管理', icon: 'ri-book-open-line', path: '/engineering-think-tank/knowledge-base' },
+    ],
+  },
+  {
     key: 'project-archive',
     label: '项目档案管理',
     icon: 'ri-archive-line',
     children: [
       { key: 'archive-config', label: '项目档案配置', icon: 'ri-settings-3-line', path: '/project-archive/config' },
       { key: 'archive-management', label: '项目档案管理', icon: 'ri-folder-chart-line', path: '/project-archive/management' },
+      { key: 'archive-history', label: '历史归档', icon: 'ri-history-line', path: '/project-archive/history' },
     ],
   },
   {
@@ -166,6 +175,8 @@ const menuItems: MenuItem[] = [
     icon: 'ri-settings-3-line',
     children: [
       { key: 'monitor-config', label: '合同监控配置', icon: 'ri-vidicon-line', path: '/system-config/monitor-config' },
+      { key: 'approval-permit-config', label: '报批报建配置管理', icon: 'ri-building-4-line', path: '/system-config/approval-permit-config' },
+      { key: 'leadership-team-config', label: '领导小组配置', icon: 'ri-organization-chart', path: '/system-config/leadership-team-config' },
     ],
   },
 ];

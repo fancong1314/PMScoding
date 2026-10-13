@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   ESTIMATE_FEE_TYPES,
   formatCurrencyFixed,
@@ -11,7 +11,11 @@ import {
   type EstimateFeeType,
   type EstimateProject,
 } from '@/mocks/estimateManagementMocks';
+import { getEstimateFeeSupplementAttachmentConfigs } from '@/mocks/archiveConfigMocks';
 import { FormField, formInputCls } from '@/components/feature/FormLayout';
+import AttachmentUploadSection, {
+  type AttachmentUploadMap,
+} from '@/pages/project-initiation/declaration/form/components/AttachmentUploadSection';
 
 interface Props {
   project: EstimateProject;
@@ -37,9 +41,13 @@ export default function FeeSupplementModal({ project, onClose, onSubmitted }: Pr
   const pending = getPendingSupplement(project.id);
   const plan = useMemo(() => getPlanControl(project), [project]);
   const lines = useMemo(() => getProjectFeeLines(project.id), [project.id]);
+  const attachConfigs = useMemo(() => getEstimateFeeSupplementAttachmentConfigs(), []);
   const [drafts, setDrafts] = useState(emptyDraft);
   const [reason, setReason] = useState('');
+  const [uploads, setUploads] = useState<AttachmentUploadMap>({});
+  const [attachErrors, setAttachErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState('');
+  const attachRef = useRef<HTMLDivElement | null>(null);
 
   const preview = useMemo(() => lines.map((line) => {
     const draft = drafts[line.type];
@@ -59,6 +67,19 @@ export default function FeeSupplementModal({ project, onClose, onSubmitted }: Pr
   };
 
   const handleConfirm = () => {
+    const aErr: Record<string, string> = {};
+    attachConfigs.forEach((cfg) => {
+      if (cfg.required && !(uploads[cfg.id] || []).length) {
+        aErr[`attach_${cfg.id}`] = `请上传「${cfg.docName}」`;
+      }
+    });
+    setAttachErrors(aErr);
+    if (Object.keys(aErr).length) {
+      setError('请完善必填附件后再提交');
+      attachRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    const attachmentNames = Object.values(uploads).flat().map((f) => f.name);
     const result = submitFeeSupplement(
       project.id,
       ESTIMATE_FEE_TYPES.map((type) => ({
@@ -67,6 +88,7 @@ export default function FeeSupplementModal({ project, onClose, onSubmitted }: Pr
         amountWan: Number(drafts[type].amount) || 0,
       })),
       reason,
+      attachmentNames,
     );
     if (!result.ok) {
       setError(result.message);
@@ -109,13 +131,13 @@ export default function FeeSupplementModal({ project, onClose, onSubmitted }: Pr
           </div>
         </div>
 
-        <div className="flex-1 overflow-auto px-6">
+        <div className="flex-1 overflow-auto px-6 space-y-4 pb-2">
           <div className="border border-slate-200 overflow-hidden">
             <table className="w-full text-sm border-collapse">
               <thead>
                 <tr style={{ backgroundColor: '#7dd3fc' }}>
                   <th className="px-3 py-2.5 text-left font-medium text-white whitespace-nowrap">费用类型</th>
-                  <th className="px-3 py-2.5 text-right font-medium text-white whitespace-nowrap">实际立项金额（元）</th>
+                  <th className="px-3 py-2.5 text-right font-medium text-white whitespace-nowrap">项目实际金额（元）</th>
                   <th className="px-3 py-2.5 text-right font-medium text-white whitespace-nowrap">需求占用金额（元）</th>
                   <th className="px-3 py-2.5 text-right font-medium text-white whitespace-nowrap">合同占用金额（元）</th>
                   <th className="px-3 py-2.5 text-right font-medium text-white whitespace-nowrap">可用金额（元）</th>
@@ -172,13 +194,13 @@ export default function FeeSupplementModal({ project, onClose, onSubmitted }: Pr
           </div>
 
           {pending && (
-            <p className="mt-3 text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
+            <p className="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
               当前增补审批中：{pending.reason}。审批通过前不能再次增减费用。
             </p>
           )}
 
           {!locked && (
-            <div className="mt-4">
+            <>
               <FormField label="增补原因" topAlign>
                 <textarea
                   rows={3}
@@ -190,9 +212,23 @@ export default function FeeSupplementModal({ project, onClose, onSubmitted }: Pr
                 />
                 <p className="text-xs text-steel-400 text-right mt-1">{reason.length}/100</p>
               </FormField>
-            </div>
+
+              <AttachmentUploadSection
+                majorType={project.majorType}
+                uploads={uploads}
+                onChange={(next) => {
+                  setUploads(next);
+                  setAttachErrors({});
+                  setError('');
+                }}
+                errors={attachErrors}
+                sectionRef={(el) => { attachRef.current = el; }}
+                configs={attachConfigs}
+                sourceLabel="依据项目档案配置 · 项目概算管理 · 费用增补"
+              />
+            </>
           )}
-          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
 
         <div className="flex justify-end gap-2 px-6 py-4">

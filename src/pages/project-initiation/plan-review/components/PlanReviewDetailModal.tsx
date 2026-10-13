@@ -14,7 +14,7 @@ interface Props {
 
 function getPlan(linkedPlanId: string): ProjectPlan | null {
   try {
-    const keys = ['ng_init_decl_plans_v10', 'ng_init_decl_plans_v9', 'ng_init_decl_plans_v8', 'ng_init_decl_plans_v7', 'ng_init_decl_plans_v6'];
+    const keys = ['ng_init_decl_plans_v11', 'ng_init_decl_plans_v10', 'ng_init_decl_plans_v9', 'ng_init_decl_plans_v8', 'ng_init_decl_plans_v7', 'ng_init_decl_plans_v6'];
     for (const key of keys) {
       const s = localStorage.getItem(key);
       if (s) {

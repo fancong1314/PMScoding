@@ -1,10 +1,12 @@
 ﻿import { useMemo, useState } from 'react';
 import { sporadicStaffDirectory, type SporadicStaffPerson } from '@/mocks/sporadicProjectMocks';
 
+export type PersonSelectMode = 'manager' | 'leader' | 'tracker';
+
 interface Props {
   open: boolean;
   title: string;
-  mode: 'manager' | 'leader';
+  mode: PersonSelectMode;
   selectedId?: string;
   onClose: () => void;
   onSelect: (person: SporadicStaffPerson) => void;
@@ -14,9 +16,19 @@ export default function PersonSelectModal({ open, title, mode, selectedId, onClo
   const [keyword, setKeyword] = useState('');
 
   const list = useMemo(() => {
-    const base = mode === 'leader'
-      ? sporadicStaffDirectory.filter((p) => p.isLeader)
-      : sporadicStaffDirectory.filter((p) => !p.isLeader);
+    let base: SporadicStaffPerson[];
+    if (mode === 'leader') {
+      base = sporadicStaffDirectory.filter((p) => p.isLeader);
+    } else if (mode === 'tracker') {
+      // 投资部成员置顶，其余非领导人员可选
+      const inv = sporadicStaffDirectory.filter((p) => p.isInvestment || p.unit === '投资部');
+      const others = sporadicStaffDirectory.filter(
+        (p) => !p.isLeader && !p.isInvestment && p.unit !== '投资部',
+      );
+      base = [...inv, ...others];
+    } else {
+      base = sporadicStaffDirectory.filter((p) => !p.isLeader);
+    }
     const k = keyword.trim();
     if (!k) return base;
     return base.filter(
@@ -25,6 +37,13 @@ export default function PersonSelectModal({ open, title, mode, selectedId, onClo
   }, [mode, keyword]);
 
   if (!open) return null;
+
+  const hint =
+    mode === 'leader'
+      ? '请选择分管领导'
+      : mode === 'tracker'
+        ? '默认优先展示投资部成员，可搜索其他单位人员'
+        : '选择项目负责人后将自动带出联系电话';
 
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center p-4" onClick={onClose}>
@@ -36,9 +55,7 @@ export default function PersonSelectModal({ open, title, mode, selectedId, onClo
         <div className="flex items-center justify-between px-5 py-4 border-b border-steel-100">
           <div>
             <h4 className="text-sm font-semibold text-steel-800">{title}</h4>
-            <p className="text-xs text-steel-400 mt-0.5">
-              {mode === 'manager' ? '选择项目负责人后将自动带出联系电话' : '请选择分管领导'}
-            </p>
+            <p className="text-xs text-steel-400 mt-0.5">{hint}</p>
           </div>
           <button type="button" onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-steel-400 hover:bg-slate-100 cursor-pointer">
             <i className="ri-close-line text-lg" />
@@ -77,10 +94,16 @@ export default function PersonSelectModal({ open, title, mode, selectedId, onClo
               ) : (
                 list.map((p) => {
                   const active = selectedId === p.id;
+                  const isInv = !!(p.isInvestment || p.unit === '投资部');
                   return (
                     <tr key={p.id} className={`border-b border-steel-100 ${active ? 'bg-emerald-50/60' : 'hover:bg-slate-50'}`}>
                       <td className="px-4 py-2.5 font-mono text-xs text-steel-500">{p.empNo}</td>
-                      <td className="px-4 py-2.5 text-steel-800 font-medium">{p.name}</td>
+                      <td className="px-4 py-2.5 text-steel-800 font-medium">
+                        {p.name}
+                        {mode === 'tracker' && isInv && (
+                          <span className="ml-1.5 px-1 py-0.5 text-[10px] rounded bg-violet-50 text-violet-600 border border-violet-100">投资部</span>
+                        )}
+                      </td>
                       <td className="px-4 py-2.5 text-steel-600">{p.unit}</td>
                       <td className="px-4 py-2.5 text-steel-600">{p.position}</td>
                       <td className="px-4 py-2.5 text-steel-600">{p.phone}</td>

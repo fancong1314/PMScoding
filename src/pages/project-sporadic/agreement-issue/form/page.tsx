@@ -10,6 +10,7 @@ import {
 import {
   AGREEMENT_DECLARE_STORAGE_KEY,
   calcBudgetEstimateTotal,
+  calcEndDateFromStartAndDays,
   emptyAgreementForm,
   emptyBudgetEstimate,
   sporadicAgreementRecords as seed,
@@ -25,7 +26,7 @@ import AttachmentUploadSection, {
   type AttachmentUploadMap,
 } from '@/pages/project-sporadic/agreement-declare/form/components/AttachmentUploadSection';
 import ContractSelectModal from '@/pages/project-sporadic/agreement-declare/form/components/ContractSelectModal';
-import PersonSelectModal from '@/pages/project-sporadic/agreement-declare/form/components/PersonSelectModal';
+import PersonSelectModal, { type PersonSelectMode } from '@/pages/project-sporadic/agreement-declare/form/components/PersonSelectModal';
 import BudgetEstimateSection, { validateBudgetEstimate } from './components/BudgetEstimateSection';
 import BudgetDetailAttachmentSection from './components/BudgetDetailAttachmentSection';
 import PlanAttachmentSection, { validatePlanAttachments } from './components/PlanAttachmentSection';
@@ -55,6 +56,7 @@ function loadAgreements(): SporadicAgreementRecord[] {
     if (s) {
       return (JSON.parse(s) as SporadicAgreementRecord[]).map(withAgreementFormFields);
     }
+    localStorage.removeItem('ng_sporadic_agreement_v8');
     localStorage.removeItem('ng_sporadic_agreement_v7');
     localStorage.removeItem('ng_sporadic_agreement_v6');
     localStorage.removeItem('ng_sporadic_agreement_v5');
@@ -90,7 +92,7 @@ export default function AgreementIssueFormPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [toast, setToast] = useState<string | null>(null);
   const [contractOpen, setContractOpen] = useState(false);
-  const [personOpen, setPersonOpen] = useState<'manager' | 'leader' | null>(null);
+  const [personOpen, setPersonOpen] = useState<PersonSelectMode | null>(null);
   const [activeSection, setActiveSection] = useState('basic');
   const [viewTab, setViewTab] = useState<AgreementViewTabKey>('agreement');
 
@@ -156,8 +158,14 @@ export default function AgreementIssueFormPage() {
     if (!form.projectManagerPhone.trim()) e.projectManagerPhone = '请填写负责人电话';
     if (!form.implementYear.trim()) e.implementYear = '请填写实施年度';
     if (!form.startDate?.trim()) e.startDate = '请选择计划开工时间';
-    if (!form.endDate?.trim()) e.endDate = '请选择计划完工时间';
-    if (form.startDate && form.endDate && form.endDate < form.startDate) {
+    const days = Number(form.planDurationDays);
+    if (!form.planDurationDays || !Number.isFinite(days) || days <= 0) {
+      e.planDurationDays = '请填写计划施工天数';
+    }
+    if (!form.trackerName?.trim()) e.trackerName = '请选择项目跟踪人';
+    const autoEnd = calcEndDateFromStartAndDays(form.startDate, form.planDurationDays);
+    if (!autoEnd) e.endDate = '请先填写计划开工时间与计划施工天数';
+    else if (form.startDate && autoEnd < form.startDate) {
       e.endDate = '计划完工时间不能早于开工时间';
     }
     const budget = Number(form.budgetAmount ?? form.amount ?? 0);
@@ -179,7 +187,8 @@ export default function AgreementIssueFormPage() {
       const map: Record<string, string> = {
         frameworkContractName: 'basic', declareName: 'basic', projectType: 'basic',
         leaderName: 'basic', projectManager: 'basic', projectManagerPhone: 'basic',
-        implementYear: 'basic', startDate: 'basic', endDate: 'basic', budgetAmount: 'basic',
+        implementYear: 'basic', startDate: 'basic', planDurationDays: 'basic', trackerName: 'basic',
+        endDate: 'basic', budgetAmount: 'basic',
         supplierContact: 'basic', supplierPhone: 'basic', declareDetail: 'detail',
         designFee: 'project-budget', jianAnFee: 'project-budget', equipmentFee: 'project-budget',
         otherFee: 'project-budget',
@@ -201,6 +210,7 @@ export default function AgreementIssueFormPage() {
     const total = calcBudgetEstimateTotal(estimate);
     const payload = withAgreementFormFields({
       ...form,
+      endDate: calcEndDateFromStartAndDays(form.startDate, form.planDurationDays) || form.endDate,
       budgetEstimate: estimate,
       budgetAmount: total,
       amount: total,
@@ -440,33 +450,75 @@ export default function AgreementIssueFormPage() {
                     value={form.startDate || ''}
                     disabled={isView}
                     onChange={(e) => {
-                      patch({ startDate: e.target.value });
+                      const startDate = e.target.value;
+                      const endDate = calcEndDateFromStartAndDays(startDate, form.planDurationDays);
+                      patch({ startDate, endDate });
                       setErrors((prev) => {
                         const next = { ...prev };
                         delete next.startDate;
-                        if (next.endDate === '计划完工时间不能早于开工时间') delete next.endDate;
+                        delete next.endDate;
                         return next;
                       });
                     }}
                     className={formInputCls(errors.startDate) + (isView ? ' bg-slate-50 cursor-not-allowed' : ' cursor-pointer')}
                   />
                 </FormField>
+                <FormField label="计划施工天数" required error={errors.planDurationDays}>
+                  <div>
+                    <input
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={form.planDurationDays ?? ''}
+                      disabled={isView}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        const planDurationDays = raw === '' ? '' : Number(raw);
+                        const endDate = calcEndDateFromStartAndDays(form.startDate, planDurationDays);
+                        patch({ planDurationDays, endDate });
+                        setErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.planDurationDays;
+                          delete next.endDate;
+                          return next;
+                        });
+                      }}
+                      className={formInputCls(errors.planDurationDays) + (isView ? ' bg-slate-50 cursor-not-allowed' : '')}
+                      placeholder="请输入天数"
+                    />
+                    <p className="mt-1 text-[11px] text-steel-400">计划完工时间 = 计划开工时间 + 计划施工天数</p>
+                  </div>
+                </FormField>
+                <FormField label="项目跟踪人" required error={errors.trackerName}>
+                  <div className="flex gap-2">
+                    <input
+                      readOnly
+                      value={form.trackerName || ''}
+                      placeholder="请选择项目跟踪人（默认优先投资部）"
+                      className={formInputCls(errors.trackerName, { readonly: true })}
+                    />
+                    {!isView && (
+                      <button
+                        type="button"
+                        onClick={() => setPersonOpen('tracker')}
+                        className="flex-shrink-0 px-3 py-2 text-sm text-sky-600 border border-sky-200 rounded-md hover:bg-sky-50 cursor-pointer whitespace-nowrap"
+                      >
+                        选择
+                      </button>
+                    )}
+                  </div>
+                </FormField>
                 <FormField label="计划完工时间" required error={errors.endDate}>
-                  <input
-                    type="date"
-                    value={form.endDate || ''}
-                    disabled={isView}
-                    min={form.startDate || undefined}
-                    onChange={(e) => {
-                      patch({ endDate: e.target.value });
-                      setErrors((prev) => {
-                        const next = { ...prev };
-                        delete next.endDate;
-                        return next;
-                      });
-                    }}
-                    className={formInputCls(errors.endDate) + (isView ? ' bg-slate-50 cursor-not-allowed' : ' cursor-pointer')}
-                  />
+                  <div>
+                    <input
+                      type="date"
+                      value={form.endDate || ''}
+                      disabled
+                      readOnly
+                      className={formInputCls(errors.endDate) + ' bg-slate-100 text-steel-500 cursor-not-allowed'}
+                    />
+                    <p className="mt-1 text-[11px] text-amber-600">根据计划开工时间与计划施工天数自动计算，不可编辑</p>
+                  </div>
                 </FormField>
                 <FormField label="概算(万元)" required error={errors.budgetAmount}>
                   <div>
@@ -670,13 +722,32 @@ export default function AgreementIssueFormPage() {
 
       <PersonSelectModal
         open={!!personOpen}
-        title={personOpen === 'leader' ? '选择分管领导' : '选择项目负责人'}
+        title={
+          personOpen === 'leader'
+            ? '选择分管领导'
+            : personOpen === 'tracker'
+              ? '选择项目跟踪人'
+              : '选择项目负责人'
+        }
         mode={personOpen || 'manager'}
-        selectedId={personOpen === 'leader' ? form.leaderId : form.projectManagerId}
+        selectedId={
+          personOpen === 'leader'
+            ? form.leaderId
+            : personOpen === 'tracker'
+              ? form.trackerId
+              : form.projectManagerId
+        }
         onClose={() => setPersonOpen(null)}
         onSelect={(p) => {
           if (personOpen === 'leader') {
             patch({ leaderId: p.id, leaderName: p.name });
+          } else if (personOpen === 'tracker') {
+            patch({ trackerId: p.id, trackerName: p.name });
+            setErrors((prev) => {
+              const next = { ...prev };
+              delete next.trackerName;
+              return next;
+            });
           } else {
             patch({
               projectManagerId: p.id,
